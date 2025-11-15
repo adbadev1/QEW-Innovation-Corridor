@@ -1,46 +1,143 @@
-# QEW Innovation Corridor
+# QEW Innovation Corridor - Digital Twin Dashboard
 
-This repository contains the QEW Camera Scraper project for automated traffic camera image collection.
+**OVIN Hackathon Project | Building Path to $150K Pilot Funding**
+
+🌐 **Live Repository:** https://github.com/adbadev1/QEW-Innovation-Corridor
+
+## 🎯 Project Overview
+
+**Real-time digital twin** of Ontario's QEW Innovation Corridor (40km Burlington-Toronto). AI-powered traffic management system featuring work zone safety monitoring, V2X alert generation, and COMPASS camera integration.
+
+### Challenge Addressed
+**OVIN Challenge #1: Work Zone Safety**
+- Real-time hazard detection from traffic camera feeds
+- Automated MTO BOOK 7 compliance checking
+- RSU-ready alert generation for V2I communication
+
+## 🏗️ Architecture
+
+```
+Traffic Camera Feed → Claude Vision API → Safety Analysis → V2X Alert Generation
+                                              ↓
+                                    Risk Assessment + Recommendations
+```
+
+## 🚀 Hackathon Deliverable (3 Hours)
+
+**Interactive Artifact:** Upload work zone photos → Get instant AI safety analysis
+
+### Features
+- ✅ Image upload with drag-and-drop
+- ✅ AI-powered hazard detection (workers, vehicles, equipment)
+- ✅ Risk scoring (1-10 scale)
+- ✅ MTO compliance checking
+- ✅ Automated RSU alert message generation
+- ✅ Actionable recommendations
+
+## 📊 Technical Stack
+
+- **Frontend:** React + Tailwind CSS (Claude Artifacts)
+- **AI Engine:** Claude 3.5 Sonnet (Vision API)
+- **Deployment:** Vercel/Netlify (post-hackathon)
+- **Future:** GCP Cloud Run + V2X-Hub integration
+
+## 🛣️ Path to Market
+
+### Phase 1: Hackathon (3 hours)
+- ✅ Interactive prototype
+- ✅ Demo with sample work zones
+- ✅ Proof of concept
+
+### Phase 2: OVIN Application (2 weeks)
+- Integrate with MTO COMPASS camera feeds
+- Deploy production prototype
+- Performance metrics collection
+
+### Phase 3: Pilot Deployment (6 months)
+- 40km QEW testbed deployment
+- Real V2X RSU integration
+- $150K pilot funding
+
+### Phase 4: Scale (12 months)
+- Province-wide deployment
+- Multi-jurisdictional licensing
+- Commercial partnerships
 
 ## 📁 Project Structure
 
 ```
-qew-innovation-corridor/
-├── camera_scraper/          # Main project folder
-│   ├── qew_camera_gui.py   # GUI application
-│   ├── docs/               # Documentation
-│   └── ...                 # Other project files
-└── venv/                   # Python virtual environment
+QEW-Innovation-Corridor/
+├── src/
+│   ├── App.jsx                          # Main Digital Twin Dashboard
+│   ├── components/
+│   │   └── WorkZoneAnalysisPanel.jsx    # Work zone analyzer
+│   ├── data/
+│   │   └── qewData.js                   # QEW corridor data (13 cameras)
+│   └── utils/
+│       └── riskUtils.js                 # Risk assessment utilities
+├── artifacts/
+│   └── work-zone-safety-analyzer.jsx    # Original prototype (reference)
+├── docs/
+│   ├── MVP_WORKFLOW.md                  # 📊 Complete MVP roadmap (Mermaid diagrams)
+│   ├── DEMO_SCRIPT.md                   # Presentation guide
+│   └── ARCHITECTURE.md                  # Technical architecture
+├── package.json
+├── vite.config.js
+└── README.md
 ```
 
-## 🚀 Getting Started
+## 📊 MVP Roadmap
 
-1. **Navigate to the project folder**:
-   ```bash
-   cd camera_scraper
-   ```
+**See detailed workflow:** [docs/MVP_WORKFLOW.md](docs/MVP_WORKFLOW.md)
 
-2. **See the project README**:
-   - [camera_scraper/README.md](camera_scraper/README.md)
+- **Phase 0:** ✅ Hackathon Prototype (COMPLETE)
+- **Phase 1:** OVIN Application (Week 1-4)
+- **Phase 2:** Production Development (Month 1-2)
+- **Phase 3:** Testing & Validation (Month 3-4)
+- **Phase 4:** Pilot Deployment (Month 5-6)
+- **Result:** 🎉 MVP Achieved
 
-## 📖 Documentation
+Full timeline with Mermaid diagrams, technical architecture evolution, and success metrics available in the workflow document.
 
-All documentation is located in the `camera_scraper/docs/` folder.
+## 🎤 Demo Script
 
-## 🔧 Virtual Environment
+**Opening (30 sec):**
+> "Every year, 70 workers die in highway work zones across North America. We built an AI system that analyzes work zone safety in real-time and prevents accidents before they happen."
 
-The virtual environment is located in the root `venv/` folder and is shared across projects.
+**Live Demo (90 sec):**
+1. Upload QEW work zone photo
+2. Show AI analysis in 3 seconds
+3. Display risk score + identified hazards
+4. Generate V2X alert message
+5. Show MTO compliance report
 
-To activate:
-```bash
-# Windows
-venv\Scripts\activate
+**Close (30 sec):**
+> "This is the future of smart highway safety. We're applying for OVIN's $150K pilot program to deploy this on all 40km of the QEW testbed."
 
-# Linux/Mac
-source venv/bin/activate
-```
+## 🔗 Resources
+
+- [OVIN Program Guidelines](https://www.ovinhub.ca/wp-content/uploads/2025/02/OVIN-QEW-IC-Program-Guidelines-Final-Version-2024.11.18.pdf)
+- [MTO COMPASS System](http://www.mto.gov.on.ca/english/traveller/trip/compass.shtml)
+- [USDOT V2X-Hub (RSU Software)](https://github.com/usdot-fhwa-OPS/V2X-Hub)
+- [SAE J2735 Standard](https://www.sae.org/standards/content/j2735_202309/)
+
+## 👥 Team
+
+**ADBA Labs**
+- Domain Expertise: Enterprise IoT, BIM, Geospatial
+- Business Acumen: M&A, Go-to-Market Strategy
+- Technical Stack: Python, GCP, AI/ML
+
+## 📧 Contact
+
+- **Email:** adbalabs0101@gmail.com
+- **OVIN Program Manager:** David Harris-Koblin (dharris-koblin@oc.innovation.ca)
+
+## 📜 License
+
+Proprietary - ADBA Labs
+Prepared for OVIN QEW Innovation Corridor Program Application
 
 ---
 
-For detailed information, see [camera_scraper/README.md](camera_scraper/README.md)
-
+**Built with Claude Code CLI** | **Powered by Anthropic Claude 3.5 Sonnet**
