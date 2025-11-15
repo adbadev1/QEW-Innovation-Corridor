@@ -1,0 +1,143 @@
+QEW Corridor Camera Locations - Google Maps Format
+================================================================================
+
+Copy and paste these coordinates into Google Maps:
+
+QEW at Burlington Skyway
+43.30917,-79.803
+
+QEW near Mississauga Road (2)
+43.550471,-79.617523
+
+QEW West of Fifty Road
+43.2201,-79.65143
+
+QEW near Millen Road
+43.239493,-79.716024
+
+QEW near Grays Road
+43.241952,-79.736366
+
+QEW near Centennial Parkway
+43.246828,-79.756794
+
+QEW near Red Hill Valley Parkway
+43.248234,-79.761738
+
+QEW near Nikola Tesla Boulevard
+43.258518,-79.767008
+
+QEW near Woodward Avenue
+43.264956,-79.772243
+
+QEW West of Eastport Drive
+43.284453,-79.787521
+
+QEW East of Eastport Drive - Toronto Bound
+43.294075,-79.793444
+
+QEW Burlington Skyway - Hamilton Side
+43.301446,-79.797735
+
+QEW Burlington Skyway - Toronto Side
+43.299637,-79.797852
+
+QEW Ramp to Northshore Boulevard
+43.314687,-79.805717
+
+QEW East of Northshore Boulevard
+43.316623,-79.808464
+
+QEW near Trafalgar Road
+43.460956,-79.683623
+
+QEW near Fairview Street
+43.327831,-79.824901
+
+QEW near Highway 403/407 IC
+43.336509,-79.828291
+
+QEW West of Brant Street
+43.339974,-79.824729
+
+QEW East of Brant Street
+43.342596,-79.819322
+
+QEW near Guelph Line
+43.350991,-79.804387
+
+QEW East of Guelph Line
+43.358979,-79.795504
+
+QEW near Walkers Line
+43.365999,-79.787822
+
+QEW East of Walkers Line
+43.37567,-79.77705
+
+QEW near Appleby Line
+43.380567,-79.771857
+
+QEW East of Appleby Line
+43.387741,-79.763918
+
+QEW near Burloak Drive
+43.39482,-79.756279
+
+QEW East of Burloak Drive
+43.402927,-79.74761
+
+QEW near Bronte Road
+43.409256,-79.740829
+
+QEW East of Bronte Road
+43.413839,-79.735937
+
+QEW near Third Line
+43.423658,-79.724908
+
+QEW East of Third Line
+43.432844,-79.714764
+
+QEW near Fourth Line
+43.437966,-79.709307
+
+QEW near Dorval Drive
+43.446158,-79.699845
+
+QEW East of Dorval Drive
+43.453417,-79.691777
+
+QEW near Royal Windsor Drive
+43.473415,-79.671822
+
+QEW East of Royal Windsor Drive
+43.481701,-79.672352
+
+QEW near Ford Drive
+43.494589,-79.672165
+
+QEW near Highway 403 (Oakville)
+43.501126,-79.678602
+
+QEW West of Winston Churchill Boulevard
+43.504197,-79.66958
+
+QEW West of Erin Mills Parkway
+43.516564,-79.655514
+
+QEW near Southbound Road/Erin Mills Parkway
+43.523846,-79.647446
+
+QEW East of Erin Mills Parkway
+43.535794,-79.634228
+
+QEW near Mississauga Road (1)
+43.552218,-79.612513
+
+QEW East of Mississauga Road
+43.558128,-79.607964
+
+QEW near Winston Churchill Boulevard
+43.509095,-79.663153
+
