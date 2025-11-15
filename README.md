@@ -1,10 +1,12 @@
-# QEW Innovation Corridor - AI Work Zone Safety Analyzer
+# QEW Innovation Corridor - Digital Twin Dashboard
 
 **OVIN Hackathon Project | Building Path to $150K Pilot Funding**
 
+🌐 **Live Repository:** https://github.com/adbadev1/QEW-Innovation-Corridor
+
 ## 🎯 Project Overview
 
-AI-powered work zone safety analysis system for Ontario's QEW Innovation Corridor. Uses Claude Vision API to detect hazards, assess risks, and generate real-time V2X safety alerts for connected vehicles.
+**Real-time digital twin** of Ontario's QEW Innovation Corridor (40km Burlington-Toronto). AI-powered traffic management system featuring work zone safety monitoring, V2X alert generation, and COMPASS camera integration.
 
 ### Challenge Addressed
 **OVIN Challenge #1: Work Zone Safety**
@@ -64,19 +66,38 @@ Traffic Camera Feed → Claude Vision API → Safety Analysis → V2X Alert Gene
 ## 📁 Project Structure
 
 ```
-qew-innovation-corridor/
+QEW-Innovation-Corridor/
+├── src/
+│   ├── App.jsx                          # Main Digital Twin Dashboard
+│   ├── components/
+│   │   └── WorkZoneAnalysisPanel.jsx    # Work zone analyzer
+│   ├── data/
+│   │   └── qewData.js                   # QEW corridor data (13 cameras)
+│   └── utils/
+│       └── riskUtils.js                 # Risk assessment utilities
 ├── artifacts/
-│   ├── work-zone-safety-analyzer.html    # Standalone artifact
-│   └── work-zone-safety-analyzer.jsx     # React component
+│   └── work-zone-safety-analyzer.jsx    # Original prototype (reference)
 ├── docs/
-│   ├── DEMO_SCRIPT.md                    # Presentation guide
-│   ├── ARCHITECTURE.md                   # Technical details
-│   └── OVIN_APPLICATION.md               # Funding application prep
-├── samples/
-│   └── work-zone-images/                 # Test images
-├── .gitignore
+│   ├── MVP_WORKFLOW.md                  # 📊 Complete MVP roadmap (Mermaid diagrams)
+│   ├── DEMO_SCRIPT.md                   # Presentation guide
+│   └── ARCHITECTURE.md                  # Technical architecture
+├── package.json
+├── vite.config.js
 └── README.md
 ```
+
+## 📊 MVP Roadmap
+
+**See detailed workflow:** [docs/MVP_WORKFLOW.md](docs/MVP_WORKFLOW.md)
+
+- **Phase 0:** ✅ Hackathon Prototype (COMPLETE)
+- **Phase 1:** OVIN Application (Week 1-4)
+- **Phase 2:** Production Development (Month 1-2)
+- **Phase 3:** Testing & Validation (Month 3-4)
+- **Phase 4:** Pilot Deployment (Month 5-6)
+- **Result:** 🎉 MVP Achieved
+
+Full timeline with Mermaid diagrams, technical architecture evolution, and success metrics available in the workflow document.
 
 ## 🎤 Demo Script
 
