@@ -92,17 +92,26 @@ function App() {
     }
   };
 
-  // QEW route polyline
+  // QEW route polyline - Actual highway path following major interchanges
   const qewPath = [
-    QEW_ROUTE.burlington,
-    [43.3580, -79.7500],
-    [43.3900, -79.7000],
-    [43.4220, -79.6500],
-    [43.4540, -79.6000],
-    [43.4860, -79.5500],
-    [43.5180, -79.5000],
-    [43.5500, -79.4500],
-    QEW_ROUTE.toronto
+    QEW_ROUTE.burlington,      // Highway 403 junction
+    [43.3400, -79.7900],       // Guelph Line
+    [43.3850, -79.7400],       // Burloak Drive
+    [43.4150, -79.7150],       // Ford Plant / Oakville area
+    [43.4350, -79.6850],       // Trafalgar Rd
+    [43.4550, -79.6650],       // Third Line
+    [43.4750, -79.6450],       // Bronte Rd
+    [43.4900, -79.6300],       // Winston Churchill
+    [43.5200, -79.6200],       // Credit River
+    [43.5450, -79.6100],       // Hurontario St
+    [43.5700, -79.5900],       // Mavis Rd
+    [43.5900, -79.5800],       // Dixie Rd
+    [43.6100, -79.5600],       // Cawthra Rd
+    [43.6250, -79.5350],       // Etobicoke Creek
+    [43.6350, -79.5000],       // Islington Ave
+    [43.6370, -79.4650],       // Kipling Ave
+    [43.6380, -79.4250],       // Park Lawn Rd
+    QEW_ROUTE.toronto          // Gardiner junction
   ];
 
   return (
