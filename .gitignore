@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+package-lock.json
 venv/
 __pycache__/
 *.pyc
@@ -28,6 +29,9 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+
+# Vite build
+.vite/
 
 # Logs
 *.log
