@@ -1,6 +1,7 @@
 """
 Script to download images from MTO cameras along QEW corridor
 Downloads 100+ images for hazard assessment and safety analysis
+Now uses SQLite database and short filenames to avoid path length issues
 """
 import requests
 import json
@@ -9,6 +10,7 @@ import time
 from datetime import datetime
 from typing import List, Dict
 import hashlib
+from database import CameraDatabase
 
 def load_camera_data(filename: str = "qew_cameras_hamilton_mississauga.json") -> List[Dict]:
     """Load camera data from JSON file"""
@@ -50,64 +52,80 @@ def download_image(url: str, output_path: str, timeout: int = 10) -> bool:
         print(f"  Error downloading {url}: {e}")
         return False
 
-def download_camera_images(cameras: List[Dict], output_dir: str, 
-                          images_per_camera: int = 3, 
-                          delay_between_captures: int = 60):
+def download_camera_images(cameras: List[Dict], output_dir: str,
+                          images_per_camera: int = 3,
+                          delay_between_captures: int = 60,
+                          db: CameraDatabase = None):
     """
-    Download images from all cameras
-    
+    Download images from all cameras using SQLite database and short filenames
+
     Args:
         cameras: List of camera dictionaries
         output_dir: Directory to save images
         images_per_camera: Number of times to capture each camera view
         delay_between_captures: Seconds to wait between captures (for temporal diversity)
+        db: CameraDatabase instance (will create new one if not provided)
     """
+    # Create or use provided database
+    close_db = False
+    if db is None:
+        db = CameraDatabase()
+        close_db = True
+
+    # Load camera metadata into database
+    db.load_cameras_from_json(cameras)
+
+    # Create collection record
+    collection_id = os.path.basename(output_dir)
+    db.create_collection(collection_id, output_dir)
+
     total_images = 0
     metadata = []
-    
+
     print(f"\nStarting image collection...")
     print(f"Target: {len(cameras)} cameras x {images_per_camera} captures")
-    print(f"Output directory: {output_dir}\n")
-    
+    print(f"Output directory: {output_dir}")
+    print(f"Collection ID: {collection_id}\n")
+
     for capture_round in range(images_per_camera):
         print(f"\n{'='*80}")
         print(f"Capture Round {capture_round + 1} of {images_per_camera}")
         print(f"{'='*80}\n")
-        
+
         for camera_idx, camera in enumerate(cameras, 1):
             camera_id = camera.get('Id')
             location = camera.get('Location', 'Unknown')
             latitude = camera.get('Latitude')
             longitude = camera.get('Longitude')
             views = camera.get('Views', [])
-            
+
             print(f"[{camera_idx}/{len(cameras)}] {location}")
-            
+
             for view in views:
                 view_id = view.get('Id')
                 view_url = view.get('Url')
                 view_desc = view.get('Description', 'Unknown')
-                
+
                 if not view_url:
                     continue
-                
-                # Create filename
-                safe_location = sanitize_filename(location)
-                safe_desc = sanitize_filename(view_desc)
+
+                # Generate short filename using database method
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"cam{camera_id}_view{view_id}_{safe_location}_{safe_desc}_round{capture_round+1}_{timestamp}.jpg"
+                filename = db.generate_short_filename(
+                    camera_id, view_id, capture_round + 1, timestamp
+                )
                 output_path = os.path.join(output_dir, filename)
-                
+
                 # Download image
                 print(f"  Downloading view: {view_desc}...", end=" ")
                 success = download_image(view_url, output_path)
-                
+
                 if success:
                     print("✓")
                     total_images += 1
-                    
-                    # Store metadata
-                    metadata.append({
+
+                    # Store metadata in database
+                    image_data = {
                         "filename": filename,
                         "camera_id": camera_id,
                         "view_id": view_id,
@@ -117,34 +135,43 @@ def download_camera_images(cameras: List[Dict], output_dir: str,
                         "view_description": view_desc,
                         "capture_round": capture_round + 1,
                         "timestamp": timestamp,
-                        "url": view_url
-                    })
+                        "url": view_url,
+                        "collection_id": collection_id
+                    }
+                    db.insert_image(image_data)
+                    metadata.append(image_data)
                 else:
                     print("✗")
-                
+
                 # Small delay between views
                 time.sleep(1)
-            
+
             # Small delay between cameras
             time.sleep(0.5)
-        
+
         # Delay between capture rounds (except after last round)
         if capture_round < images_per_camera - 1:
             print(f"\nWaiting {delay_between_captures} seconds before next capture round...")
             time.sleep(delay_between_captures)
-    
-    # Save metadata
+
+    # Complete collection in database
+    db.complete_collection(collection_id, total_images)
+
+    # Save metadata JSON for backward compatibility
     metadata_file = os.path.join(output_dir, "image_metadata.json")
     with open(metadata_file, 'w') as f:
         json.dump(metadata, f, indent=2)
-    
+
     print(f"\n{'='*80}")
     print(f"Collection Complete!")
     print(f"{'='*80}")
     print(f"Total images downloaded: {total_images}")
-    print(f"Metadata saved to: {metadata_file}")
+    print(f"Metadata saved to database and: {metadata_file}")
     print(f"Images saved to: {output_dir}")
-    
+
+    if close_db:
+        db.close()
+
     return total_images, metadata
 
 def generate_summary_report(cameras: List[Dict], metadata: List[Dict], output_dir: str):

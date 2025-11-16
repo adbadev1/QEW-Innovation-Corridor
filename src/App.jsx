@@ -5,8 +5,9 @@ import { Shield, Activity, AlertTriangle, Radio, Camera, Navigation } from 'luci
 import L from 'leaflet';
 
 import { getRiskColor, getRiskLabel, generateMockBSM, generateV2XAlert } from './utils/riskUtils';
-import { QEW_ROUTE, COMPASS_CAMERAS, WORK_ZONES, generateMockTrafficData } from './data/qewData';
+import { QEW_ROUTE, WORK_ZONES, generateMockTrafficData } from './data/qewData';
 import WorkZoneAnalysisPanel from './components/WorkZoneAnalysisPanel';
+import { qewPathWestbound, qewPathEastbound } from './data/qewRoutes';
 
 // Fix Leaflet default icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -36,21 +37,246 @@ function App() {
   const [trafficData, setTrafficData] = useState(generateMockTrafficData());
   const [alerts, setAlerts] = useState([]);
   const [aiAnalysis, setAiAnalysis] = useState('');
+  const [cameras, setCameras] = useState([]);
+  const [loadingCameras, setLoadingCameras] = useState(true);
+  const vehiclesInitialized = React.useRef(false);
 
-  // Simulate vehicle movement along QEW
+  // Load real camera data with images from database export
+  useEffect(() => {
+    const basePath = import.meta.env.BASE_URL || '/';
+    fetch(`${basePath}camera_scraper/qew_cameras_with_images.json`)
+      .then(r => r.json())
+      .then(cameraData => {
+        setCameras(cameraData);
+        setLoadingCameras(false);
+      })
+      .catch(error => {
+        console.error('Error loading camera data:', error);
+        setLoadingCameras(false);
+      });
+  }, []);
+
+  // Initialize 10 vehicles at random positions along the routes
+  // Only initialize AFTER routes are loaded
+  useEffect(() => {
+    // Don't initialize until routes are loaded
+    if (!qewPathWestbound || !qewPathEastbound || qewPathWestbound.length === 0 || qewPathEastbound.length === 0) {
+      console.log('Waiting for routes to load before initializing vehicles...');
+      return;
+    }
+
+    // Don't re-initialize if already initialized
+    if (vehiclesInitialized.current) {
+      console.log('Vehicles already initialized, skipping...');
+      return;
+    }
+
+    console.log('Initializing 10 vehicles...');
+    const initialVehicles = [];
+
+    for (let i = 0; i < 10; i++) {
+      // Randomly assign to westbound or eastbound
+      const direction = Math.random() > 0.5 ? 'westbound' : 'eastbound';
+      const routeLength = direction === 'westbound' ? qewPathWestbound.length : qewPathEastbound.length;
+
+      // Spread vehicles evenly along the route with some randomness
+      const basePosition = (i / 10) * routeLength;
+      const randomOffset = (Math.random() - 0.5) * (routeLength / 10);
+      const position = Math.max(0, Math.min(routeLength - 1, basePosition + randomOffset));
+
+      initialVehicles.push({
+        id: `VEH_${i + 1}`,
+        position: position,
+        direction: direction,
+        speed: 70 + Math.random() * 40, // 70-110 km/h (varied speeds so they don't overlap)
+        speedMultiplier: 0.8 + Math.random() * 0.4, // 0.8x to 1.2x speed variation
+        spawnOffset: Math.random() * 100, // Unique spawn offset for each vehicle (0-100)
+      });
+    }
+
+    console.log(`Initialized ${initialVehicles.length} vehicles`);
+    vehiclesInitialized.current = true; // Mark as initialized
+    setVehicles(initialVehicles);
+  }, [qewPathWestbound, qewPathEastbound]); // Re-run when routes load
+
+  // Move vehicles along the route (1 hour per direction)
+  useEffect(() => {
+    // Don't start interval until routes are loaded and vehicles are initialized
+    if (!qewPathWestbound || !qewPathEastbound || !vehiclesInitialized.current) {
+      console.log('Waiting for routes and vehicles before starting movement...');
+      return;
+    }
+
+    console.log('Starting vehicle movement interval...');
+    let updateCount = 0;
+
+    const interval = setInterval(() => {
+      updateCount++;
+      if (updateCount % 10 === 0) { // Log every 10th update to reduce spam
+        console.log(`Vehicle update #${updateCount}`);
+      }
+
+      setVehicles(prevVehicles => {
+        if (!qewPathWestbound || !qewPathEastbound) {
+          console.warn('Routes not loaded, skipping vehicle update');
+          return prevVehicles; // Don't move if routes aren't loaded
+        }
+
+        if (prevVehicles.length === 0) {
+          console.warn('No vehicles to update');
+          return prevVehicles;
+        }
+
+        const totalWestbound = qewPathWestbound.length;
+        const totalEastbound = qewPathEastbound.length;
+
+        const updatedVehicles = prevVehicles.map(vehicle => {
+          // Calculate movement speed
+          // 1 hour = 3600 seconds = 3600000 ms
+          // Update every 3000ms (3 seconds)
+          // So we need to move: totalWaypoints / (3600000 / 3000) = totalWaypoints / 1200 per update
+          const baseMovement = vehicle.direction === 'westbound'
+            ? totalWestbound / 1200
+            : totalEastbound / 1200;
+
+          // Apply speed multiplier for variation
+          const movementPerUpdate = baseMovement * (vehicle.speedMultiplier || 1.0);
+
+          let newPosition = vehicle.position + movementPerUpdate;
+          let newDirection = vehicle.direction;
+
+          // Get current route length
+          const currentRouteLength = vehicle.direction === 'westbound' ? totalWestbound : totalEastbound;
+
+          // Check if reached end of current route - switch to other route
+          if (newPosition >= currentRouteLength - 5) {
+            // Switch direction (go to other side of highway)
+            newDirection = vehicle.direction === 'westbound' ? 'eastbound' : 'westbound';
+
+            // Calculate new route length
+            const newRouteLen = newDirection === 'westbound' ? totalWestbound : totalEastbound;
+
+            // Spawn at a RANDOM position each time (not the same spawnOffset)
+            // Use a percentage of the route length to ensure it's valid
+            const randomPercent = Math.random(); // 0.0 to 1.0
+            newPosition = newRouteLen * randomPercent;
+
+            console.log(`${vehicle.id} switched from ${vehicle.direction} to ${newDirection} at position ${newPosition.toFixed(2)} (${(randomPercent * 100).toFixed(1)}% of route)`);
+          }
+
+          // Safety check - ensure position is always valid
+          const newRouteLength = newDirection === 'westbound' ? totalWestbound : totalEastbound;
+          if (newPosition < 0) {
+            console.warn(`${vehicle.id} position < 0, clamping to 0`);
+            newPosition = 0;
+          }
+          if (newPosition >= newRouteLength - 1) {
+            console.warn(`${vehicle.id} position >= route length, clamping`);
+            newPosition = newRouteLength - 2;
+          }
+
+          // Validate the new position
+          if (isNaN(newPosition)) {
+            console.error(`${vehicle.id} has NaN position! Resetting to 0`);
+            newPosition = 0;
+          }
+
+          return {
+            ...vehicle,
+            position: newPosition,
+            direction: newDirection,
+          };
+        });
+
+        // Log count to detect disappearing vehicles
+        if (updatedVehicles.length !== prevVehicles.length) {
+          console.error(`VEHICLE COUNT CHANGED! Was ${prevVehicles.length}, now ${updatedVehicles.length}`);
+        }
+
+        return updatedVehicles;
+      });
+    }, 3000); // Update every 3 seconds
+
+    return () => {
+      console.log('Cleaning up vehicle movement interval');
+      clearInterval(interval);
+    };
+  }, [qewPathWestbound, qewPathEastbound]); // Only restart when routes change, NOT when vehicles update
+
+  // Debug: Log vehicle status every 30 seconds
+  useEffect(() => {
+    const debugInterval = setInterval(() => {
+      console.log('=== VEHICLE STATUS ===');
+      vehicles.forEach(v => {
+        const coords = getVehicleCoordinates(v);
+        const routeLength = v.direction === 'westbound' ? qewPathWestbound?.length : qewPathEastbound?.length;
+        const progress = routeLength ? ((v.position / routeLength) * 100).toFixed(1) : 'N/A';
+        console.log(`${v.id}: ${v.direction} @ ${v.position.toFixed(2)}/${routeLength} (${progress}%) - Coords: ${coords ? `[${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}]` : 'NULL'}`);
+      });
+      console.log('=====================');
+    }, 30000); // Every 30 seconds
+
+    return () => clearInterval(debugInterval);
+  }, [vehicles]);
+
+  // Get current lat/lon for a vehicle based on its position
+  const getVehicleCoordinates = (vehicle) => {
+    const route = vehicle.direction === 'westbound' ? qewPathWestbound : qewPathEastbound;
+
+    // Safety checks
+    if (!route || route.length === 0) {
+      console.warn(`Route not loaded for ${vehicle.id}`);
+      return null; // Return null instead of default - will be filtered out
+    }
+
+    // Ensure position is valid
+    let position = vehicle.position;
+    if (isNaN(position) || position < 0) {
+      position = 0;
+    }
+    if (position >= route.length) {
+      position = route.length - 1;
+    }
+
+    const index = Math.floor(position);
+
+    // Bounds checking
+    if (index < 0) {
+      return route[0];
+    }
+
+    if (index >= route.length - 1) {
+      return route[route.length - 1];
+    }
+
+    // Interpolate between waypoints for smooth movement
+    const fraction = position - index;
+    const current = route[index];
+    const next = route[index + 1];
+
+    // Additional safety check
+    if (!current || !next || current.length < 2 || next.length < 2) {
+      console.warn(`Invalid waypoint data for ${vehicle.id} at index ${index}`);
+      return route[Math.min(index, route.length - 1)] || route[0];
+    }
+
+    const lat = current[0] + (next[0] - current[0]) * fraction;
+    const lon = current[1] + (next[1] - current[1]) * fraction;
+
+    // Validate coordinates
+    if (isNaN(lat) || isNaN(lon)) {
+      console.warn(`Invalid coordinates for ${vehicle.id}: [${lat}, ${lon}]`);
+      return route[index];
+    }
+
+    return [lat, lon];
+  };
+
+  // OLD VEHICLE GENERATION CODE - DISABLED
+  // This was conflicting with our new vehicle movement system
+  // Keeping traffic data and AI analysis updates only
   useEffect(() => {
     const interval = setInterval(() => {
-      // Generate new vehicles at random points along QEW
-      const latRange = QEW_ROUTE.toronto[0] - QEW_ROUTE.burlington[0];
-      const lonRange = QEW_ROUTE.toronto[1] - QEW_ROUTE.burlington[1];
-
-      const newVehicle = generateMockBSM(
-        QEW_ROUTE.burlington[0] + Math.random() * latRange,
-        QEW_ROUTE.burlington[1] + Math.random() * lonRange
-      );
-
-      setVehicles(prev => [...prev.slice(-20), newVehicle]);
-
       // Update traffic data
       if (Math.random() > 0.7) {
         setTrafficData(generateMockTrafficData());
@@ -92,26 +318,66 @@ function App() {
     }
   };
 
-  // QEW route polyline - Actual highway path following major interchanges
-  const qewPath = [
-    QEW_ROUTE.burlington,      // Highway 403 junction
-    [43.3400, -79.7900],       // Guelph Line
-    [43.3850, -79.7400],       // Burloak Drive
-    [43.4150, -79.7150],       // Ford Plant / Oakville area
-    [43.4350, -79.6850],       // Trafalgar Rd
-    [43.4550, -79.6650],       // Third Line
-    [43.4750, -79.6450],       // Bronte Rd
-    [43.4900, -79.6300],       // Winston Churchill
-    [43.5200, -79.6200],       // Credit River
-    [43.5450, -79.6100],       // Hurontario St
-    [43.5700, -79.5900],       // Mavis Rd
-    [43.5900, -79.5800],       // Dixie Rd
-    [43.6100, -79.5600],       // Cawthra Rd
-    [43.6250, -79.5350],       // Etobicoke Creek
-    [43.6350, -79.5000],       // Islington Ave
-    [43.6370, -79.4650],       // Kipling Ave
-    [43.6380, -79.4250],       // Park Lawn Rd
-    QEW_ROUTE.toronto          // Gardiner junction
+  // QEW route polylines - ACTUAL CAR ROUTES from OSRM
+  // qewPathWestbound and qewPathEastbound imported from './data/qewRoutes'
+  // These are real driving routes fetched from OpenStreetMap routing service
+  // Route 1: Westbound (Hamilton → Toronto) - 364 waypoints
+  // Route 2: Eastbound (Toronto → Hamilton) - 316 waypoints
+
+  // MOCK DATA - Work zones positioned ON the blue line
+  // These are simulated for demo purposes - will be replaced with real AI detections
+  const mockWorkZones = [
+    {
+      id: 'WZ_001',
+      name: 'QEW Work Zone - West Section',
+      ...qewPathWestbound[Math.floor(qewPathWestbound.length * 0.25)], // 25% along route
+      lat: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.25)][0],
+      lon: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.25)][1],
+      riskScore: 8,
+      workers: 4,
+      vehicles: 2,
+      equipment: 1,
+      barriers: false,
+      status: 'HIGH RISK',
+      hazards: [
+        'Workers within 2m of active traffic lane',
+        'Approaching vehicle speed >80 km/h',
+        'Missing advance warning signage'
+      ],
+    },
+    {
+      id: 'WZ_002',
+      name: 'QEW Work Zone - Central Section',
+      ...qewPathWestbound[Math.floor(qewPathWestbound.length * 0.50)], // 50% along route
+      lat: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.50)][0],
+      lon: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.50)][1],
+      riskScore: 5,
+      workers: 2,
+      vehicles: 1,
+      equipment: 2,
+      barriers: true,
+      status: 'MEDIUM RISK',
+      hazards: [
+        'Equipment partially obstructing sight lines',
+        'Single barrier configuration (double recommended)'
+      ],
+    },
+    {
+      id: 'WZ_003',
+      name: 'QEW Work Zone - East Section',
+      ...qewPathWestbound[Math.floor(qewPathWestbound.length * 0.75)], // 75% along route
+      lat: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.75)][0],
+      lon: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.75)][1],
+      riskScore: 2,
+      workers: 3,
+      vehicles: 0,
+      equipment: 1,
+      barriers: true,
+      status: 'LOW RISK',
+      hazards: [
+        'Minor: Cones spaced 12m apart (10m recommended)'
+      ],
+    }
   ];
 
   return (
@@ -129,15 +395,15 @@ function App() {
           <div className="flex items-center space-x-6 text-sm">
             <div className="flex items-center space-x-2">
               <Camera className="w-5 h-5" />
-              <span>{COMPASS_CAMERAS.length} Cameras Active</span>
+              <span>{cameras.length} Real COMPASS Cameras</span>
             </div>
             <div className="flex items-center space-x-2">
               <AlertTriangle className="w-5 h-5" />
-              <span>{WORK_ZONES.length} Work Zones</span>
+              <span>{mockWorkZones.length} Work Zones (Mock)</span>
             </div>
             <div className="flex items-center space-x-2">
               <Navigation className="w-5 h-5" />
-              <span>{vehicles.length} Vehicles Tracked</span>
+              <span>{vehicles.length} Vehicles (Mock)</span>
             </div>
           </div>
         </div>
@@ -157,28 +423,84 @@ function App() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            {/* QEW Route Polyline */}
-            <Polyline positions={qewPath} color="blue" weight={4} opacity={0.6} />
+            {/* QEW Route Polylines - ACTUAL CAR ROUTES (Both Directions) */}
+            {/* Westbound: Hamilton → Toronto (364 waypoints) */}
+            <Polyline positions={qewPathWestbound} color="blue" weight={3} opacity={0.6} />
 
-            {/* COMPASS Cameras */}
-            {COMPASS_CAMERAS.map(camera => (
-              <Marker
-                key={camera.id}
-                position={[camera.lat, camera.lon]}
-                icon={cameraIcon}
-              >
-                <Popup>
-                  <div className="text-sm">
-                    <strong>{camera.name}</strong><br />
-                    Status: {camera.status}<br />
-                    <span className="text-blue-600">COMPASS System</span>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+            {/* Eastbound: Toronto → Hamilton (316 waypoints) */}
+            <Polyline positions={qewPathEastbound} color="blue" weight={3} opacity={0.6} />
 
-            {/* Work Zones */}
-            {WORK_ZONES.map(zone => (
+            {/* Real QEW Cameras */}
+            {cameras.map(camera => {
+              return (
+                <Marker
+                  key={camera.Id}
+                  position={[camera.Latitude, camera.Longitude]}
+                  icon={cameraIcon}
+                >
+                  <Popup maxWidth={400} maxHeight={500}>
+                    <div className="text-sm">
+                      <strong className="text-base block mb-1">{camera.Location}</strong>
+                      <span className="text-blue-600 text-xs">{camera.Source}</span>
+                      <div className="mt-3 space-y-3 max-h-80 overflow-y-auto">
+                        {camera.Views.map(view => {
+                          // Images are now included in the view data from the database
+                          const hasImages = view.Images && view.Images.length > 0;
+                          const primaryImage = hasImages ? view.Images[0] : null;
+                          const basePath = import.meta.env.BASE_URL || '/';
+
+                          return (
+                            <div key={view.Id} className="border-t pt-2 first:border-t-0 first:pt-0">
+                              <div className="font-semibold text-gray-700 mb-2 text-xs">
+                                📹 {view.Description || 'Camera View'}
+                              </div>
+                              {primaryImage ? (
+                                <a
+                                  href={view.Url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block"
+                                >
+                                  <img
+                                    src={`${basePath}${primaryImage.path}`}
+                                    alt={`${camera.Location} - ${view.Description}`}
+                                    className="w-full rounded border border-gray-300 hover:border-blue-500 transition"
+                                    style={{maxHeight: '200px', objectFit: 'cover'}}
+                                  />
+                                  <div className="text-xs text-center text-blue-600 mt-1 hover:underline">
+                                    Click for live feed →
+                                  </div>
+                                </a>
+                              ) : (
+                                <a
+                                  href={view.Url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block"
+                                >
+                                  <div className="bg-blue-50 border-2 border-blue-200 rounded p-3 text-center hover:bg-blue-100 transition">
+                                    <div className="text-blue-600 font-semibold mb-1">
+                                      🎥 View Live Camera
+                                    </div>
+                                    <div className="text-xs text-gray-600">
+                                      Click to open 511ON feed
+                                    </div>
+                                  </div>
+                                </a>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+
+            {/* MOCK DATA - Work Zones - Positioned ON the blue line */}
+            {/* These are simulated for demo - will be replaced with real AI detections */}
+            {mockWorkZones.map(zone => (
               <React.Fragment key={zone.id}>
                 <Marker
                   position={[zone.lat, zone.lon]}
@@ -190,6 +512,7 @@ function App() {
                   <Popup>
                     <div className="text-sm">
                       <strong>{zone.name}</strong><br />
+                      <span className="text-xs text-gray-500">(MOCK DATA)</span><br />
                       Risk Score: <span className={zone.riskScore >= 7 ? 'text-red-600 font-bold' : 'text-yellow-600'}>{zone.riskScore}/10</span><br />
                       Workers: {zone.workers} | Vehicles: {zone.vehicles}<br />
                       <button
@@ -214,22 +537,63 @@ function App() {
               </React.Fragment>
             ))}
 
-            {/* Simulated Vehicles */}
-            {vehicles.map(vehicle => (
-              <Marker
-                key={vehicle.id}
-                position={[vehicle.lat, vehicle.lon]}
-                icon={vehicleIcon}
-              >
-                <Popup>
-                  <div className="text-sm">
-                    Vehicle ID: {vehicle.id}<br />
-                    Speed: {vehicle.speed.toFixed(0)} km/h<br />
-                    Heading: {vehicle.heading.toFixed(0)}°
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+            {/* MOCK DATA - Simulated Vehicles - Moving along the blue line */}
+            {/* These vehicles move slowly (1 hour per direction) along the actual car routes */}
+            {qewPathWestbound && qewPathEastbound && vehicles.map((vehicle, index) => {
+              // Validate vehicle object
+              if (!vehicle || !vehicle.id) {
+                console.error(`Invalid vehicle at index ${index}:`, vehicle);
+                return null;
+              }
+
+              const coords = getVehicleCoordinates(vehicle);
+
+              // Safety check - don't render if coords are invalid
+              if (!coords || coords.length < 2) {
+                console.warn(`${vehicle.id} has invalid coords:`, coords, `Position: ${vehicle.position}, Direction: ${vehicle.direction}`);
+                // Return a placeholder marker at a default location instead of null
+                // This prevents the vehicle from disappearing from the array
+                return (
+                  <Marker
+                    key={vehicle.id}
+                    position={[43.4848, -79.5975]} // Default center position
+                    icon={vehicleIcon}
+                    opacity={0.3}
+                  >
+                    <Popup>
+                      <div className="text-sm">
+                        <strong>{vehicle.id}</strong><br />
+                        <span className="text-xs text-red-500">(ERROR - Invalid Position)</span><br />
+                        Position: {vehicle.position}<br />
+                        Direction: {vehicle.direction}
+                      </div>
+                    </Popup>
+                  </Marker>
+                );
+              }
+
+              return (
+                <Marker
+                  key={vehicle.id}
+                  position={coords}
+                  icon={vehicleIcon}
+                >
+                  <Popup>
+                    <div className="text-sm">
+                      <strong>{vehicle.id}</strong><br />
+                      <span className="text-xs text-gray-500">(MOCK DATA)</span><br />
+                      Speed: {vehicle.speed.toFixed(0)} km/h<br />
+                      Direction: {vehicle.direction === 'westbound' ? 'Hamilton → Toronto' : 'Toronto → Hamilton'}<br />
+                      Progress: {(() => {
+                        const routeLength = vehicle.direction === 'westbound' ? qewPathWestbound?.length : qewPathEastbound?.length;
+                        if (!routeLength || routeLength === 0) return '0.0';
+                        return ((vehicle.position / routeLength) * 100).toFixed(1);
+                      })()}%
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
           </MapContainer>
         </div>
 

@@ -1,0 +1,1300 @@
+[
+  {
+    "Id": 210,
+    "Source": "COMPASS - Central",
+    "SourceId": "425-QEW W/of Fifty Rd",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.2201,
+    "Longitude": -79.65143,
+    "Location": "QEW West of Fifty Road",
+    "SortOrder": 85,
+    "Views": [
+      {
+        "Id": 570,
+        "Url": "https://511on.ca/map/Cctv/570",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c210_v570_r1_20251116_021527.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c210_v570_r1_20251116_021527.jpg",
+            "timestamp": "20251116_021527",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 211,
+    "Source": "COMPASS - Central",
+    "SourceId": "426-QEW Millen Rd",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.239493,
+    "Longitude": -79.716024,
+    "Location": "QEW near Millen Road",
+    "SortOrder": 90,
+    "Views": [
+      {
+        "Id": 571,
+        "Url": "https://511on.ca/map/Cctv/571",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c211_v571_r1_20251116_021529.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c211_v571_r1_20251116_021529.jpg",
+            "timestamp": "20251116_021529",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 212,
+    "Source": "COMPASS - Central",
+    "SourceId": "427-QEW Grays Rd",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.241952,
+    "Longitude": -79.736366,
+    "Location": "QEW near Grays Road",
+    "SortOrder": 95,
+    "Views": [
+      {
+        "Id": 572,
+        "Url": "https://511on.ca/map/Cctv/572",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c212_v572_r1_20251116_021532.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c212_v572_r1_20251116_021532.jpg",
+            "timestamp": "20251116_021532",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 213,
+    "Source": "COMPASS - Central",
+    "SourceId": "428-QEW Centennial Pkwy",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.246828,
+    "Longitude": -79.756794,
+    "Location": "QEW near Centennial Parkway",
+    "SortOrder": 100,
+    "Views": [
+      {
+        "Id": 573,
+        "Url": "https://511on.ca/map/Cctv/573",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c213_v573_r1_20251116_021534.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c213_v573_r1_20251116_021534.jpg",
+            "timestamp": "20251116_021534",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 214,
+    "Source": "COMPASS - Central",
+    "SourceId": "429-QEW Red Hill Valley Pkwy",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.248234,
+    "Longitude": -79.761738,
+    "Location": "QEW near Red Hill Valley Parkway",
+    "SortOrder": 105,
+    "Views": [
+      {
+        "Id": 574,
+        "Url": "https://511on.ca/map/Cctv/574",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c214_v574_r1_20251116_021536.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c214_v574_r1_20251116_021536.jpg",
+            "timestamp": "20251116_021536",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 215,
+    "Source": "COMPASS - Central",
+    "SourceId": "430-QEW NIKOLA TESLA",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.258518,
+    "Longitude": -79.767008,
+    "Location": "QEW near Nikola Tesla Boulevard",
+    "SortOrder": 110,
+    "Views": [
+      {
+        "Id": 575,
+        "Url": "https://511on.ca/map/Cctv/575",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c215_v575_r1_20251116_021539.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c215_v575_r1_20251116_021539.jpg",
+            "timestamp": "20251116_021539",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 216,
+    "Source": "COMPASS - Central",
+    "SourceId": "431-QEW WOODWARD",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.264956,
+    "Longitude": -79.772243,
+    "Location": "QEW near Woodward Avenue",
+    "SortOrder": 115,
+    "Views": [
+      {
+        "Id": 576,
+        "Url": "https://511on.ca/map/Cctv/576",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c216_v576_r1_20251116_021541.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c216_v576_r1_20251116_021541.jpg",
+            "timestamp": "20251116_021541",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 217,
+    "Source": "COMPASS - Central",
+    "SourceId": "432-QEW W/of EASTPORT",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.284453,
+    "Longitude": -79.787521,
+    "Location": "QEW West of Eastport Drive",
+    "SortOrder": 120,
+    "Views": [
+      {
+        "Id": 577,
+        "Url": "https://511on.ca/map/Cctv/577",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c217_v577_r1_20251116_021544.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c217_v577_r1_20251116_021544.jpg",
+            "timestamp": "20251116_021544",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 218,
+    "Source": "COMPASS - Central",
+    "SourceId": "433-QEW E/of EASTPORT TOR BOUND",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.294075,
+    "Longitude": -79.793444,
+    "Location": "QEW East of Eastport Drive - Toronto Bound",
+    "SortOrder": 125,
+    "Views": [
+      {
+        "Id": 578,
+        "Url": "https://511on.ca/map/Cctv/578",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c218_v578_r1_20251116_021546.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c218_v578_r1_20251116_021546.jpg",
+            "timestamp": "20251116_021546",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 219,
+    "Source": "COMPASS - Central",
+    "SourceId": "434-QEW Burlington Skyway (Hamilton Side)",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.301446,
+    "Longitude": -79.797735,
+    "Location": "QEW Burlington Skyway - Hamilton Side",
+    "SortOrder": 130,
+    "Views": [
+      {
+        "Id": 579,
+        "Url": "https://511on.ca/map/Cctv/579",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c219_v579_r1_20251116_021549.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c219_v579_r1_20251116_021549.jpg",
+            "timestamp": "20251116_021549",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 220,
+    "Source": "COMPASS - Central",
+    "SourceId": "435-QEW Burlington Skyway (Burlington Side)",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.299637,
+    "Longitude": -79.797852,
+    "Location": "QEW Burlington Skyway - Toronto Side",
+    "SortOrder": 135,
+    "Views": [
+      {
+        "Id": 580,
+        "Url": "https://511on.ca/map/Cctv/580",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c220_v580_r1_20251116_021551.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c220_v580_r1_20251116_021551.jpg",
+            "timestamp": "20251116_021551",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 4,
+    "Source": "RWIS (MTO)",
+    "SourceId": "CR-8",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.30917,
+    "Longitude": -79.803,
+    "Location": "QEW at Burlington Skyway",
+    "SortOrder": 140,
+    "Views": [
+      {
+        "Id": 10,
+        "Url": "https://511on.ca/map/Cctv/10",
+        "Status": "Enabled",
+        "Description": "Fort Erie Bound",
+        "Images": [
+          {
+            "filename": "c4_v10_r1_20251116_021515.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c4_v10_r1_20251116_021515.jpg",
+            "timestamp": "20251116_021515",
+            "capture_round": 1
+          }
+        ]
+      },
+      {
+        "Id": 11,
+        "Url": "https://511on.ca/map/Cctv/11",
+        "Status": "Enabled",
+        "Description": "Looking Down",
+        "Images": [
+          {
+            "filename": "c4_v11_r1_20251116_021517.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c4_v11_r1_20251116_021517.jpg",
+            "timestamp": "20251116_021517",
+            "capture_round": 1
+          }
+        ]
+      },
+      {
+        "Id": 12,
+        "Url": "https://511on.ca/map/Cctv/12",
+        "Status": "Enabled",
+        "Description": "Toronto Bound",
+        "Images": [
+          {
+            "filename": "c4_v12_r1_20251116_021519.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c4_v12_r1_20251116_021519.jpg",
+            "timestamp": "20251116_021519",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 221,
+    "Source": "COMPASS - Central",
+    "SourceId": "436-QEW Ramp to North Shore Blvd",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.314687,
+    "Longitude": -79.805717,
+    "Location": "QEW Ramp to Northshore Boulevard",
+    "SortOrder": 145,
+    "Views": [
+      {
+        "Id": 581,
+        "Url": "https://511on.ca/map/Cctv/581",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c221_v581_r1_20251116_021553.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c221_v581_r1_20251116_021553.jpg",
+            "timestamp": "20251116_021553",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 222,
+    "Source": "COMPASS - Central",
+    "SourceId": "437-QEW E/of NORTHSHORE BLVD",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.316623,
+    "Longitude": -79.808464,
+    "Location": "QEW East of Northshore Boulevard",
+    "SortOrder": 150,
+    "Views": [
+      {
+        "Id": 582,
+        "Url": "https://511on.ca/map/Cctv/582",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c222_v582_r1_20251116_021555.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c222_v582_r1_20251116_021555.jpg",
+            "timestamp": "20251116_021555",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 224,
+    "Source": "COMPASS - Central",
+    "SourceId": "438-QEW FAIRVIEW",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.327831,
+    "Longitude": -79.824901,
+    "Location": "QEW near Fairview Street",
+    "SortOrder": 160,
+    "Views": [
+      {
+        "Id": 584,
+        "Url": "https://511on.ca/map/Cctv/584",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c224_v584_r1_20251116_021601.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c224_v584_r1_20251116_021601.jpg",
+            "timestamp": "20251116_021601",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 225,
+    "Source": "COMPASS - Central",
+    "SourceId": "439-QEW/403/407 IC BURL",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.336509,
+    "Longitude": -79.828291,
+    "Location": "QEW near Highway 403/407 IC",
+    "SortOrder": 165,
+    "Views": [
+      {
+        "Id": 585,
+        "Url": "https://511on.ca/map/Cctv/585",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c225_v585_r1_20251116_021606.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c225_v585_r1_20251116_021606.jpg",
+            "timestamp": "20251116_021606",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 226,
+    "Source": "COMPASS - Central",
+    "SourceId": "440-QEW W/of BRANT St",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.339974,
+    "Longitude": -79.824729,
+    "Location": "QEW West of Brant Street",
+    "SortOrder": 170,
+    "Views": [
+      {
+        "Id": 586,
+        "Url": "https://511on.ca/map/Cctv/586",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c226_v586_r1_20251116_021611.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c226_v586_r1_20251116_021611.jpg",
+            "timestamp": "20251116_021611",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 227,
+    "Source": "COMPASS - Central",
+    "SourceId": "441-QEW E/of Brant St",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.342596,
+    "Longitude": -79.819322,
+    "Location": "QEW East of Brant Street",
+    "SortOrder": 175,
+    "Views": [
+      {
+        "Id": 587,
+        "Url": "https://511on.ca/map/Cctv/587",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c227_v587_r1_20251116_021617.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c227_v587_r1_20251116_021617.jpg",
+            "timestamp": "20251116_021617",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 228,
+    "Source": "COMPASS - Central",
+    "SourceId": "442-QEW Guelph Line",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.350991,
+    "Longitude": -79.804387,
+    "Location": "QEW near Guelph Line",
+    "SortOrder": 180,
+    "Views": [
+      {
+        "Id": 588,
+        "Url": "https://511on.ca/map/Cctv/588",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c228_v588_r1_20251116_021622.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c228_v588_r1_20251116_021622.jpg",
+            "timestamp": "20251116_021622",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 229,
+    "Source": "COMPASS - Central",
+    "SourceId": "443-QEW E/of Guelph Line",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.358979,
+    "Longitude": -79.795504,
+    "Location": "QEW East of Guelph Line",
+    "SortOrder": 185,
+    "Views": [
+      {
+        "Id": 589,
+        "Url": "https://511on.ca/map/Cctv/589",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c229_v589_r1_20251116_021624.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c229_v589_r1_20251116_021624.jpg",
+            "timestamp": "20251116_021624",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 230,
+    "Source": "COMPASS - Central",
+    "SourceId": "444-QEW Walkers Line",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.365999,
+    "Longitude": -79.787822,
+    "Location": "QEW near Walkers Line",
+    "SortOrder": 190,
+    "Views": [
+      {
+        "Id": 590,
+        "Url": "https://511on.ca/map/Cctv/590",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c230_v590_r1_20251116_021625.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c230_v590_r1_20251116_021625.jpg",
+            "timestamp": "20251116_021625",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 231,
+    "Source": "COMPASS - Central",
+    "SourceId": "445-QEW E/of Walkers Line",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.37567,
+    "Longitude": -79.77705,
+    "Location": "QEW East of Walkers Line",
+    "SortOrder": 195,
+    "Views": [
+      {
+        "Id": 591,
+        "Url": "https://511on.ca/map/Cctv/591",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c231_v591_r1_20251116_021627.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c231_v591_r1_20251116_021627.jpg",
+            "timestamp": "20251116_021627",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 232,
+    "Source": "COMPASS - Central",
+    "SourceId": "446-QEW Appleby Line",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.380567,
+    "Longitude": -79.771857,
+    "Location": "QEW near Appleby Line",
+    "SortOrder": 200,
+    "Views": [
+      {
+        "Id": 592,
+        "Url": "https://511on.ca/map/Cctv/592",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c232_v592_r1_20251116_021630.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c232_v592_r1_20251116_021630.jpg",
+            "timestamp": "20251116_021630",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 233,
+    "Source": "COMPASS - Central",
+    "SourceId": "447-QEW E/of Appleby Line",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.387741,
+    "Longitude": -79.763918,
+    "Location": "QEW East of Appleby Line",
+    "SortOrder": 205,
+    "Views": [
+      {
+        "Id": 593,
+        "Url": "https://511on.ca/map/Cctv/593",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c233_v593_r1_20251116_021632.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c233_v593_r1_20251116_021632.jpg",
+            "timestamp": "20251116_021632",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 234,
+    "Source": "COMPASS - Central",
+    "SourceId": "448-QEW Burloak Dr",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.39482,
+    "Longitude": -79.756279,
+    "Location": "QEW near Burloak Drive",
+    "SortOrder": 210,
+    "Views": [
+      {
+        "Id": 594,
+        "Url": "https://511on.ca/map/Cctv/594",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c234_v594_r1_20251116_021634.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c234_v594_r1_20251116_021634.jpg",
+            "timestamp": "20251116_021634",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 235,
+    "Source": "COMPASS - Central",
+    "SourceId": "449-QEW E/of BURLOAK Dr",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.402927,
+    "Longitude": -79.74761,
+    "Location": "QEW East of Burloak Drive",
+    "SortOrder": 215,
+    "Views": [
+      {
+        "Id": 595,
+        "Url": "https://511on.ca/map/Cctv/595",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c235_v595_r1_20251116_021636.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c235_v595_r1_20251116_021636.jpg",
+            "timestamp": "20251116_021636",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 236,
+    "Source": "COMPASS - Central",
+    "SourceId": "450-QEW BRONTE Rd",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.409256,
+    "Longitude": -79.740829,
+    "Location": "QEW near Bronte Road",
+    "SortOrder": 220,
+    "Views": [
+      {
+        "Id": 596,
+        "Url": "https://511on.ca/map/Cctv/596",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c236_v596_r1_20251116_021638.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c236_v596_r1_20251116_021638.jpg",
+            "timestamp": "20251116_021638",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 237,
+    "Source": "COMPASS - Central",
+    "SourceId": "451-QEW E/of BRONTE Rd",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.413839,
+    "Longitude": -79.735937,
+    "Location": "QEW East of Bronte Road",
+    "SortOrder": 225,
+    "Views": [
+      {
+        "Id": 597,
+        "Url": "https://511on.ca/map/Cctv/597",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c237_v597_r1_20251116_021640.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c237_v597_r1_20251116_021640.jpg",
+            "timestamp": "20251116_021640",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 238,
+    "Source": "COMPASS - Central",
+    "SourceId": "452-QEW THIRD LINE",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.423658,
+    "Longitude": -79.724908,
+    "Location": "QEW near Third Line",
+    "SortOrder": 230,
+    "Views": [
+      {
+        "Id": 598,
+        "Url": "https://511on.ca/map/Cctv/598",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c238_v598_r1_20251116_021644.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c238_v598_r1_20251116_021644.jpg",
+            "timestamp": "20251116_021644",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 239,
+    "Source": "COMPASS - Central",
+    "SourceId": "453-QEW E/of THIRD LINE",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.432844,
+    "Longitude": -79.714764,
+    "Location": "QEW East of Third Line",
+    "SortOrder": 235,
+    "Views": [
+      {
+        "Id": 599,
+        "Url": "https://511on.ca/map/Cctv/599",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c239_v599_r1_20251116_021649.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c239_v599_r1_20251116_021649.jpg",
+            "timestamp": "20251116_021649",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 240,
+    "Source": "COMPASS - Central",
+    "SourceId": "454-QEW FOURTH LINE",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.437966,
+    "Longitude": -79.709307,
+    "Location": "QEW near Fourth Line",
+    "SortOrder": 240,
+    "Views": [
+      {
+        "Id": 600,
+        "Url": "https://511on.ca/map/Cctv/600",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c240_v600_r1_20251116_021653.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c240_v600_r1_20251116_021653.jpg",
+            "timestamp": "20251116_021653",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 241,
+    "Source": "COMPASS - Central",
+    "SourceId": "455-QEW DORVAL Dr",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.446158,
+    "Longitude": -79.699845,
+    "Location": "QEW near Dorval Drive",
+    "SortOrder": 245,
+    "Views": [
+      {
+        "Id": 601,
+        "Url": "https://511on.ca/map/Cctv/601",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c241_v601_r1_20251116_021655.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c241_v601_r1_20251116_021655.jpg",
+            "timestamp": "20251116_021655",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 242,
+    "Source": "COMPASS - Central",
+    "SourceId": "456-QEW E/of DORVAL Dr",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.453417,
+    "Longitude": -79.691777,
+    "Location": "QEW East of Dorval Drive",
+    "SortOrder": 250,
+    "Views": [
+      {
+        "Id": 602,
+        "Url": "https://511on.ca/map/Cctv/602",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c242_v602_r1_20251116_021657.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c242_v602_r1_20251116_021657.jpg",
+            "timestamp": "20251116_021657",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 223,
+    "Source": "COMPASS - Central",
+    "SourceId": "457-QEW TRAFALGAR Rd",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.460956,
+    "Longitude": -79.683623,
+    "Location": "QEW near Trafalgar Road",
+    "SortOrder": 251,
+    "Views": [
+      {
+        "Id": 583,
+        "Url": "https://511on.ca/map/Cctv/583",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c223_v583_r1_20251116_021558.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c223_v583_r1_20251116_021558.jpg",
+            "timestamp": "20251116_021558",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 243,
+    "Source": "COMPASS - Central",
+    "SourceId": "458-QEW ROYAL WINDSOR Dr",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.473415,
+    "Longitude": -79.671822,
+    "Location": "QEW near Royal Windsor Drive",
+    "SortOrder": 255,
+    "Views": [
+      {
+        "Id": 603,
+        "Url": "https://511on.ca/map/Cctv/603",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c243_v603_r1_20251116_021700.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c243_v603_r1_20251116_021700.jpg",
+            "timestamp": "20251116_021700",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 244,
+    "Source": "COMPASS - Central",
+    "SourceId": "459-QEW E/of ROYAL WINDSOR Dr",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.481701,
+    "Longitude": -79.672352,
+    "Location": "QEW East of Royal Windsor Drive",
+    "SortOrder": 260,
+    "Views": [
+      {
+        "Id": 604,
+        "Url": "https://511on.ca/map/Cctv/604",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c244_v604_r1_20251116_021702.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c244_v604_r1_20251116_021702.jpg",
+            "timestamp": "20251116_021702",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 245,
+    "Source": "COMPASS - Central",
+    "SourceId": "460-QEW FORD DR",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.494589,
+    "Longitude": -79.672165,
+    "Location": "QEW near Ford Drive",
+    "SortOrder": 265,
+    "Views": [
+      {
+        "Id": 605,
+        "Url": "https://511on.ca/map/Cctv/605",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c245_v605_r1_20251116_021704.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c245_v605_r1_20251116_021704.jpg",
+            "timestamp": "20251116_021704",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 246,
+    "Source": "COMPASS - Central",
+    "SourceId": "461-QEW /403 IC (OAK)",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.501126,
+    "Longitude": -79.678602,
+    "Location": "QEW near Highway 403 (Oakville)",
+    "SortOrder": 270,
+    "Views": [
+      {
+        "Id": 606,
+        "Url": "https://511on.ca/map/Cctv/606",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c246_v606_r1_20251116_021706.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c246_v606_r1_20251116_021706.jpg",
+            "timestamp": "20251116_021706",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 247,
+    "Source": "COMPASS - Central",
+    "SourceId": "462-QEW W/of WINSTON CHURCHILL",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.504197,
+    "Longitude": -79.66958,
+    "Location": "QEW West of Winston Churchill Boulevard",
+    "SortOrder": 275,
+    "Views": [
+      {
+        "Id": 607,
+        "Url": "https://511on.ca/map/Cctv/607",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c247_v607_r1_20251116_021708.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c247_v607_r1_20251116_021708.jpg",
+            "timestamp": "20251116_021708",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 1159,
+    "Source": "COMPASS - Central",
+    "SourceId": "463-QEW Winston Churchill Blvd",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.509095,
+    "Longitude": -79.663153,
+    "Location": "QEW near Winston Churchill Boulevard",
+    "SortOrder": 280,
+    "Views": [
+      {
+        "Id": 2261,
+        "Url": "https://511on.ca/map/Cctv/2261",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c1159_v2261_r1_20251116_021721.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c1159_v2261_r1_20251116_021721.jpg",
+            "timestamp": "20251116_021721",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 249,
+    "Source": "COMPASS - Central",
+    "SourceId": "464-QEW W/of ERIN MILLS",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.516564,
+    "Longitude": -79.655514,
+    "Location": "QEW West of Erin Mills Parkway",
+    "SortOrder": 285,
+    "Views": [
+      {
+        "Id": 609,
+        "Url": "https://511on.ca/map/Cctv/609",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c249_v609_r1_20251116_021711.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c249_v609_r1_20251116_021711.jpg",
+            "timestamp": "20251116_021711",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 250,
+    "Source": "COMPASS - Central",
+    "SourceId": "465-QEW SOUTBOUND Rd/ERIN MILLS PKWY",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.523846,
+    "Longitude": -79.647446,
+    "Location": "QEW near Southbound Road/Erin Mills Parkway",
+    "SortOrder": 290,
+    "Views": [
+      {
+        "Id": 610,
+        "Url": "https://511on.ca/map/Cctv/610",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c250_v610_r1_20251116_021713.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c250_v610_r1_20251116_021713.jpg",
+            "timestamp": "20251116_021713",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 251,
+    "Source": "COMPASS - Central",
+    "SourceId": "466-QEW E/of ERIN MILLS",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.535794,
+    "Longitude": -79.634228,
+    "Location": "QEW East of Erin Mills Parkway",
+    "SortOrder": 295,
+    "Views": [
+      {
+        "Id": 611,
+        "Url": "https://511on.ca/map/Cctv/611",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c251_v611_r1_20251116_021715.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c251_v611_r1_20251116_021715.jpg",
+            "timestamp": "20251116_021715",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 252,
+    "Source": "COMPASS - Central",
+    "SourceId": "467-QEW MISSISSAUGA Rd",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.552218,
+    "Longitude": -79.612513,
+    "Location": "QEW near Mississauga Road (1)",
+    "SortOrder": 300,
+    "Views": [
+      {
+        "Id": 612,
+        "Url": "https://511on.ca/map/Cctv/612",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c252_v612_r1_20251116_021717.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c252_v612_r1_20251116_021717.jpg",
+            "timestamp": "20251116_021717",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 5,
+    "Source": "RWIS (MTO)",
+    "SourceId": "CR-13",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.550471,
+    "Longitude": -79.617523,
+    "Location": "QEW near Mississauga Road (2)",
+    "SortOrder": 305,
+    "Views": [
+      {
+        "Id": 13,
+        "Url": "https://511on.ca/map/Cctv/13",
+        "Status": "Enabled",
+        "Description": "Toronto Bound",
+        "Images": [
+          {
+            "filename": "c5_v13_r1_20251116_021521.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c5_v13_r1_20251116_021521.jpg",
+            "timestamp": "20251116_021521",
+            "capture_round": 1
+          }
+        ]
+      },
+      {
+        "Id": 14,
+        "Url": "https://511on.ca/map/Cctv/14",
+        "Status": "Enabled",
+        "Description": "Looking Down",
+        "Images": [
+          {
+            "filename": "c5_v14_r1_20251116_021523.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c5_v14_r1_20251116_021523.jpg",
+            "timestamp": "20251116_021523",
+            "capture_round": 1
+          }
+        ]
+      },
+      {
+        "Id": 15,
+        "Url": "https://511on.ca/map/Cctv/15",
+        "Status": "Enabled",
+        "Description": "Fort Erie Bound",
+        "Images": [
+          {
+            "filename": "c5_v15_r1_20251116_021525.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c5_v15_r1_20251116_021525.jpg",
+            "timestamp": "20251116_021525",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 253,
+    "Source": "COMPASS - Central",
+    "SourceId": "468-QEW E/of MISSISSAUGA Rd",
+    "Roadway": "QEW",
+    "Direction": "Unknown",
+    "Latitude": 43.558128,
+    "Longitude": -79.607964,
+    "Location": "QEW East of Mississauga Road",
+    "SortOrder": 310,
+    "Views": [
+      {
+        "Id": 613,
+        "Url": "https://511on.ca/map/Cctv/613",
+        "Status": "Enabled",
+        "Description": "",
+        "Images": [
+          {
+            "filename": "c253_v613_r1_20251116_021719.jpg",
+            "path": "camera_images/qew_collection_20251116_021515/c253_v613_r1_20251116_021719.jpg",
+            "timestamp": "20251116_021719",
+            "capture_round": 1
+          }
+        ]
+      }
+    ]
+  }
+]

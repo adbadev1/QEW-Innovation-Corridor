@@ -1,21 +1,23 @@
 """
 QEW Camera Collection GUI
 PyQt6 interface for automated camera image collection with scheduling
+Now uses SQLite database and short filenames
 """
 import sys
 import json
 import os
 from datetime import datetime
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                             QHBoxLayout, QLabel, QPushButton, QSpinBox, 
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
+                             QHBoxLayout, QLabel, QPushButton, QSpinBox,
                              QComboBox, QTextEdit, QGroupBox, QGridLayout)
 from PyQt6.QtCore import QTimer, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont, QPalette, QColor, QLinearGradient
 import pytz
 
 # Import our camera collection functions
-from download_camera_images import (load_camera_data, create_output_directory, 
+from download_camera_images import (load_camera_data, create_output_directory,
                                    download_camera_images, generate_summary_report)
+from database import CameraDatabase
 
 class CameraCollectionWorker(QThread):
     """Worker thread for camera image collection"""

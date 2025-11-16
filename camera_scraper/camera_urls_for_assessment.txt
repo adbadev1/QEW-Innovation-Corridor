@@ -1,0 +1,638 @@
+================================================================================
+QEW CAMERA URLs FOR MANUAL ASSESSMENT
+================================================================================
+
+
+================================================================================
+CAMERA 4: QEW at Burlington Skyway
+GPS: 43.30917, -79.803
+================================================================================
+
+  View 10: Fort Erie Bound
+  URL: https://511on.ca/map/Cctv/10
+  Current Direction: West (270.0°)
+  Compass: W (W)
+  Mount: Bridge Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+  View 11: Looking Down
+  URL: https://511on.ca/map/Cctv/11
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Bridge Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+  View 12: Toronto Bound
+  URL: https://511on.ca/map/Cctv/12
+  Current Direction: East (90.0°)
+  Compass: E (E)
+  Mount: Bridge Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 5: QEW near Mississauga Road (2)
+GPS: 43.550471, -79.617523
+================================================================================
+
+  View 13: Toronto Bound
+  URL: https://511on.ca/map/Cctv/13
+  Current Direction: East (90.0°)
+  Compass: E (E)
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+  View 14: Looking Down
+  URL: https://511on.ca/map/Cctv/14
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Overhead Gantry
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+  View 15: Fort Erie Bound
+  URL: https://511on.ca/map/Cctv/15
+  Current Direction: West (270.0°)
+  Compass: W (W)
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 210: QEW West of Fifty Road
+GPS: 43.2201, -79.65143
+================================================================================
+
+  View 570: 
+  URL: https://511on.ca/map/Cctv/570
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 211: QEW near Millen Road
+GPS: 43.239493, -79.716024
+================================================================================
+
+  View 571: 
+  URL: https://511on.ca/map/Cctv/571
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 212: QEW near Grays Road
+GPS: 43.241952, -79.736366
+================================================================================
+
+  View 572: 
+  URL: https://511on.ca/map/Cctv/572
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 213: QEW near Centennial Parkway
+GPS: 43.246828, -79.756794
+================================================================================
+
+  View 573: 
+  URL: https://511on.ca/map/Cctv/573
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 214: QEW near Red Hill Valley Parkway
+GPS: 43.248234, -79.761738
+================================================================================
+
+  View 574: 
+  URL: https://511on.ca/map/Cctv/574
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 215: QEW near Nikola Tesla Boulevard
+GPS: 43.258518, -79.767008
+================================================================================
+
+  View 575: 
+  URL: https://511on.ca/map/Cctv/575
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 216: QEW near Woodward Avenue
+GPS: 43.264956, -79.772243
+================================================================================
+
+  View 576: 
+  URL: https://511on.ca/map/Cctv/576
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 217: QEW West of Eastport Drive
+GPS: 43.284453, -79.787521
+================================================================================
+
+  View 577: 
+  URL: https://511on.ca/map/Cctv/577
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 218: QEW East of Eastport Drive - Toronto Bound
+GPS: 43.294075, -79.793444
+================================================================================
+
+  View 578: 
+  URL: https://511on.ca/map/Cctv/578
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 219: QEW Burlington Skyway - Hamilton Side
+GPS: 43.301446, -79.797735
+================================================================================
+
+  View 579: 
+  URL: https://511on.ca/map/Cctv/579
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Bridge Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 220: QEW Burlington Skyway - Toronto Side
+GPS: 43.299637, -79.797852
+================================================================================
+
+  View 580: 
+  URL: https://511on.ca/map/Cctv/580
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Bridge Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 221: QEW Ramp to Northshore Boulevard
+GPS: 43.314687, -79.805717
+================================================================================
+
+  View 581: 
+  URL: https://511on.ca/map/Cctv/581
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 222: QEW East of Northshore Boulevard
+GPS: 43.316623, -79.808464
+================================================================================
+
+  View 582: 
+  URL: https://511on.ca/map/Cctv/582
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 223: QEW near Trafalgar Road
+GPS: 43.460956, -79.683623
+================================================================================
+
+  View 583: 
+  URL: https://511on.ca/map/Cctv/583
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 224: QEW near Fairview Street
+GPS: 43.327831, -79.824901
+================================================================================
+
+  View 584: 
+  URL: https://511on.ca/map/Cctv/584
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 225: QEW near Highway 403/407 IC
+GPS: 43.336509, -79.828291
+================================================================================
+
+  View 585: 
+  URL: https://511on.ca/map/Cctv/585
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 226: QEW West of Brant Street
+GPS: 43.339974, -79.824729
+================================================================================
+
+  View 586: 
+  URL: https://511on.ca/map/Cctv/586
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 227: QEW East of Brant Street
+GPS: 43.342596, -79.819322
+================================================================================
+
+  View 587: 
+  URL: https://511on.ca/map/Cctv/587
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 228: QEW near Guelph Line
+GPS: 43.350991, -79.804387
+================================================================================
+
+  View 588: 
+  URL: https://511on.ca/map/Cctv/588
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 229: QEW East of Guelph Line
+GPS: 43.358979, -79.795504
+================================================================================
+
+  View 589: 
+  URL: https://511on.ca/map/Cctv/589
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 230: QEW near Walkers Line
+GPS: 43.365999, -79.787822
+================================================================================
+
+  View 590: 
+  URL: https://511on.ca/map/Cctv/590
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 231: QEW East of Walkers Line
+GPS: 43.37567, -79.77705
+================================================================================
+
+  View 591: 
+  URL: https://511on.ca/map/Cctv/591
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 232: QEW near Appleby Line
+GPS: 43.380567, -79.771857
+================================================================================
+
+  View 592: 
+  URL: https://511on.ca/map/Cctv/592
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 233: QEW East of Appleby Line
+GPS: 43.387741, -79.763918
+================================================================================
+
+  View 593: 
+  URL: https://511on.ca/map/Cctv/593
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 234: QEW near Burloak Drive
+GPS: 43.39482, -79.756279
+================================================================================
+
+  View 594: 
+  URL: https://511on.ca/map/Cctv/594
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 235: QEW East of Burloak Drive
+GPS: 43.402927, -79.74761
+================================================================================
+
+  View 595: 
+  URL: https://511on.ca/map/Cctv/595
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 236: QEW near Bronte Road
+GPS: 43.409256, -79.740829
+================================================================================
+
+  View 596: 
+  URL: https://511on.ca/map/Cctv/596
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 237: QEW East of Bronte Road
+GPS: 43.413839, -79.735937
+================================================================================
+
+  View 597: 
+  URL: https://511on.ca/map/Cctv/597
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 238: QEW near Third Line
+GPS: 43.423658, -79.724908
+================================================================================
+
+  View 598: 
+  URL: https://511on.ca/map/Cctv/598
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 239: QEW East of Third Line
+GPS: 43.432844, -79.714764
+================================================================================
+
+  View 599: 
+  URL: https://511on.ca/map/Cctv/599
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 240: QEW near Fourth Line
+GPS: 43.437966, -79.709307
+================================================================================
+
+  View 600: 
+  URL: https://511on.ca/map/Cctv/600
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 241: QEW near Dorval Drive
+GPS: 43.446158, -79.699845
+================================================================================
+
+  View 601: 
+  URL: https://511on.ca/map/Cctv/601
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 242: QEW East of Dorval Drive
+GPS: 43.453417, -79.691777
+================================================================================
+
+  View 602: 
+  URL: https://511on.ca/map/Cctv/602
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 243: QEW near Royal Windsor Drive
+GPS: 43.473415, -79.671822
+================================================================================
+
+  View 603: 
+  URL: https://511on.ca/map/Cctv/603
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 244: QEW East of Royal Windsor Drive
+GPS: 43.481701, -79.672352
+================================================================================
+
+  View 604: 
+  URL: https://511on.ca/map/Cctv/604
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 245: QEW near Ford Drive
+GPS: 43.494589, -79.672165
+================================================================================
+
+  View 605: 
+  URL: https://511on.ca/map/Cctv/605
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 246: QEW near Highway 403 (Oakville)
+GPS: 43.501126, -79.678602
+================================================================================
+
+  View 606: 
+  URL: https://511on.ca/map/Cctv/606
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 247: QEW West of Winston Churchill Boulevard
+GPS: 43.504197, -79.66958
+================================================================================
+
+  View 607: 
+  URL: https://511on.ca/map/Cctv/607
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 249: QEW West of Erin Mills Parkway
+GPS: 43.516564, -79.655514
+================================================================================
+
+  View 609: 
+  URL: https://511on.ca/map/Cctv/609
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 250: QEW near Southbound Road/Erin Mills Parkway
+GPS: 43.523846, -79.647446
+================================================================================
+
+  View 610: 
+  URL: https://511on.ca/map/Cctv/610
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 251: QEW East of Erin Mills Parkway
+GPS: 43.535794, -79.634228
+================================================================================
+
+  View 611: 
+  URL: https://511on.ca/map/Cctv/611
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 252: QEW near Mississauga Road (1)
+GPS: 43.552218, -79.612513
+================================================================================
+
+  View 612: 
+  URL: https://511on.ca/map/Cctv/612
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 253: QEW East of Mississauga Road
+GPS: 43.558128, -79.607964
+================================================================================
+
+  View 613: 
+  URL: https://511on.ca/map/Cctv/613
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
+
+================================================================================
+CAMERA 1159: QEW near Winston Churchill Boulevard
+GPS: 43.509095, -79.663153
+================================================================================
+
+  View 2261: 
+  URL: https://511on.ca/map/Cctv/2261
+  Current Direction: Unknown - NEEDS MANUAL REVIEW
+  Mount: Pole Mount
+  Manual Assessment: [Enter heading 0-360°] _______
+  Manual Compass: [Enter N/NE/E/SE/S/SW/W/NW] _______
+
