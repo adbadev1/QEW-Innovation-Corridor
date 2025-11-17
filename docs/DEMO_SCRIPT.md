@@ -130,6 +130,105 @@
 
 ---
 
+## 🗺️ Map Visualization Guide
+
+### **Understanding the Three Marker Types**
+
+#### **🔵 BLUE MARKERS - Real COMPASS Cameras (46 total)**
+**What they are:**
+- Actual MTO traffic cameras along the QEW corridor
+- All positioned on the real QEW highway route (Burlington to Toronto)
+- GPS coordinates match actual camera installations
+
+**What they show:**
+- Real camera images scraped from MTO's 511ON system
+- Camera location name (e.g., "QEW West of Fifty Road")
+- Link to live 511ON feed
+- Camera status (active/inactive)
+
+**Geographic constraint:**
+- ALL 46 cameras are positioned along the QEW corridor polyline
+- Span from Burlington (Highway 403 junction) to Toronto (Gardiner Expressway)
+- No cameras outside the 40km QEW route
+
+**Demo talking point:**
+> "These 46 blue markers show every COMPASS camera along our target corridor. Click any one to see the actual camera feed - these are real images from MTO's system, not mock data."
+
+---
+
+#### **🔴 RED MARKERS - Work Zone Simulations (3 total)**
+**What they are:**
+- Simulated AI analysis results (demo purposes)
+- Represent what the production system would detect
+- Positioned at actual work zone locations on the QEW
+
+**What they show:**
+- Risk score (1-10) with color-coded danger zones
+- Detected elements (workers, vehicles, equipment, barriers)
+- Specific hazards identified
+- MTO BOOK 7 compliance violations
+- Actionable recommendations
+- Generated V2X alert message
+
+**Geographic constraint:**
+- ALL 3 work zones are on the QEW corridor route
+- Positioned at real highway landmarks:
+  - WZ_001: QEW @ Burloak Drive (Oakville)
+  - WZ_002: QEW @ Hurontario St (Mississauga)
+  - WZ_003: QEW @ Etobicoke Creek (Toronto)
+- No work zones off the highway
+
+**Demo talking point:**
+> "These red markers show active work zones our AI has analyzed. In production, the system would analyze camera feeds in real-time and generate these assessments automatically. For the demo, we're showing what the AI would detect."
+
+---
+
+#### **🟢 GREEN MARKERS - Connected Vehicles (Simulated BSM)**
+**What they are:**
+- Simulated connected vehicles (Basic Safety Messages)
+- Demonstrate V2X communication concept
+- Show how vehicles respond to work zone alerts
+
+**What they show:**
+- Vehicle ID and telemetry (speed, heading, position)
+- Alert reception status
+- Distance to hazard
+- Speed reduction behavior
+
+**Geographic constraint:**
+- ALL vehicles travel ONLY on the QEW corridor route
+- Movement constrained to the blue polyline (Burlington to Toronto)
+- Vehicles do not appear off the highway
+- Simulated traffic flow follows actual QEW path
+
+**Demo talking point:**
+> "These green markers are connected vehicles receiving our V2X alerts. Watch how they slow down when approaching a high-risk work zone - the system warns them before they even see the construction."
+
+---
+
+### **The Blue Polyline - QEW Corridor Route**
+
+**What it represents:**
+- The actual QEW highway route from Burlington to Toronto
+- 40 kilometers of monitored corridor
+- Accurate GPS path following Lake Ontario shoreline
+
+**Key waypoints:**
+- **Start:** Burlington (43.3300, -79.8000) - Highway 403 junction
+- **End:** Toronto (43.6395, -79.3950) - Gardiner Expressway junction
+- **Center:** (43.4848, -79.5975) - Map display center point
+
+**Why it matters:**
+- Proves geographic accuracy (not random placement)
+- Shows comprehensive coverage (cameras span entire route)
+- Demonstrates real-world deployment feasibility
+- All markers (blue, red, green) are constrained to this route
+
+**Demo talking point:**
+> "This blue line is the actual QEW corridor we're monitoring - 40 kilometers from Burlington to Toronto. Every camera, every work zone, every vehicle is positioned on this real highway route. This isn't a concept - this is the actual deployment area."
+
+---
+
 ## 🤔 Anticipated Questions & Answers
 
 ### Q: "How accurate is your AI detection?"
@@ -145,12 +244,12 @@ Our target is **95% accuracy** before going live."
 
 ### Q: "How does this integrate with existing MTO systems?"
 
-**A:** "MTO already has the **COMPASS traffic management system** with cameras every kilometer on the QEW. We're building a **software layer** that:
-1. Pulls camera feeds via their existing APIs
+**A:** "MTO already has the **COMPASS traffic management system** with 46 cameras along the QEW corridor. We're building a **software layer** that:
+1. Pulls camera feeds via their existing APIs (we're already scraping 511ON images)
 2. Processes frames in **Google Cloud Run** (serverless, scalable)
 3. Sends alerts to their **existing RSU network**
 
-**Zero hardware deployment required.** We work with what's already there."
+**Zero hardware deployment required.** We work with what's already there. Our demo shows real images from 46 actual COMPASS cameras."
 
 ---
 
@@ -205,15 +304,17 @@ Plus, **we're already applying for OVIN funding.** This isn't a weekend project 
 ## 🎯 Key Talking Points (Memorize These)
 
 1. **70 workers die annually** in North American work zones
-2. **40 kilometers** of QEW under construction
-3. **8/10 risk score** in high-danger scenarios
-4. **3 seconds** for AI analysis
-5. **$150,000** OVIN pilot funding available
-6. **MTO BOOK 7** compliance checking
-7. **V2X/V2I** communication standards
-8. **COMPASS system** integration
-9. **95% accuracy** target for production
-10. **6 months** to QEW deployment
+2. **40 kilometers** of QEW corridor (Burlington to Toronto)
+3. **46 real COMPASS cameras** with live image feeds
+4. **8/10 risk score** in high-danger scenarios
+5. **3 seconds** for AI analysis
+6. **$150,000** OVIN pilot funding available
+7. **MTO BOOK 7** compliance checking
+8. **V2X/V2I** communication standards
+9. **COMPASS system** integration (existing infrastructure)
+10. **95% accuracy** target for production
+11. **6 months** to QEW deployment
+12. **All markers constrained to QEW route** (blue cameras, red work zones, green vehicles)
 
 ---
 

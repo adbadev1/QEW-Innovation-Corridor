@@ -17,7 +17,7 @@ graph TB
     %% Current State
     START[🎯 Current State:<br/>Hackathon Prototype<br/>LOCAL ONLY] --> PHASE0{Phase 0:<br/>Hackathon Demo<br/>3 hours}
 
-    PHASE0 --> DEMO[✅ Digital Twin Dashboard<br/>- 13 Camera Locations<br/>- 3 Work Zones<br/>- Mock BSM Simulation<br/>- Production Coordinates]
+    PHASE0 --> DEMO[✅ Digital Twin Dashboard<br/>- 46 Real COMPASS Camera Locations<br/>- 3 Work Zones (on QEW corridor)<br/>- Mock BSM Simulation (on QEW route)<br/>- Production GPS Coordinates]
 
     DEMO --> DECISION{Hackathon<br/>Success?}
 
@@ -103,7 +103,7 @@ graph TB
     PILOT2B --> MVP
     PILOT2C --> MVP
 
-    MVP --> MVP_FEATURES[MVP Features:<br/>✅ 13 COMPASS Cameras<br/>✅ Real-time Work Zone Analysis<br/>✅ V2X RSU Alerts<br/>✅ 95%+ Accuracy<br/>✅ <5s Latency<br/>✅ MTO Compliant]
+    MVP --> MVP_FEATURES[MVP Features:<br/>✅ 46+ COMPASS Cameras (Full QEW Coverage)<br/>✅ Real-time Work Zone Analysis<br/>✅ V2X RSU Alerts<br/>✅ 95%+ Accuracy<br/>✅ <5s Latency<br/>✅ MTO Compliant]
 
     %% Post-MVP
     MVP_FEATURES --> POSTMVP{Post-MVP Path}
@@ -225,9 +225,10 @@ graph LR
 **Status:** ✅ Complete
 **Deliverables:**
 - ✅ Digital Twin Dashboard (React + Leaflet)
-- ✅ 13 Production-accurate camera locations
-- ✅ 3 Work zone simulations
-- ✅ Mock BSM vehicle tracking
+- ✅ 46 Real COMPASS camera locations with live images (from MTO 511ON)
+- ✅ 3 Work zone simulations (positioned on actual QEW corridor)
+- ✅ Mock BSM vehicle tracking (constrained to QEW route Burlington-Toronto)
+- ✅ QEW corridor polyline (accurate 40km route visualization)
 - ✅ AI Traffic Analyst panel
 - ✅ GitHub repository (public)
 - ✅ Demo script & architecture docs
@@ -705,10 +706,15 @@ Scale-Up Plan:
   Week 21-24: Performance analysis + reporting
 
 Full Camera List:
-  Burlington:  403, Guelph Line, Burloak
-  Oakville:    Trafalgar, Third Line, Winston Churchill
-  Mississauga: Hurontario, Dixie, Cawthra
-  Toronto:     Etobicoke Creek, Islington, Kipling, Park Lawn
+  Burlington-Hamilton:  403, Guelph Line, Burloak, Fifty Rd, Millen Rd, Grays Rd,
+                        Centennial Pkwy, Red Hill Valley, Nikola Tesla, Woodward,
+                        Eastport, Burlington Skyway (both sides), Northshore
+  Oakville:             Trafalgar, Fairview, Third Line, Bronte, Appleby, Walkers,
+                        Brant, Dorval
+  Mississauga:          Winston Churchill, Hurontario, Dixie, Cawthra
+  Toronto:              Etobicoke Creek, Islington, Kipling, Park Lawn
+
+  Total: 46 COMPASS cameras covering full 40km QEW corridor
 
 Results:
   - 1.87M frames analyzed
@@ -726,7 +732,7 @@ Results:
 ## 🎉 MVP Achievement Criteria
 
 ### **Technical Milestones**
-- ✅ 13 COMPASS cameras integrated and operational
+- ✅ 46+ COMPASS cameras integrated and operational (full QEW corridor coverage)
 - ✅ Real-time work zone analysis (<5s latency)
 - ✅ V2X RSU alert broadcasting (SAE J2735 compliant)
 - ✅ 95%+ worker detection accuracy

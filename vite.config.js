@@ -7,6 +7,7 @@ import react from '@vitejs/plugin-react'
 // - New hackathon projects: Use 8200+ range
 export default defineConfig({
   plugins: [react()],
+  base: '/QEW-Innovation-Corridor/',
   server: {
     port: 8200,
     open: true

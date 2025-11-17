@@ -1,0 +1,51 @@
+camera_id,view_id,location,latitude,longitude,view_description,url,current_heading_degrees,current_compass_16,current_compass_8,mount_type,needs_manual_review
+4,10,QEW at Burlington Skyway,43.30917,-79.803,Fort Erie Bound,https://511on.ca/map/Cctv/10,270.0,W,W,Bridge Mount,NO
+4,11,QEW at Burlington Skyway,43.30917,-79.803,Looking Down,https://511on.ca/map/Cctv/11,,,,Bridge Mount,YES
+4,12,QEW at Burlington Skyway,43.30917,-79.803,Toronto Bound,https://511on.ca/map/Cctv/12,90.0,E,E,Bridge Mount,NO
+5,13,QEW near Mississauga Road (2),43.550471,-79.617523,Toronto Bound,https://511on.ca/map/Cctv/13,90.0,E,E,Pole Mount,NO
+5,14,QEW near Mississauga Road (2),43.550471,-79.617523,Looking Down,https://511on.ca/map/Cctv/14,,,,Overhead Gantry,YES
+5,15,QEW near Mississauga Road (2),43.550471,-79.617523,Fort Erie Bound,https://511on.ca/map/Cctv/15,270.0,W,W,Pole Mount,NO
+210,570,QEW West of Fifty Road,43.2201,-79.65143,,https://511on.ca/map/Cctv/570,,,,Pole Mount,YES
+211,571,QEW near Millen Road,43.239493,-79.716024,,https://511on.ca/map/Cctv/571,,,,Pole Mount,YES
+212,572,QEW near Grays Road,43.241952,-79.736366,,https://511on.ca/map/Cctv/572,,,,Pole Mount,YES
+213,573,QEW near Centennial Parkway,43.246828,-79.756794,,https://511on.ca/map/Cctv/573,,,,Pole Mount,YES
+214,574,QEW near Red Hill Valley Parkway,43.248234,-79.761738,,https://511on.ca/map/Cctv/574,,,,Pole Mount,YES
+215,575,QEW near Nikola Tesla Boulevard,43.258518,-79.767008,,https://511on.ca/map/Cctv/575,,,,Pole Mount,YES
+216,576,QEW near Woodward Avenue,43.264956,-79.772243,,https://511on.ca/map/Cctv/576,,,,Pole Mount,YES
+217,577,QEW West of Eastport Drive,43.284453,-79.787521,,https://511on.ca/map/Cctv/577,,,,Pole Mount,YES
+218,578,QEW East of Eastport Drive - Toronto Bound,43.294075,-79.793444,,https://511on.ca/map/Cctv/578,,,,Pole Mount,YES
+219,579,QEW Burlington Skyway - Hamilton Side,43.301446,-79.797735,,https://511on.ca/map/Cctv/579,,,,Bridge Mount,YES
+220,580,QEW Burlington Skyway - Toronto Side,43.299637,-79.797852,,https://511on.ca/map/Cctv/580,,,,Bridge Mount,YES
+221,581,QEW Ramp to Northshore Boulevard,43.314687,-79.805717,,https://511on.ca/map/Cctv/581,,,,Pole Mount,YES
+222,582,QEW East of Northshore Boulevard,43.316623,-79.808464,,https://511on.ca/map/Cctv/582,,,,Pole Mount,YES
+223,583,QEW near Trafalgar Road,43.460956,-79.683623,,https://511on.ca/map/Cctv/583,,,,Pole Mount,YES
+224,584,QEW near Fairview Street,43.327831,-79.824901,,https://511on.ca/map/Cctv/584,,,,Pole Mount,YES
+225,585,QEW near Highway 403/407 IC,43.336509,-79.828291,,https://511on.ca/map/Cctv/585,,,,Pole Mount,YES
+226,586,QEW West of Brant Street,43.339974,-79.824729,,https://511on.ca/map/Cctv/586,,,,Pole Mount,YES
+227,587,QEW East of Brant Street,43.342596,-79.819322,,https://511on.ca/map/Cctv/587,,,,Pole Mount,YES
+228,588,QEW near Guelph Line,43.350991,-79.804387,,https://511on.ca/map/Cctv/588,,,,Pole Mount,YES
+229,589,QEW East of Guelph Line,43.358979,-79.795504,,https://511on.ca/map/Cctv/589,,,,Pole Mount,YES
+230,590,QEW near Walkers Line,43.365999,-79.787822,,https://511on.ca/map/Cctv/590,,,,Pole Mount,YES
+231,591,QEW East of Walkers Line,43.37567,-79.77705,,https://511on.ca/map/Cctv/591,,,,Pole Mount,YES
+232,592,QEW near Appleby Line,43.380567,-79.771857,,https://511on.ca/map/Cctv/592,,,,Pole Mount,YES
+233,593,QEW East of Appleby Line,43.387741,-79.763918,,https://511on.ca/map/Cctv/593,,,,Pole Mount,YES
+234,594,QEW near Burloak Drive,43.39482,-79.756279,,https://511on.ca/map/Cctv/594,,,,Pole Mount,YES
+235,595,QEW East of Burloak Drive,43.402927,-79.74761,,https://511on.ca/map/Cctv/595,,,,Pole Mount,YES
+236,596,QEW near Bronte Road,43.409256,-79.740829,,https://511on.ca/map/Cctv/596,,,,Pole Mount,YES
+237,597,QEW East of Bronte Road,43.413839,-79.735937,,https://511on.ca/map/Cctv/597,,,,Pole Mount,YES
+238,598,QEW near Third Line,43.423658,-79.724908,,https://511on.ca/map/Cctv/598,,,,Pole Mount,YES
+239,599,QEW East of Third Line,43.432844,-79.714764,,https://511on.ca/map/Cctv/599,,,,Pole Mount,YES
+240,600,QEW near Fourth Line,43.437966,-79.709307,,https://511on.ca/map/Cctv/600,,,,Pole Mount,YES
+241,601,QEW near Dorval Drive,43.446158,-79.699845,,https://511on.ca/map/Cctv/601,,,,Pole Mount,YES
+242,602,QEW East of Dorval Drive,43.453417,-79.691777,,https://511on.ca/map/Cctv/602,,,,Pole Mount,YES
+243,603,QEW near Royal Windsor Drive,43.473415,-79.671822,,https://511on.ca/map/Cctv/603,,,,Pole Mount,YES
+244,604,QEW East of Royal Windsor Drive,43.481701,-79.672352,,https://511on.ca/map/Cctv/604,,,,Pole Mount,YES
+245,605,QEW near Ford Drive,43.494589,-79.672165,,https://511on.ca/map/Cctv/605,,,,Pole Mount,YES
+246,606,QEW near Highway 403 (Oakville),43.501126,-79.678602,,https://511on.ca/map/Cctv/606,,,,Pole Mount,YES
+247,607,QEW West of Winston Churchill Boulevard,43.504197,-79.66958,,https://511on.ca/map/Cctv/607,,,,Pole Mount,YES
+249,609,QEW West of Erin Mills Parkway,43.516564,-79.655514,,https://511on.ca/map/Cctv/609,,,,Pole Mount,YES
+250,610,QEW near Southbound Road/Erin Mills Parkway,43.523846,-79.647446,,https://511on.ca/map/Cctv/610,,,,Pole Mount,YES
+251,611,QEW East of Erin Mills Parkway,43.535794,-79.634228,,https://511on.ca/map/Cctv/611,,,,Pole Mount,YES
+252,612,QEW near Mississauga Road (1),43.552218,-79.612513,,https://511on.ca/map/Cctv/612,,,,Pole Mount,YES
+253,613,QEW East of Mississauga Road,43.558128,-79.607964,,https://511on.ca/map/Cctv/613,,,,Pole Mount,YES
+1159,2261,QEW near Winston Churchill Boulevard,43.509095,-79.663153,,https://511on.ca/map/Cctv/2261,,,,Pole Mount,YES
