@@ -1,0 +1,40 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# API Keys
+config.py
+.env
+
+# Database
+data/*.db
+*.db
+
+# Images
+satellite_images/*.jpg
+satellite_images/*.png
+camera_images/*.jpg
+camera_images/*.png
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+

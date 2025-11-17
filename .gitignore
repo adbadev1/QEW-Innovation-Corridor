@@ -1,0 +1,67 @@
+# Dependencies
+node_modules/
+package-lock.json
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Vite build
+.vite/
+
+# Logs
+*.log
+logs/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# API Keys (safety)
+*credentials*
+*secret*
+*api_key*
+
+# Camera image collections (too large for git)
+camera_scraper/camera_images/qew_collection_*/
+camera_scraper/quick_test_db/
+camera_scraper/test_images_db/
+public/camera_images/qew_collection_*/
+
+# Database files
+*.db
+camera_scraper/*.db
+ai_camera_direction/data/*.db
