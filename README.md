@@ -3,6 +3,7 @@
 **OVIN Hackathon Project | Building Path to $150K Pilot Funding**
 
 🌐 **Live Repository:** https://github.com/adbadev1/QEW-Innovation-Corridor
+🚀 **Live Demo:** https://adbadev1.github.io/QEW-Innovation-Corridor/
 
 ## 🎯 Project Overview
 
