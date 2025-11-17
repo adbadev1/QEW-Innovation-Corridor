@@ -65,3 +65,4 @@ public/camera_images/qew_collection_*/
 *.db
 camera_scraper/*.db
 ai_camera_direction/data/*.db
+gui_settings.json
