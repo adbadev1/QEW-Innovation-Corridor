@@ -305,6 +305,35 @@ cleanup_camera_images() {
     else
         log_info "No camera image collections found"
     fi
+
+    # Clean up camera GUI settings
+    if [ -f "camera_scraper/gui_settings.json" ]; then
+        echo ""
+        read -p "Remove camera GUI settings (gui_settings.json)? (y/n) " -n 1 -r
+        echo
+
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            rm -f camera_scraper/gui_settings.json
+            log_success "Camera GUI settings removed"
+        else
+            log_info "Skipped camera GUI settings"
+        fi
+    fi
+
+    # Clean up camera database files
+    CAMERA_DBS=$(find camera_scraper -maxdepth 1 -name "*.db" 2>/dev/null | wc -l)
+    if [ "$CAMERA_DBS" -gt 0 ]; then
+        echo ""
+        read -p "Remove camera database files (*.db)? (y/n) " -n 1 -r
+        echo
+
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            rm -f camera_scraper/*.db 2>/dev/null || true
+            log_success "Camera database files removed"
+        else
+            log_info "Skipped camera database cleanup"
+        fi
+    fi
 }
 
 ################################################################################

@@ -150,6 +150,57 @@ if [ -n "$VITE_PIDS" ]; then
 fi
 
 ################################################################################
+# Stop Camera Collection System
+################################################################################
+
+log_info "Checking for camera collection processes..."
+
+# Check for camera GUI (qew_camera_gui.py)
+CAMERA_GUI_PIDS=$(ps aux | grep "qew_camera_gui.py" | grep -v grep | awk '{print $2}' || true)
+if [ -n "$CAMERA_GUI_PIDS" ]; then
+    log_info "Stopping camera collection GUI..."
+    echo "$CAMERA_GUI_PIDS" | while read -r PID; do
+        log_info "Stopping camera GUI (PID: $PID)..."
+        kill $PID 2>/dev/null || true
+        sleep 2
+
+        # Force kill if still running
+        if ps -p $PID > /dev/null 2>&1; then
+            log_warning "Force killing camera GUI (PID: $PID)..."
+            kill -9 $PID 2>/dev/null || true
+        fi
+    done
+    log_success "Camera collection GUI stopped"
+else
+    log_info "No camera GUI processes found"
+fi
+
+# Check for camera download scripts
+CAMERA_DOWNLOAD_PIDS=$(ps aux | grep "download_camera_images.py" | grep -v grep | awk '{print $2}' || true)
+if [ -n "$CAMERA_DOWNLOAD_PIDS" ]; then
+    log_info "Stopping camera download scripts..."
+    echo "$CAMERA_DOWNLOAD_PIDS" | while read -r PID; do
+        kill $PID 2>/dev/null || true
+    done
+    log_success "Camera download scripts stopped"
+fi
+
+# Check for other camera scraper Python processes
+CAMERA_SCRAPER_PIDS=$(ps aux | grep "camera_scraper" | grep "python" | grep -v grep | awk '{print $2}' || true)
+if [ -n "$CAMERA_SCRAPER_PIDS" ]; then
+    log_info "Stopping other camera scraper processes..."
+    echo "$CAMERA_SCRAPER_PIDS" | while read -r PID; do
+        kill $PID 2>/dev/null || true
+    done
+    log_success "Camera scraper processes stopped"
+fi
+
+# Clean up camera GUI settings (optional, since it's in .gitignore)
+if [ -f "camera_scraper/gui_settings.json" ]; then
+    log_info "Camera GUI settings preserved (camera_scraper/gui_settings.json)"
+fi
+
+################################################################################
 # Cleanup PID Directory
 ################################################################################
 
@@ -229,13 +280,15 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  Service Status"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  Frontend:      ❌ STOPPED"
-echo "  Backend:       ❌ STOPPED (local)"
-echo "  Port 8200:     ✅ FREE"
+echo "  Frontend:            ❌ STOPPED"
+echo "  Backend:             ❌ STOPPED (local)"
+echo "  Camera Collection:   ❌ STOPPED"
+echo "  Port 8200:           ✅ FREE"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "To start services again:"
-echo "  ./startup.sh"
+echo "  ./startup.sh                # Frontend dev server"
+echo "  cd camera_scraper && python qew_camera_gui.py    # Camera collection"
 echo ""
 echo "To cleanup build artifacts and logs:"
 echo "  ./cleanup.sh"
