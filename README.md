@@ -37,17 +37,20 @@ Traffic Camera Feed → Claude Vision API → Safety Analysis → V2X Alert Gene
 
 ## 📊 Technical Stack
 
-- **Frontend:** React + Tailwind CSS (Claude Artifacts)
-- **AI Engine:** Claude 3.5 Sonnet (Vision API)
-- **Deployment:** Vercel/Netlify (post-hackathon)
+- **Frontend:** React + Vite + Tailwind CSS + Leaflet
+- **AI Engine:** Google Gemini 2.0 Flash (Vision API)
+- **Real Data:** 46 COMPASS traffic cameras (MTO 511ON)
+- **Deployment:** GitHub Pages (live demo)
 - **Future:** GCP Cloud Run + V2X-Hub integration
 
 ## 🛣️ Path to Market
 
-### Phase 1: Hackathon (3 hours)
-- ✅ Interactive prototype
-- ✅ Demo with sample work zones
-- ✅ Proof of concept
+### Phase 1: MVP1 (Complete) ✅
+- ✅ Interactive dashboard with real QEW data
+- ✅ 46 COMPASS cameras integrated
+- ✅ AI-powered work zone analysis (Gemini Vision)
+- ✅ Image upload for real-time safety analysis
+- ✅ Proof of concept deployed
 
 ### Phase 2: OVIN Application (2 weeks)
 - Integrate with MTO COMPASS camera feeds
@@ -139,6 +142,36 @@ Full timeline with Mermaid diagrams, technical architecture evolution, and succe
 Proprietary - ADBA Labs
 Prepared for OVIN QEW Innovation Corridor Program Application
 
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+
+- Google Gemini API key ([Get one free](https://aistudio.google.com/app/apikey))
+
+### Setup
+```bash
+# Clone the repository
+git clone https://github.com/adbadev1/QEW-Innovation-Corridor.git
+cd QEW-Innovation-Corridor
+
+# Install dependencies
+npm install
+
+# Create .env file
+cp .env.example .env
+# Edit .env and add your VITE_GEMINI_API_KEY
+
+# Run development server
+npm run dev
+```
+
+Open http://localhost:8200 to view the dashboard!
+
+### Testing AI Analysis
+1. Click any mock work zone on the map
+2. Upload a work zone image in the side panel
+3. Get real-time AI safety analysis in 2-3 seconds!
+
 ---
 
-**Built with Claude Code CLI** | **Powered by Anthropic Claude 3.5 Sonnet**
+**Built with Claude Code CLI** | **Powered by Google Gemini 2.0 Flash**

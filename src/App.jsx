@@ -610,7 +610,7 @@ function App() {
                 {aiAnalysis || "Initializing AI analysis..."}
               </p>
               <p className="text-xs text-gray-500 mt-2">
-                Powered by Claude 3.5 Sonnet
+                Powered by Google Gemini 2.0 Flash
               </p>
             </div>
           </div>

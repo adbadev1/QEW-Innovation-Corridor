@@ -1,9 +1,57 @@
-import React from 'react';
-import { AlertTriangle, CheckCircle, Radio, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertTriangle, CheckCircle, Radio, X, Upload, Loader } from 'lucide-react';
 import { getRiskColor, getRiskLabel, generateV2XAlert } from '../utils/riskUtils';
+import { analyzeWorkZoneImage, formatWorkZoneForDashboard } from '../services/geminiVision';
 
 const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
-  if (!workZone) return null;
+  const [uploading, setUploading] = useState(false);
+  const [aiWorkZone, setAiWorkZone] = useState(null);
+  const [error, setError] = useState(null);
+
+  // Use AI-analyzed work zone if available, otherwise use mock data
+  const displayWorkZone = aiWorkZone || workZone;
+
+  if (!displayWorkZone) return null;
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      // Call Gemini Vision API
+      const analysis = await analyzeWorkZoneImage(file);
+
+      if (analysis.error) {
+        setError(analysis.message);
+        setUploading(false);
+        return;
+      }
+
+      // Format for dashboard display
+      const newWorkZone = formatWorkZoneForDashboard(
+        analysis,
+        displayWorkZone.cameraId || 'UPLOAD',
+        { lat: displayWorkZone.lat || 43.3850, lon: displayWorkZone.lon || -79.7400 }
+      );
+
+      // If no work zone detected, show message
+      if (!newWorkZone) {
+        setError('No work zone detected in this image. Please upload an image showing an active construction work zone.');
+        setUploading(false);
+        return;
+      }
+
+      setAiWorkZone(newWorkZone);
+      setUploading(false);
+    } catch (err) {
+      console.error('Upload error:', err);
+      setError(err.message || 'Failed to analyze image. Please try again.');
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="p-6 bg-gray-900 border-t border-gray-700">
@@ -17,21 +65,64 @@ const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
         </button>
       </div>
 
+      {/* NEW: AI Image Upload */}
+      <div className="mb-4 p-4 bg-indigo-900/30 border border-indigo-600 rounded-lg">
+        <div className="flex items-center mb-2">
+          <Upload className="w-4 h-4 mr-2 text-indigo-300" />
+          <h5 className="font-bold text-indigo-200">AI Analysis (Gemini Vision)</h5>
+        </div>
+        <p className="text-xs text-indigo-300 mb-3">
+          Upload a work zone image for real-time AI safety analysis
+        </p>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          disabled={uploading}
+          className="block w-full text-sm text-gray-300
+            file:mr-4 file:py-2 file:px-4
+            file:rounded file:border-0
+            file:text-sm file:font-semibold
+            file:bg-indigo-600 file:text-white
+            hover:file:bg-indigo-700
+            file:cursor-pointer
+            cursor-pointer"
+        />
+        {uploading && (
+          <div className="flex items-center mt-2 text-sm text-indigo-300">
+            <Loader className="w-4 h-4 mr-2 animate-spin" />
+            Analyzing with Gemini AI...
+          </div>
+        )}
+        {error && (
+          <div className="mt-2 text-sm text-red-400">
+            ⚠️ {error}
+          </div>
+        )}
+        {aiWorkZone && (
+          <div className="mt-2 text-sm text-green-400">
+            ✅ AI Analysis Complete! Confidence: {(aiWorkZone.confidence * 100).toFixed(0)}%
+          </div>
+        )}
+      </div>
+
       <div className="space-y-4">
         {/* Work Zone Name */}
         <div>
-          <h4 className="font-bold text-white">{workZone.name}</h4>
-          <p className="text-sm text-gray-400">Camera: {workZone.cameraId}</p>
+          <h4 className="font-bold text-white">{displayWorkZone.name || 'Uploaded Work Zone'}</h4>
+          <p className="text-sm text-gray-400">
+            {aiWorkZone ? '🤖 AI-Analyzed' : '📋 Mock Data'} | Camera: {displayWorkZone.cameraId || 'UPLOAD'}
+          </p>
         </div>
 
         {/* Risk Score - Reused component */}
-        <div className={`p-4 rounded-lg border-2 ${getRiskColor(workZone.riskScore)}`}>
+        <div className={`p-4 rounded-lg border-2 ${getRiskColor(displayWorkZone.riskScore)}`}>
           <div className="flex items-center justify-between">
             <span className="text-lg font-bold">RISK SCORE</span>
-            <span className="text-3xl font-bold">{workZone.riskScore}/10</span>
+            <span className="text-3xl font-bold">{displayWorkZone.riskScore}/10</span>
           </div>
           <div className="text-sm font-semibold mt-2">
-            {getRiskLabel(workZone.riskScore)}
+            {getRiskLabel(displayWorkZone.riskScore)}
           </div>
         </div>
 
@@ -39,22 +130,22 @@ const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-blue-900/30 border border-blue-600 p-3 rounded">
             <div className="text-sm text-blue-300 font-semibold">Workers</div>
-            <div className="text-2xl font-bold text-blue-100">{workZone.workers}</div>
+            <div className="text-2xl font-bold text-blue-100">{displayWorkZone.workers || 0}</div>
           </div>
           <div className="bg-purple-900/30 border border-purple-600 p-3 rounded">
             <div className="text-sm text-purple-300 font-semibold">Vehicles</div>
-            <div className="text-2xl font-bold text-purple-100">{workZone.vehicles}</div>
+            <div className="text-2xl font-bold text-purple-100">{displayWorkZone.vehicles || 0}</div>
           </div>
           <div className="bg-orange-900/30 border border-orange-600 p-3 rounded">
             <div className="text-sm text-orange-300 font-semibold">Equipment</div>
-            <div className="text-2xl font-bold text-orange-100">{workZone.equipment}</div>
+            <div className="text-2xl font-bold text-orange-100">{displayWorkZone.equipment || 0}</div>
           </div>
-          <div className={`p-3 rounded border ${workZone.barriers ? 'bg-green-900/30 border-green-600' : 'bg-red-900/30 border-red-600'}`}>
-            <div className={`text-sm font-semibold ${workZone.barriers ? 'text-green-300' : 'text-red-300'}`}>
+          <div className={`p-3 rounded border ${displayWorkZone.barriers ? 'bg-green-900/30 border-green-600' : 'bg-red-900/30 border-red-600'}`}>
+            <div className={`text-sm font-semibold ${displayWorkZone.barriers ? 'text-green-300' : 'text-red-300'}`}>
               Barriers
             </div>
-            <div className={`text-2xl font-bold ${workZone.barriers ? 'text-green-100' : 'text-red-100'}`}>
-              {workZone.barriers ? 'YES' : 'NO'}
+            <div className={`text-2xl font-bold ${displayWorkZone.barriers ? 'text-green-100' : 'text-red-100'}`}>
+              {displayWorkZone.barriers ? 'YES' : 'NO'}
             </div>
           </div>
         </div>
@@ -66,7 +157,7 @@ const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
             Identified Hazards
           </h5>
           <ul className="space-y-1">
-            {workZone.hazards.map((hazard, idx) => (
+            {(displayWorkZone.hazards || []).map((hazard, idx) => (
               <li key={idx} className="text-sm text-red-300">• {hazard}</li>
             ))}
           </ul>
@@ -74,8 +165,8 @@ const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
 
         {/* MTO Compliance */}
         <div className={`p-4 rounded-lg border ${
-          workZone.riskScore <= 3 ? 'bg-green-900/30 border-green-600' :
-          workZone.riskScore <= 6 ? 'bg-yellow-900/30 border-yellow-600' :
+          displayWorkZone.riskScore <= 3 ? 'bg-green-900/30 border-green-600' :
+          displayWorkZone.riskScore <= 6 ? 'bg-yellow-900/30 border-yellow-600' :
           'bg-red-900/30 border-red-600'
         }`}>
           <h5 className="font-bold mb-2 flex items-center">
@@ -83,11 +174,20 @@ const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
             MTO BOOK 7 Compliance
           </h5>
           <div className="text-sm font-semibold mb-2">
-            {workZone.riskScore <= 3 ? 'COMPLIANT' :
-             workZone.riskScore <= 6 ? 'PARTIAL COMPLIANCE' :
-             'NON-COMPLIANT'}
+            {displayWorkZone.mtoBookCompliance !== undefined
+              ? (displayWorkZone.mtoBookCompliance ? 'COMPLIANT' : 'NON-COMPLIANT')
+              : (displayWorkZone.riskScore <= 3 ? 'COMPLIANT' :
+                 displayWorkZone.riskScore <= 6 ? 'PARTIAL COMPLIANCE' :
+                 'NON-COMPLIANT')}
           </div>
-          {workZone.riskScore > 6 && (
+          {displayWorkZone.violations && displayWorkZone.violations.length > 0 && (
+            <ul className="text-sm space-y-1">
+              {displayWorkZone.violations.map((violation, idx) => (
+                <li key={idx}>• {violation}</li>
+              ))}
+            </ul>
+          )}
+          {!displayWorkZone.violations && displayWorkZone.riskScore > 6 && (
             <p className="text-sm">
               • BOOK 7 Section 3.2: Insufficient safety measures<br />
               • BOOK 7 Section 4.1: Missing or inadequate barriers
@@ -99,25 +199,33 @@ const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
         <div className="bg-indigo-900/30 border border-indigo-600 p-4 rounded-lg">
           <h5 className="font-bold text-indigo-200 mb-2">Recommended Actions</h5>
           <ul className="space-y-1">
-            {workZone.riskScore >= 7 && (
+            {displayWorkZone.recommendations && displayWorkZone.recommendations.length > 0 ? (
+              displayWorkZone.recommendations.map((rec, idx) => (
+                <li key={idx} className="text-sm text-indigo-300">{idx + 1}. {rec}</li>
+              ))
+            ) : (
               <>
-                <li className="text-sm text-indigo-300">1. IMMEDIATE: Close adjacent lane</li>
-                <li className="text-sm text-indigo-300">2. Deploy advance warning signs 500m upstream</li>
-                <li className="text-sm text-indigo-300">3. Install temporary barriers</li>
-                <li className="text-sm text-indigo-300">4. Reduce speed limit to 60 km/h</li>
-              </>
-            )}
-            {workZone.riskScore >= 4 && workZone.riskScore < 7 && (
-              <>
-                <li className="text-sm text-indigo-300">1. Add secondary barrier row</li>
-                <li className="text-sm text-indigo-300">2. Increase visibility signage</li>
-                <li className="text-sm text-indigo-300">3. Monitor traffic speeds</li>
-              </>
-            )}
-            {workZone.riskScore < 4 && (
-              <>
-                <li className="text-sm text-indigo-300">1. Continue current safety protocols</li>
-                <li className="text-sm text-indigo-300">2. Regular monitoring recommended</li>
+                {displayWorkZone.riskScore >= 7 && (
+                  <>
+                    <li className="text-sm text-indigo-300">1. IMMEDIATE: Close adjacent lane</li>
+                    <li className="text-sm text-indigo-300">2. Deploy advance warning signs 500m upstream</li>
+                    <li className="text-sm text-indigo-300">3. Install temporary barriers</li>
+                    <li className="text-sm text-indigo-300">4. Reduce speed limit to 60 km/h</li>
+                  </>
+                )}
+                {displayWorkZone.riskScore >= 4 && displayWorkZone.riskScore < 7 && (
+                  <>
+                    <li className="text-sm text-indigo-300">1. Add secondary barrier row</li>
+                    <li className="text-sm text-indigo-300">2. Increase visibility signage</li>
+                    <li className="text-sm text-indigo-300">3. Monitor traffic speeds</li>
+                  </>
+                )}
+                {displayWorkZone.riskScore < 4 && (
+                  <>
+                    <li className="text-sm text-indigo-300">1. Continue current safety protocols</li>
+                    <li className="text-sm text-indigo-300">2. Regular monitoring recommended</li>
+                  </>
+                )}
               </>
             )}
           </ul>
@@ -130,7 +238,9 @@ const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
             <span className="font-bold">V2X RSU BROADCAST</span>
           </div>
           <div className="bg-gray-900 p-2 rounded">
-            {generateV2XAlert(workZone.riskScore, workZone.hazards)}
+            {displayWorkZone.v2xAlert
+              ? JSON.stringify(displayWorkZone.v2xAlert, null, 2)
+              : generateV2XAlert(displayWorkZone.riskScore, displayWorkZone.hazards || [])}
           </div>
           <div className="text-xs text-gray-500 mt-2">
             SAE J2735 TIM Message Format | 1000m Range
