@@ -29,6 +29,8 @@ const GOOGLE_CUSTOM_SEARCH_URL = 'https://www.googleapis.com/customsearch/v1';
 export async function searchWorkZoneImages(conditions) {
   const { direction = 'eastbound', weather = 'clear', timeOfDay = 'afternoon', season = 'summer', limit = 8 } = conditions;
 
+  console.log('[Image Search] Starting search with conditions:', { direction, weather, timeOfDay, season, limit });
+
   // Build search query
   const queries = [
     'highway construction work zone',
@@ -39,11 +41,12 @@ export async function searchWorkZoneImages(conditions) {
   ];
 
   const searchQuery = queries[Math.floor(Math.random() * queries.length)];
+  console.log('[Image Search] Using search query:', searchQuery);
 
   try {
     // Use Google Custom Search if API key available
     if (GOOGLE_API_KEY && GOOGLE_API_KEY !== 'YOUR_GOOGLE_API_KEY') {
-      console.log('Using Google Custom Search API');
+      console.log('[Image Search] Using Google Custom Search API with key:', GOOGLE_API_KEY?.substring(0, 10) + '...');
 
       const params = new URLSearchParams({
         key: GOOGLE_API_KEY,
@@ -55,20 +58,26 @@ export async function searchWorkZoneImages(conditions) {
         safe: 'active'
       });
 
-      const response = await fetch(`${GOOGLE_CUSTOM_SEARCH_URL}?${params}`);
+      const url = `${GOOGLE_CUSTOM_SEARCH_URL}?${params}`;
+      console.log('[Image Search] Fetching from Google:', url.replace(GOOGLE_API_KEY, 'HIDDEN'));
+
+      const response = await fetch(url);
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[Image Search] Google API error:', response.status, errorText);
         throw new Error(`Google API error: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('[Image Search] Google API response:', data);
 
       if (!data.items || data.items.length === 0) {
-        console.warn('No images from Google Search - using fallback');
+        console.warn('[Image Search] No images from Google Search - using fallback');
         return getFallbackImages(conditions);
       }
 
-      return data.items.map((item, idx) => ({
+      const images = data.items.map((item, idx) => ({
         id: `google_${idx}`,
         url: item.link,
         thumbnail: item.image?.thumbnailLink || item.link,
@@ -80,15 +89,22 @@ export async function searchWorkZoneImages(conditions) {
         width: item.image?.width || 800,
         height: item.image?.height || 600
       }));
+
+      console.log('[Image Search] Returning', images.length, 'Google images');
+      return images;
     }
 
     // Fallback to Unsplash if no Google API key
-    console.warn('No Google API key - using fallback images');
-    return getFallbackImages(conditions);
+    console.warn('[Image Search] No Google API key - using fallback images');
+    const fallbackImages = getFallbackImages(conditions);
+    console.log('[Image Search] Returning', fallbackImages.length, 'fallback images');
+    return fallbackImages;
 
   } catch (error) {
-    console.error('Error fetching images:', error);
-    return getFallbackImages(conditions);
+    console.error('[Image Search] Error fetching images:', error);
+    const fallbackImages = getFallbackImages(conditions);
+    console.log('[Image Search] Error recovery - returning', fallbackImages.length, 'fallback images');
+    return fallbackImages;
   }
 }
 

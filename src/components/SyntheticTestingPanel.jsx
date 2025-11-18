@@ -49,7 +49,12 @@ function SyntheticTestingPanel({ cameras }) {
 
   // Generate test work zone images
   const handleGenerateImages = async () => {
+    console.log('[SyntheticTestingPanel] Generate button clicked!');
+    console.log('[SyntheticTestingPanel] Current conditions:', conditions);
+    console.log('[SyntheticTestingPanel] Selected camera:', selectedCamera);
+
     if (!conditions || !selectedCamera) {
+      console.error('[SyntheticTestingPanel] Missing conditions or camera');
       setError('Please select a camera first');
       return;
     }
@@ -73,6 +78,14 @@ function SyntheticTestingPanel({ cameras }) {
         }
       }
 
+      console.log('[SyntheticTestingPanel] Calling searchWorkZoneImages with:', {
+        direction,
+        weather: conditions.weather,
+        timeOfDay: conditions.timeOfDay,
+        season: conditions.season,
+        limit: 8
+      });
+
       const fetchedImages = await searchWorkZoneImages({
         direction: direction,
         weather: conditions.weather,
@@ -81,16 +94,23 @@ function SyntheticTestingPanel({ cameras }) {
         limit: 8
       });
 
+      console.log('[SyntheticTestingPanel] Received images:', fetchedImages);
+      console.log('[SyntheticTestingPanel] Number of images:', fetchedImages.length);
+
       if (fetchedImages.length === 0) {
+        console.error('[SyntheticTestingPanel] No images returned!');
         setError(`No geotagged construction images found in QEW corridor for ${direction}. Try again.`);
+      } else {
+        console.log('[SyntheticTestingPanel] Setting images state with', fetchedImages.length, 'images');
       }
 
       setImages(fetchedImages);
     } catch (err) {
-      console.error('Error fetching images:', err);
+      console.error('[SyntheticTestingPanel] Error fetching images:', err);
       setError(err.message || 'Failed to fetch images');
     } finally {
       setLoading(false);
+      console.log('[SyntheticTestingPanel] Done - loading=false');
     }
   };
 

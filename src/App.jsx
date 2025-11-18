@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Circle, Popup, Polyline } from 'react-leaflet';
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
-import { Shield, Activity, AlertTriangle, Radio, Camera, Navigation } from 'lucide-react';
+import { Shield, AlertTriangle, Camera, Navigation } from 'lucide-react';
 import L from 'leaflet';
 
 import { getRiskColor, getRiskLabel, generateMockBSM, generateV2XAlert } from './utils/riskUtils';
@@ -9,6 +8,7 @@ import { QEW_ROUTE, WORK_ZONES, generateMockTrafficData } from './data/qewData';
 import WorkZoneAnalysisPanel from './components/WorkZoneAnalysisPanel';
 import CameraCollectionPanel from './components/CameraCollectionPanel';
 import SyntheticTestingPanel from './components/SyntheticTestingPanel';
+import TrafficMonitoringPanel from './components/TrafficMonitoringPanel';
 import { CollectionProvider } from './contexts/CollectionContext';
 import { useV2X } from './contexts/V2XContext';
 import { calculateDistance } from './utils/geoUtils';
@@ -561,57 +561,12 @@ function App() {
 
         {/* Right Panel - 30% */}
         <div className="w-1/3 bg-gray-800 text-white overflow-y-auto">
-          {/* AI Traffic Analyst */}
-          <div className="p-3 border-b border-gray-700">
-            <h2 className="text-sm font-bold mb-2 flex items-center">
-              <Activity className="w-4 h-4 mr-1.5 text-indigo-400" />
-              AI Traffic Analyst
-            </h2>
-            <div className="bg-gray-900 p-2 rounded border border-gray-700">
-              <p className="text-xs text-gray-300 leading-tight">
-                {aiAnalysis || "Initializing AI analysis..."}
-              </p>
-              <p className="text-[10px] text-gray-500 mt-1">
-                Powered by Gemini 2.0 Flash
-              </p>
-            </div>
-          </div>
-
-          {/* Active Alerts */}
-          <div className="p-3 border-b border-gray-700">
-            <h3 className="text-sm font-semibold mb-2 flex items-center">
-              <Radio className="w-4 h-4 mr-1.5 text-red-400" />
-              Active RSU Broadcasts
-            </h3>
-            <div className="space-y-1.5">
-              {alerts.length > 0 ? alerts.map(alert => (
-                <div key={alert.id} className="bg-red-900/30 border border-red-600 p-2 rounded">
-                  <p className="text-xs text-red-200 leading-tight">{alert.message}</p>
-                  <p className="text-[10px] font-mono text-gray-400 mt-1 leading-tight">{alert.rsuAlert}</p>
-                  <p className="text-[10px] text-gray-500 mt-0.5">{alert.timestamp}</p>
-                </div>
-              )) : (
-                <p className="text-xs text-gray-500">No active alerts</p>
-              )}
-            </div>
-          </div>
-
-          {/* Traffic Flow Chart */}
-          <div className="p-3 border-b border-gray-700">
-            <h3 className="text-sm font-semibold mb-2">Traffic Flow (Last 20 min)</h3>
-            <ResponsiveContainer width="100%" height={100}>
-              <LineChart data={trafficData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="time" stroke="#9CA3AF" tick={{ fontSize: 8 }} />
-                <YAxis stroke="#9CA3AF" tick={{ fontSize: 8 }} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', fontSize: '10px' }}
-                  labelStyle={{ color: '#E5E7EB', fontSize: '10px' }}
-                />
-                <Line type="monotone" dataKey="avgSpeed" stroke="#3B82F6" strokeWidth={1.5} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          {/* Traffic Monitoring Panel - Persistent Collapsible */}
+          <TrafficMonitoringPanel
+            aiAnalysis={aiAnalysis}
+            alerts={alerts}
+            trafficData={trafficData}
+          />
 
           {/* Camera Collection Panel - Persistent Collapsible */}
           <CameraCollectionPanel />
