@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Circle, Popup, Polyline } from 'react-leaflet';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
-import { Shield, Activity, AlertTriangle, Radio, Camera, Navigation, Beaker } from 'lucide-react';
+import { Shield, Activity, AlertTriangle, Radio, Camera, Navigation } from 'lucide-react';
 import L from 'leaflet';
 
 import { getRiskColor, getRiskLabel, generateMockBSM, generateV2XAlert } from './utils/riskUtils';
@@ -46,7 +46,6 @@ function App() {
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [cameras, setCameras] = useState([]);
   const [loadingCameras, setLoadingCameras] = useState(true);
-  const [showSyntheticTesting, setShowSyntheticTesting] = useState(false);
   const vehiclesInitialized = React.useRef(false);
 
   // V2X Context for vehicle alert management
@@ -381,17 +380,6 @@ function App() {
               <Navigation className="w-5 h-5" />
               <span>{vehicles.length} Vehicles</span>
             </div>
-            <button
-              onClick={() => setShowSyntheticTesting(!showSyntheticTesting)}
-              className={`px-4 py-2 rounded-lg font-semibold transition ${
-                showSyntheticTesting
-                  ? 'bg-green-600 hover:bg-green-700'
-                  : 'bg-purple-600 hover:bg-purple-700'
-              }`}
-            >
-              <Beaker className="w-5 h-5 inline mr-2" />
-              {showSyntheticTesting ? 'Hide' : 'Show'} Testing
-            </button>
           </div>
         </div>
       </header>
@@ -628,19 +616,14 @@ function App() {
           {/* Camera Collection Panel - Persistent Collapsible */}
           <CameraCollectionPanel />
 
+          {/* Synthetic Testing Panel - Persistent Collapsible */}
+          <SyntheticTestingPanel cameras={cameras} />
+
           {/* Work Zone Details */}
-          {selectedWorkZone && !showSyntheticTesting && (
+          {selectedWorkZone && (
             <WorkZoneAnalysisPanel
               workZone={selectedWorkZone}
               onClose={() => setSelectedWorkZone(null)}
-            />
-          )}
-
-          {/* Synthetic Testing Panel */}
-          {showSyntheticTesting && (
-            <SyntheticTestingPanel
-              onClose={() => setShowSyntheticTesting(false)}
-              cameras={cameras}
             />
           )}
         </div>

@@ -31,9 +31,10 @@ async function fileToBase64(file) {
  * Analyze work zone image for safety compliance
  *
  * @param {File} imageFile - JPEG/PNG image file from camera or upload
+ * @param {Object} metadata - Optional metadata for tracking source (COMPASS vs SYNTHETIC)
  * @returns {Promise<Object>} Work zone analysis results
  */
-export async function analyzeWorkZoneImage(imageFile) {
+export async function analyzeWorkZoneImage(imageFile, metadata = {}) {
   try {
     // Get Gemini model (use 2.0 Flash for speed, or 1.5 Pro for accuracy)
     const model = genAI.getGenerativeModel({
@@ -137,6 +138,15 @@ Respond ONLY with valid JSON. No markdown, no code blocks, just raw JSON.`;
     // Add metadata
     analysis.analysisTimestamp = new Date().toISOString();
     analysis.model = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash-exp';
+
+    // Add source tracking (COMPASS real vs SYNTHETIC test)
+    analysis.synthetic = metadata.synthetic || false;
+    analysis.source = metadata.source || 'COMPASS';
+
+    // Include full synthetic metadata if present
+    if (metadata.synthetic && metadata) {
+      analysis.syntheticMetadata = metadata;
+    }
 
     return analysis;
 
@@ -262,8 +272,16 @@ export async function formatWorkZoneForDashboard(analysis, cameraId, location, r
     confidence: analysis.confidence,
     detectedAt: analysis.analysisTimestamp,
     v2xAlert: generateV2XAlert(analysis, location),
-    vrsuBroadcast: null // Will be populated if broadcast succeeds
+    vrsuBroadcast: null, // Will be populated if broadcast succeeds
+    // Source tracking (COMPASS real vs SYNTHETIC test)
+    synthetic: analysis.synthetic || false,
+    source: analysis.source || 'COMPASS'
   };
+
+  // Include full synthetic metadata if present
+  if (analysis.syntheticMetadata) {
+    workZone.syntheticMetadata = analysis.syntheticMetadata;
+  }
 
   // Automatically broadcast to vRSU if risk score >= 5
   // This triggers V2X messages to connected vehicles
