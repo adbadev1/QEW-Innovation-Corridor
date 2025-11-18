@@ -7,12 +7,13 @@
  * - Generate location-aware AI analysis
  */
 
-// QEW corridor reference points
+// QEW corridor reference points (based on actual camera coverage)
+// Cameras span from Burlington (west) to Oakville/Mississauga (east)
 const QEW_REFERENCE = {
-  // Western terminus (Burlington/Hamilton area)
-  WEST: { lat: 43.2201, lon: -79.65143, km: 0, name: 'Burlington (Fifty Road)' },
-  // Eastern terminus (Toronto area)
-  EAST: { lat: 43.6426, lon: -79.3871, km: 40, name: 'Toronto (Gardiner Expressway)' }
+  // Western terminus (Burlington area - westernmost camera)
+  WEST: { lat: 43.336509, lon: -79.828291, km: 0, name: 'Burlington (West End)' },
+  // Eastern terminus (Oakville/Mississauga area - easternmost camera)
+  EAST: { lat: 43.579156, lon: -79.607964, km: 25, name: 'Oakville/Mississauga (East End)' }
 };
 
 /**
@@ -21,7 +22,7 @@ const QEW_REFERENCE = {
  *
  * @param {number} lat - Latitude
  * @param {number} lon - Longitude
- * @returns {number} Approximate KM marker (0 = Burlington, 40 = Toronto)
+ * @returns {number} Approximate KM marker (0 = West, 25 = East for camera coverage)
  */
 export function calculateKmMarker(lat, lon) {
   const west = QEW_REFERENCE.WEST;
@@ -32,40 +33,36 @@ export function calculateKmMarker(lat, lon) {
   const lonPosition = lon - west.lon;
   const ratio = lonPosition / lonRange;
 
-  // KM = 0 at Burlington (west), 40 at Toronto (east)
-  const km = ratio * 40;
+  // KM = 0 at western cameras, 25 at eastern cameras
+  const kmRange = east.km - west.km;
+  const km = west.km + (ratio * kmRange);
 
-  // Clamp to 0-40 range and round to 1 decimal
-  return Math.max(0, Math.min(40, km)).toFixed(1);
+  // Clamp to valid range and round to 1 decimal
+  return Math.max(0, Math.min(25, km)).toFixed(1);
 }
 
 /**
  * Get nearest major exit/landmark for a KM marker
  *
- * @param {number} km - KM marker along corridor
+ * @param {number} km - KM marker along corridor (camera coverage: 0-25)
  * @returns {string} Exit/landmark name
  */
 export function getNearestExit(km) {
   const exits = [
-    { km: 0, name: 'Fifty Road (Burlington)' },
-    { km: 3, name: 'Millen Road' },
-    { km: 6, name: 'Walkers Line' },
-    { km: 8, name: 'Guelph Line' },
-    { km: 10, name: 'Appleby Line' },
-    { km: 12, name: 'Bronte Road' },
-    { km: 15, name: 'Trafalgar Road' },
-    { km: 18, name: 'Kerr Street' },
-    { km: 20, name: 'Dorval Drive' },
-    { km: 22, name: 'Winston Churchill Blvd' },
-    { km: 24, name: 'Erin Mills Parkway' },
-    { km: 26, name: 'Mississauga Road' },
-    { km: 28, name: 'Cawthra Road' },
-    { km: 30, name: 'Hurontario Street' },
-    { km: 32, name: 'Dixie Road' },
-    { km: 34, name: 'Royal York Road' },
-    { km: 36, name: 'Islington Avenue' },
-    { km: 38, name: 'Kipling Avenue' },
-    { km: 40, name: 'Gardiner Expressway (Toronto)' }
+    { km: 0, name: 'Burlington West' },
+    { km: 2, name: 'Walkers Line' },
+    { km: 4, name: 'Guelph Line' },
+    { km: 6, name: 'Appleby Line' },
+    { km: 8, name: 'Bronte Road' },
+    { km: 10, name: 'Trafalgar Road' },
+    { km: 12, name: 'Kerr Street' },
+    { km: 14, name: 'Dorval Drive' },
+    { km: 16, name: 'Winston Churchill Blvd' },
+    { km: 18, name: 'Erin Mills Parkway' },
+    { km: 20, name: 'Mississauga Road' },
+    { km: 22, name: 'Cawthra Road' },
+    { km: 24, name: 'Hurontario Street' },
+    { km: 25, name: 'Dixie Road' }
   ];
 
   // Find closest exit

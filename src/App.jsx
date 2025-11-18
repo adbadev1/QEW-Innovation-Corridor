@@ -8,6 +8,7 @@ import { QEW_ROUTE, WORK_ZONES, generateMockTrafficData } from './data/qewData';
 import WorkZoneAnalysisPanel from './components/WorkZoneAnalysisPanel';
 import CameraCollectionPanel from './components/CameraCollectionPanel';
 import SyntheticTestingPanel from './components/SyntheticTestingPanel';
+import MLValidationPanel from './components/MLValidationPanel';
 import TrafficMonitoringPanel from './components/TrafficMonitoringPanel';
 import { CollectionProvider } from './contexts/CollectionContext';
 import { useV2X } from './contexts/V2XContext';
@@ -429,15 +430,40 @@ function App() {
                       </div>
                       <div className="mt-3 space-y-3 max-h-80 overflow-y-auto">
                         {camera.Views.map(view => {
-                          // Check if test image exists for this camera/view
                           const basePath = import.meta.env.BASE_URL || '/';
-                          const testImagePath = `camera_scraper/test_images/test_cam${camera.Id}_view${view.Id}.jpg`;
+
+                          // Get last collected image for this view
+                          const lastImage = view.Images && view.Images.length > 0
+                            ? view.Images[view.Images.length - 1]
+                            : null;
 
                           return (
                             <div key={view.Id} className="border-t pt-2 first:border-t-0 first:pt-0">
                               <div className="font-semibold text-gray-700 mb-2 text-xs">
                                 📹 {view.Description || 'Camera View'}
                               </div>
+
+                              {/* Last Collected Image Thumbnail */}
+                              {lastImage && (
+                                <div className="mb-2">
+                                  <div className="text-[10px] text-gray-600 mb-1 font-semibold">Last Collected Image:</div>
+                                  <img
+                                    src={`${basePath}${lastImage.path}`}
+                                    alt="Last collected camera image"
+                                    className="w-full rounded border border-gray-300"
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                      e.target.nextSibling.style.display = 'block';
+                                    }}
+                                  />
+                                  <div className="text-[9px] text-gray-500 mt-1 hidden">Image not available</div>
+                                  <div className="text-[9px] text-gray-500 mt-1">
+                                    Captured: {new Date(lastImage.timestamp.replace(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/, '$1-$2-$3T$4:$5:$6')).toLocaleString()}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Live Camera Link */}
                               <a
                                 href={view.Url}
                                 target="_blank"
@@ -446,7 +472,7 @@ function App() {
                               >
                                 <div className="bg-blue-50 border-2 border-blue-200 rounded p-3 text-center hover:bg-blue-100 transition">
                                   <div className="text-blue-600 font-semibold mb-1">
-                                    🎥 View Live Camera
+                                    🎥 View Live Camera Feed
                                   </div>
                                   <div className="text-xs text-gray-600">
                                     Click to open 511ON live feed
@@ -583,6 +609,9 @@ function App() {
 
           {/* Synthetic Testing Panel - Persistent Collapsible */}
           <SyntheticTestingPanel cameras={cameras} />
+
+          {/* ML Vision Model Validation Panel - Persistent Collapsible */}
+          <MLValidationPanel cameras={cameras} />
 
           {/* Work Zone Details */}
           {selectedWorkZone && (
