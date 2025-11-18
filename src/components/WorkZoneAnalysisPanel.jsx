@@ -30,8 +30,8 @@ const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
         return;
       }
 
-      // Format for dashboard display
-      const newWorkZone = formatWorkZoneForDashboard(
+      // Format for dashboard display (now async - broadcasts to vRSU)
+      const newWorkZone = await formatWorkZoneForDashboard(
         analysis,
         displayWorkZone.cameraId || 'UPLOAD',
         { lat: displayWorkZone.lat || 43.3850, lon: displayWorkZone.lon || -79.7400 }
@@ -100,9 +100,21 @@ const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
           </div>
         )}
         {aiWorkZone && (
-          <div className="mt-2 text-sm text-green-400">
-            ✅ AI Analysis Complete! Confidence: {(aiWorkZone.confidence * 100).toFixed(0)}%
-          </div>
+          <>
+            <div className="mt-2 text-sm text-green-400">
+              ✅ AI Analysis Complete! Confidence: {(aiWorkZone.confidence * 100).toFixed(0)}%
+            </div>
+            {aiWorkZone.vrsuBroadcast && aiWorkZone.vrsuBroadcast.success && (
+              <div className="mt-1 text-sm text-cyan-400">
+                📡 vRSU Broadcast: {aiWorkZone.vrsuBroadcast.messageType} message sent
+              </div>
+            )}
+            {aiWorkZone.vrsuBroadcast && !aiWorkZone.vrsuBroadcast.success && (
+              <div className="mt-1 text-sm text-yellow-400">
+                ⚠️ vRSU: {aiWorkZone.vrsuBroadcast.error}
+              </div>
+            )}
+          </>
         )}
       </div>
 

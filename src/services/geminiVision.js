@@ -3,9 +3,11 @@
  *
  * AI-powered work zone safety analysis using Google Gemini 2.0 Flash
  * Analyzes highway camera images for MTO BOOK 7 compliance
+ * Integrated with vRSU (Virtual Roadside Unit) for V2X broadcasting
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { broadcastIfHighRisk } from './vRSUClient.js';
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
@@ -229,15 +231,19 @@ export function generateV2XAlert(analysis, location) {
 /**
  * Format analysis for display in dashboard
  *
+ * NEW: Automatically broadcasts high-risk work zones to vRSU service
+ *
  * @param {Object} analysis - Raw analysis from Gemini
+ * @param {string} cameraId - Camera ID
+ * @param {Object} location - GPS coordinates {lat, lon}
  * @returns {Object} Formatted work zone object
  */
-export function formatWorkZoneForDashboard(analysis, cameraId, location) {
+export async function formatWorkZoneForDashboard(analysis, cameraId, location) {
   if (!analysis.hasWorkZone) {
     return null;
   }
 
-  return {
+  const workZone = {
     id: `WZ_${cameraId}_${Date.now()}`,
     lat: location.lat,
     lon: location.lon,
@@ -246,6 +252,7 @@ export function formatWorkZoneForDashboard(analysis, cameraId, location) {
     status: analysis.riskScore >= 7 ? 'high-risk' : analysis.riskScore >= 5 ? 'medium-risk' : 'compliant',
     workers: analysis.workers,
     vehicles: analysis.vehicles,
+    equipment: 0, // Not detected by current model
     barriers: analysis.barriers,
     hazards: analysis.hazards,
     violations: analysis.violations,
@@ -253,6 +260,35 @@ export function formatWorkZoneForDashboard(analysis, cameraId, location) {
     mtoBookCompliance: analysis.mtoBookCompliance,
     confidence: analysis.confidence,
     detectedAt: analysis.analysisTimestamp,
-    v2xAlert: generateV2XAlert(analysis, location)
+    v2xAlert: generateV2XAlert(analysis, location),
+    vrsuBroadcast: null // Will be populated if broadcast succeeds
   };
+
+  // Automatically broadcast to vRSU if risk score >= 5
+  // This triggers V2X messages to connected vehicles
+  try {
+    const broadcastResult = await broadcastIfHighRisk(workZone, 5);
+
+    if (broadcastResult) {
+      workZone.vrsuBroadcast = {
+        success: true,
+        messageId: broadcastResult.message_id,
+        messageType: broadcastResult.message_type,
+        timestamp: broadcastResult.timestamp,
+        broadcastStatus: broadcastResult.broadcast_status
+      };
+
+      console.log(`📡 vRSU Broadcast: ${broadcastResult.message_type} message sent (ID: ${broadcastResult.message_id})`);
+    } else {
+      console.log(`📊 Work zone below broadcast threshold (risk: ${analysis.riskScore}/10)`);
+    }
+  } catch (error) {
+    console.error('⚠️ vRSU broadcast failed:', error.message);
+    workZone.vrsuBroadcast = {
+      success: false,
+      error: error.message
+    };
+  }
+
+  return workZone;
 }
