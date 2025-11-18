@@ -245,9 +245,13 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
     }
   }, [sessionId, sessionStartTime]);
 
-  // Log camera data loading
+  // Log camera data loading (only when cameras are actually loaded)
+  const camerasLoadedRef = useRef(false);
   useEffect(() => {
-    if (cameras.length > 0) {
+    // Only log once when cameras are first loaded (avoid logging "waiting..." on initial mount)
+    if (cameras.length > 0 && !camerasLoadedRef.current) {
+      camerasLoadedRef.current = true;
+
       logStatus(`📷 Camera data loaded: ${cameras.length} cameras available`, 'success');
       logStatus(`→ Camera locations: ${cameras.slice(0, 3).map(c => c.Location).join(', ')}...`, 'info', true);
 
@@ -260,8 +264,6 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
         totalViews,
         sampleLocations: cameras.slice(0, 5).map(c => c.Location)
       });
-    } else {
-      logStatus(`⚠️ No camera data available - waiting for load...`, 'warning');
     }
   }, [cameras.length]);
 

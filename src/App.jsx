@@ -445,19 +445,22 @@ function App() {
 
                               {/* Last Collected Image Thumbnail */}
                               {lastImage && (
-                                <div className="mb-2">
+                                <div className="mb-2" id={`img-container-${view.Id}`}>
                                   <div className="text-[10px] text-gray-600 mb-1 font-semibold">Last Collected Image:</div>
                                   <img
                                     src={`${basePath}camera_scraper/${lastImage.path}`}
                                     alt="Last collected camera image"
                                     className="w-full rounded border border-gray-300"
                                     onError={(e) => {
-                                      console.error('Failed to load image:', `${basePath}camera_scraper/${lastImage.path}`);
-                                      e.target.style.display = 'none';
-                                      e.target.nextSibling.style.display = 'block';
+                                      console.warn('Image file not found:', `${basePath}camera_scraper/${lastImage.path}`);
+                                      // Hide the entire image container instead of showing error text
+                                      const container = document.getElementById(`img-container-${view.Id}`);
+                                      if (container) container.style.display = 'none';
+                                    }}
+                                    onLoad={(e) => {
+                                      console.log('Image loaded successfully:', lastImage.path);
                                     }}
                                   />
-                                  <div className="text-[9px] text-red-500 mt-1 hidden">Image not available</div>
                                   <div className="text-[9px] text-gray-500 mt-1">
                                     Captured: {new Date(lastImage.timestamp.replace(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/, '$1-$2-$3T$4:$5:$6')).toLocaleString()}
                                   </div>
