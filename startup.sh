@@ -259,6 +259,32 @@ if command -v gcloud &> /dev/null && [ "$(gcloud config get-value project 2>/dev
 fi
 
 ################################################################################
+# Camera Collection Status Check
+################################################################################
+
+echo ""
+log_info "Checking camera collection system..."
+
+# Check if camera GUI is running
+CAMERA_GUI_RUNNING=false
+if ps aux | grep "qew_camera_gui.py" | grep -v grep > /dev/null 2>&1; then
+    CAMERA_GUI_PID=$(ps aux | grep "qew_camera_gui.py" | grep -v grep | awk '{print $2}' | head -n 1)
+    log_success "Camera collection GUI is running (PID: $CAMERA_GUI_PID)"
+    CAMERA_GUI_RUNNING=true
+else
+    log_info "Camera collection GUI not running"
+    log_info "To start: cd camera_scraper && python qew_camera_gui.py"
+fi
+
+# Check for Python installation (for camera scraper)
+if command -v python &> /dev/null || command -v python3 &> /dev/null; then
+    PYTHON_CMD=$(command -v python3 || command -v python)
+    log_success "Python detected: $PYTHON_CMD"
+else
+    log_warning "Python not found - camera collection unavailable"
+fi
+
+################################################################################
 # Summary
 ################################################################################
 
@@ -272,25 +298,36 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  Service Status"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  Frontend:      ✅ RUNNING (PID: $FRONTEND_PID)"
-echo "  Port:          8200"
-echo "  URL:           http://localhost:8200"
-echo "  Live Demo:     https://adbadev1.github.io/QEW-Innovation-Corridor/"
+echo "  Frontend:            ✅ RUNNING (PID: $FRONTEND_PID)"
+echo "  Port:                8200"
+echo "  URL:                 http://localhost:8200"
+echo "  Live Demo:           https://adbadev1.github.io/QEW-Innovation-Corridor/"
 echo ""
-echo "  Backend:       ⏳ Phase 2 (GCP Cloud Run)"
-echo "  GCP Project:   qew-innovation-pilot (843899919832)"
-echo "  Region:        northamerica-northeast1"
+if [ "$CAMERA_GUI_RUNNING" = true ]; then
+    echo "  Camera Collection:   ✅ RUNNING (PID: $CAMERA_GUI_PID)"
+else
+    echo "  Camera Collection:   ⏳ Not started"
+fi
+echo ""
+echo "  Backend:             ⏳ Phase 2 (GCP Cloud Run)"
+echo "  GCP Project:         qew-innovation-pilot (843899919832)"
+echo "  Region:              northamerica-northeast1"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "Logs:"
 echo "  Frontend:      tail -f logs/frontend.log"
 echo "  All Services:  tail -f logs/*.log"
 echo ""
+if [ "$CAMERA_GUI_RUNNING" = false ]; then
+    echo "Start Camera Collection:"
+    echo "  cd camera_scraper && python qew_camera_gui.py"
+    echo ""
+fi
 echo "Stop Services:"
-echo "  ./stop.sh"
+echo "  ./stop.sh      # Stops frontend + camera collection + backend"
 echo ""
 echo "Cleanup:"
-echo "  ./cleanup.sh"
+echo "  ./cleanup.sh   # Clean logs, cache, build artifacts"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
