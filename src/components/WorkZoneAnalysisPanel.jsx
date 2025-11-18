@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { AlertTriangle, CheckCircle, Radio, X, Upload, Loader } from 'lucide-react';
 import { getRiskColor, getRiskLabel, generateV2XAlert } from '../utils/riskUtils';
 import { analyzeWorkZoneImage, formatWorkZoneForDashboard } from '../services/geminiVision';
+import { useV2X } from '../contexts/V2XContext';
 
 const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
   const [uploading, setUploading] = useState(false);
   const [aiWorkZone, setAiWorkZone] = useState(null);
   const [error, setError] = useState(null);
+
+  // Get V2X context for broadcast registration
+  const { registerBroadcast } = useV2X();
 
   // Use AI-analyzed work zone if available, otherwise use mock data
   const displayWorkZone = aiWorkZone || workZone;
@@ -34,7 +38,8 @@ const WorkZoneAnalysisPanel = ({ workZone, onClose }) => {
       const newWorkZone = await formatWorkZoneForDashboard(
         analysis,
         displayWorkZone.cameraId || 'UPLOAD',
-        { lat: displayWorkZone.lat || 43.3850, lon: displayWorkZone.lon || -79.7400 }
+        { lat: displayWorkZone.lat || 43.3850, lon: displayWorkZone.lon || -79.7400 },
+        registerBroadcast // Pass V2X broadcast registration callback
       );
 
       // If no work zone detected, show message

@@ -236,9 +236,10 @@ export function generateV2XAlert(analysis, location) {
  * @param {Object} analysis - Raw analysis from Gemini
  * @param {string} cameraId - Camera ID
  * @param {Object} location - GPS coordinates {lat, lon}
+ * @param {Function} registerBroadcast - Optional V2X broadcast registration callback
  * @returns {Object} Formatted work zone object
  */
-export async function formatWorkZoneForDashboard(analysis, cameraId, location) {
+export async function formatWorkZoneForDashboard(analysis, cameraId, location, registerBroadcast = null) {
   if (!analysis.hasWorkZone) {
     return null;
   }
@@ -279,6 +280,12 @@ export async function formatWorkZoneForDashboard(analysis, cameraId, location) {
       };
 
       console.log(`📡 vRSU Broadcast: ${broadcastResult.message_type} message sent (ID: ${broadcastResult.message_id})`);
+
+      // Register broadcast in V2X context so vehicles can receive alerts
+      if (registerBroadcast && typeof registerBroadcast === 'function') {
+        registerBroadcast(workZone, broadcastResult);
+        console.log(`📡 V2X Context: Broadcast registered for vehicle alerts`);
+      }
     } else {
       console.log(`📊 Work zone below broadcast threshold (risk: ${analysis.riskScore}/10)`);
     }

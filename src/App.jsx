@@ -9,6 +9,8 @@ import { QEW_ROUTE, WORK_ZONES, generateMockTrafficData } from './data/qewData';
 import WorkZoneAnalysisPanel from './components/WorkZoneAnalysisPanel';
 import CameraCollectionPanel from './components/CameraCollectionPanel';
 import { CollectionProvider } from './contexts/CollectionContext';
+import { useV2X } from './contexts/V2XContext';
+import { calculateDistance } from './utils/geoUtils';
 import { qewPathWestbound, qewPathEastbound } from './data/qewRoutes';
 
 // Fix Leaflet default icon issue
@@ -32,6 +34,8 @@ const createCustomIcon = (color) => new L.Icon({
 const workZoneIcon = createCustomIcon('red');
 const cameraIcon = createCustomIcon('blue');
 const vehicleIcon = createCustomIcon('green');
+const vehicleIconOrange = createCustomIcon('orange');  // V2X alert - medium/high risk
+const vehicleIconRed = createCustomIcon('red');        // V2X alert - critical risk
 
 function App() {
   const [vehicles, setVehicles] = useState([]);
@@ -43,6 +47,9 @@ function App() {
   const [loadingCameras, setLoadingCameras] = useState(true);
   const [showCameraCollection, setShowCameraCollection] = useState(false);
   const vehiclesInitialized = React.useRef(false);
+
+  // V2X Context for vehicle alert management
+  const { checkVehicleAlerts, getVehicleAlerts, activeBroadcasts } = useV2X();
 
   // Load real camera data with images from database export
   useEffect(() => {
@@ -184,11 +191,31 @@ function App() {
             newPosition = 0;
           }
 
-          return {
+          const updatedVehicle = {
             ...vehicle,
             position: newPosition,
             direction: newDirection,
           };
+
+          // Check V2X alerts for this vehicle
+          const route = newDirection === 'westbound' ? qewPathWestbound : qewPathEastbound;
+          if (route && route.length > 0) {
+            const index = Math.floor(newPosition);
+            if (index >= 0 && index < route.length - 1) {
+              const fraction = newPosition - index;
+              const current = route[index];
+              const next = route[index + 1];
+              if (current && next && current.length >= 2 && next.length >= 2) {
+                const lat = current[0] + (next[0] - current[0]) * fraction;
+                const lon = current[1] + (next[1] - current[1]) * fraction;
+                if (!isNaN(lat) && !isNaN(lon)) {
+                  checkVehicleAlerts(updatedVehicle.id, [lat, lon], calculateDistance);
+                }
+              }
+            }
+          }
+
+          return updatedVehicle;
         });
 
         // Log count to detect disappearing vehicles
@@ -473,11 +500,24 @@ function App() {
                 );
               }
 
+              // Get V2X alerts for this vehicle
+              const vehicleAlerts = getVehicleAlerts(vehicle.id);
+              const hasAlert = vehicleAlerts.length > 0;
+
+              // Determine icon color based on highest urgency
+              let vehicleMarkerIcon = vehicleIcon;
+              if (hasAlert) {
+                const highestUrgency = Math.max(...vehicleAlerts.map(a =>
+                  a.urgency === 'critical' ? 3 : a.urgency === 'high' ? 2 : 1
+                ));
+                vehicleMarkerIcon = highestUrgency >= 3 ? vehicleIconRed : vehicleIconOrange;
+              }
+
               return (
                 <Marker
                   key={vehicle.id}
                   position={coords}
-                  icon={vehicleIcon}
+                  icon={vehicleMarkerIcon}
                 >
                   <Popup>
                     <div className="text-sm">
@@ -489,6 +529,39 @@ function App() {
                         if (!routeLength || routeLength === 0) return '0.0';
                         return ((vehicle.position / routeLength) * 100).toFixed(1);
                       })()}%
+
+                      {/* V2X ALERTS - SMS Style Notifications */}
+                      {vehicleAlerts.length > 0 && (
+                        <div style={{ marginTop: '12px', borderTop: '1px solid #ddd', paddingTop: '8px' }}>
+                          <strong style={{ color: '#ea580c', display: 'block', marginBottom: '8px' }}>
+                            📱 V2X ALERTS ({vehicleAlerts.length})
+                          </strong>
+                          {vehicleAlerts.map((alert, idx) => (
+                            <div
+                              key={idx}
+                              style={{
+                                marginTop: idx > 0 ? '8px' : '0',
+                                padding: '8px',
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                backgroundColor: alert.urgency === 'critical' ? '#fee2e2' :
+                                                 alert.urgency === 'high' ? '#ffedd5' : '#fef3c7',
+                                border: alert.urgency === 'critical' ? '1px solid #f87171' :
+                                        alert.urgency === 'high' ? '1px solid #fb923c' : '1px solid #fbbf24',
+                                color: '#000'
+                              }}
+                            >
+                              <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                                {alert.message}
+                              </div>
+                              <div style={{ fontSize: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                                <span>Distance: {alert.distance}m</span>
+                                <span>Speed Limit: {alert.speedLimit} km/h</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </Popup>
                 </Marker>
