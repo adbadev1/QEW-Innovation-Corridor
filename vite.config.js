@@ -10,6 +10,7 @@ export default defineConfig({
   base: '/QEW-Innovation-Corridor/',
   server: {
     port: 8200,
+    strictPort: true,  // Fail if port 8200 is not available (no auto-increment)
     open: true
   }
 })
