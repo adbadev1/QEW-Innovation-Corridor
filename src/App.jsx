@@ -448,15 +448,16 @@ function App() {
                                 <div className="mb-2">
                                   <div className="text-[10px] text-gray-600 mb-1 font-semibold">Last Collected Image:</div>
                                   <img
-                                    src={`${basePath}${lastImage.path}`}
+                                    src={`${basePath}camera_scraper/${lastImage.path}`}
                                     alt="Last collected camera image"
                                     className="w-full rounded border border-gray-300"
                                     onError={(e) => {
+                                      console.error('Failed to load image:', `${basePath}camera_scraper/${lastImage.path}`);
                                       e.target.style.display = 'none';
                                       e.target.nextSibling.style.display = 'block';
                                     }}
                                   />
-                                  <div className="text-[9px] text-gray-500 mt-1 hidden">Image not available</div>
+                                  <div className="text-[9px] text-red-500 mt-1 hidden">Image not available</div>
                                   <div className="text-[9px] text-gray-500 mt-1">
                                     Captured: {new Date(lastImage.timestamp.replace(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/, '$1-$2-$3T$4:$5:$6')).toLocaleString()}
                                   </div>
