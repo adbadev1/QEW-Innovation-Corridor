@@ -168,8 +168,9 @@ echo ""
 log_info "Starting services..."
 echo ""
 
-# Create PID directory
+# Create PID and logs directories
 mkdir -p .pids
+mkdir -p logs
 
 # Frontend Service (Vite Dev Server)
 log_info "Starting frontend dev server (port 8200)..."

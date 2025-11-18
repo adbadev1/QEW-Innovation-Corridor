@@ -37,6 +37,9 @@ build/
 *.log
 logs/
 
+# Process PIDs
+.pids/
+
 # Testing
 .coverage
 htmlcov/
