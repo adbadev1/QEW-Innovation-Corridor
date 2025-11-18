@@ -12,6 +12,7 @@ import TrafficMonitoringPanel from './components/TrafficMonitoringPanel';
 import { CollectionProvider } from './contexts/CollectionContext';
 import { useV2X } from './contexts/V2XContext';
 import { calculateDistance } from './utils/geoUtils';
+import { generateLocationAwareAnalysis, formatCameraLocation } from './utils/locationUtils';
 import { qewPathWestbound, qewPathEastbound } from './data/qewRoutes';
 
 // Fix Leaflet default icon issue
@@ -322,15 +323,9 @@ function App() {
   }, []);
 
   const analyzeTrafficWithAI = () => {
-    const analyses = [
-      "Traffic flow nominal across all 40km corridor. No congestion detected.",
-      "Moderate congestion detected at KM 25 (Oakville). Recommending speed reduction.",
-      "Work zone at KM 15 showing elevated risk. RSU alert activated.",
-      "Heavy vehicle concentration near KM 40. Monitoring for queue formation.",
-      "Weather conditions optimal. All work zones operating safely."
-    ];
-
-    setAiAnalysis(analyses[Math.floor(Math.random() * analyses.length)]);
+    // Generate location-aware AI analysis using real camera positions
+    const analysis = generateLocationAwareAnalysis(cameras, vehicles);
+    setAiAnalysis(analysis);
   };
 
   const handleWorkZoneClick = (workZone) => {
@@ -407,6 +402,9 @@ function App() {
 
             {/* Real QEW Cameras */}
             {cameras.map(camera => {
+              // Get location metadata
+              const location = formatCameraLocation(camera);
+
               return (
                 <Marker
                   key={camera.Id}
@@ -416,7 +414,19 @@ function App() {
                   <Popup maxWidth={400} maxHeight={500}>
                     <div className="text-sm">
                       <strong className="text-base block mb-1">{camera.Location}</strong>
-                      <span className="text-blue-600 text-xs">{camera.Source}</span>
+                      <div className="flex items-center space-x-2 text-xs mt-1">
+                        <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">
+                          📍 {location.kmFormatted}
+                        </span>
+                        <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded font-semibold">
+                          🛣️ {location.exit}
+                        </span>
+                      </div>
+                      <div className="mt-2 space-y-1 text-xs">
+                        <div><strong>Camera ID:</strong> #{camera.Id}</div>
+                        <div><strong>Source:</strong> {camera.Source}</div>
+                        <div><strong>Coordinates:</strong> {camera.Latitude.toFixed(4)}, {camera.Longitude.toFixed(4)}</div>
+                      </div>
                       <div className="mt-3 space-y-3 max-h-80 overflow-y-auto">
                         {camera.Views.map(view => {
                           // Check if test image exists for this camera/view

@@ -17,7 +17,9 @@ import { useV2X } from '../contexts/V2XContext';
 function SyntheticTestingPanel({ cameras }) {
   const [isExpanded, setIsExpanded] = useState(() => {
     const saved = localStorage.getItem('syntheticTestingExpanded');
-    return saved === 'true';
+    const initialValue = saved !== null ? saved === 'true' : true; // Default to TRUE if not set
+    console.log('[SyntheticTestingPanel] Initial isExpanded:', initialValue, '(localStorage value:', saved, ')');
+    return initialValue;
   });
   const [conditions, setConditions] = useState(null);
   const [images, setImages] = useState([]);
@@ -31,6 +33,12 @@ function SyntheticTestingPanel({ cameras }) {
   // V2X context for broadcast registration
   const { registerBroadcast } = useV2X();
 
+  // Debug: Log when images state changes
+  useEffect(() => {
+    console.log('[SyntheticTestingPanel] RENDER: images.length =', images.length, '| analysisResult =', !!analysisResult);
+    console.log('[SyntheticTestingPanel] Should show image grid?', images.length > 0 && !analysisResult);
+  }, [images, analysisResult]);
+
   // Persist expansion state
   useEffect(() => {
     localStorage.setItem('syntheticTestingExpanded', isExpanded.toString());
@@ -38,12 +46,16 @@ function SyntheticTestingPanel({ cameras }) {
 
   // Load current conditions on mount
   useEffect(() => {
+    console.log('[SyntheticTestingPanel] Component MOUNTED');
+    console.log('[SyntheticTestingPanel] Cameras received:', cameras?.length || 0);
+
     const currentConditions = getCurrentConditions();
     setConditions(currentConditions);
 
     // Auto-select first camera if available
     if (cameras && cameras.length > 0) {
       setSelectedCamera(cameras[0]);
+      console.log('[SyntheticTestingPanel] Auto-selected camera:', cameras[0].Location);
     }
   }, [cameras]);
 
@@ -181,6 +193,8 @@ function SyntheticTestingPanel({ cameras }) {
     setError(null);
   };
 
+  console.log('[SyntheticTestingPanel] RENDERING - isExpanded:', isExpanded, 'images:', images.length, 'cameras:', cameras?.length);
+
   return (
     <div className="bg-gray-800 text-white border-b border-gray-700">
       {/* Collapsible Header */}
@@ -202,7 +216,7 @@ function SyntheticTestingPanel({ cameras }) {
 
       {/* Collapsible Content */}
       {isExpanded && (
-        <div className="flex flex-col max-h-[600px]">{/* end of header section */}
+        <div className="flex flex-col max-h-[600px] overflow-y-auto">{/* end of header section */}
 
       {/* Current Conditions */}
       {conditions && (
@@ -287,9 +301,9 @@ function SyntheticTestingPanel({ cameras }) {
 
       {/* Image Grid */}
       {images.length > 0 && !analysisResult && (
-        <div className="flex-1 overflow-y-auto p-3">
+        <div className="flex-1 overflow-y-auto p-3 bg-gray-800">
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-xs font-semibold">Select Test Image ({images.length} found)</h3>
+            <h3 className="text-xs font-semibold text-yellow-300">⬇️ SCROLL DOWN - Select Test Image ({images.length} found)</h3>
             <button
               onClick={handleReset}
               className="text-[9px] text-gray-400 hover:text-white"
@@ -362,6 +376,20 @@ function SyntheticTestingPanel({ cameras }) {
               Test Another
             </button>
           </div>
+
+          {/* Test Image Thumbnail */}
+          {selectedImage && (
+            <div className="border border-purple-600 rounded overflow-hidden">
+              <img
+                src={selectedImage.thumbnail}
+                alt={selectedImage.description}
+                className="w-full h-32 object-cover"
+              />
+              <div className="p-1.5 bg-purple-900/30">
+                <p className="text-[9px] text-purple-300">{selectedImage.description}</p>
+              </div>
+            </div>
+          )}
 
           {/* Synthetic Badge */}
           <div className="p-2 bg-purple-900/30 border border-purple-600 rounded">
