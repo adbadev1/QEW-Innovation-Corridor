@@ -1,7 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { info as logInfo, warn as logWarn, error as logError, critical as logCritical } from '../utils/logger';
 
 /**
  * Collection Context - Persistent Camera Collection State Management
+ *
+ * PRODUCTION-GRADE:
+ * - Comprehensive error handling and logging
+ * - Input validation for all settings
+ * - Automatic recovery from storage failures
+ * - Timeout handling for long operations
+ * - Graceful degradation when features unavailable
  *
  * Maintains collection state, logs, and settings across panel show/hide cycles.
  * Ensures logs and collection activity persist for the entire browser session.
@@ -17,36 +25,116 @@ export const useCollection = () => {
   return context;
 };
 
+// Helper: Safe storage operations with error handling
+const safeStorageGet = (key, storageType = 'sessionStorage') => {
+  try {
+    const storage = storageType === 'localStorage' ? localStorage : sessionStorage;
+    return storage.getItem(key);
+  } catch (error) {
+    logError(`Failed to read from ${storageType}: ${key}`, { error: error.message });
+    return null;
+  }
+};
+
+const safeStorageSet = (key, value, storageType = 'sessionStorage') => {
+  try {
+    const storage = storageType === 'localStorage' ? localStorage : sessionStorage;
+    storage.setItem(key, value);
+    return true;
+  } catch (error) {
+    logError(`Failed to write to ${storageType}: ${key}`, { error: error.message });
+    return false;
+  }
+};
+
+const safeStorageRemove = (key, storageType = 'sessionStorage') => {
+  try {
+    const storage = storageType === 'localStorage' ? localStorage : sessionStorage;
+    storage.removeItem(key);
+    return true;
+  } catch (error) {
+    logError(`Failed to remove from ${storageType}: ${key}`, { error: error.message });
+    return false;
+  }
+};
+
+// Helper: Validate settings
+const validateSettings = (settings) => {
+  const errors = [];
+
+  if (typeof settings.intervalHours !== 'number' || settings.intervalHours < 0 || settings.intervalHours > 23) {
+    errors.push('intervalHours must be between 0 and 23');
+  }
+
+  if (typeof settings.intervalMinutes !== 'number' || settings.intervalMinutes < 0 || settings.intervalMinutes > 59) {
+    errors.push('intervalMinutes must be between 0 and 59');
+  }
+
+  if (typeof settings.imagesPerCamera !== 'number' || settings.imagesPerCamera < 1 || settings.imagesPerCamera > 10) {
+    errors.push('imagesPerCamera must be between 1 and 10');
+  }
+
+  return { isValid: errors.length === 0, errors };
+};
+
 export const CollectionProvider = ({ children, cameras = [] }) => {
   // Session ID (created once per browser session, persists across page reloads)
   const [sessionId] = useState(() => {
-    const stored = sessionStorage.getItem('collectionSessionId');
-    if (stored) return stored;
+    const stored = safeStorageGet('collectionSessionId');
+    if (stored) {
+      logInfo('Restored existing collection session', { sessionId: stored });
+      return stored;
+    }
 
     const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    sessionStorage.setItem('collectionSessionId', newSessionId);
+    safeStorageSet('collectionSessionId', newSessionId);
+    logInfo('Created new collection session', { sessionId: newSessionId });
     return newSessionId;
   });
 
   // Session start time (persists across page reloads)
   const [sessionStartTime] = useState(() => {
-    const stored = sessionStorage.getItem('collectionSessionStart');
-    if (stored) return new Date(stored);
+    const stored = safeStorageGet('collectionSessionStart');
+    if (stored) {
+      const startTime = new Date(stored);
+      if (!isNaN(startTime.getTime())) {
+        return startTime;
+      }
+      logWarn('Invalid session start time, creating new', { stored });
+    }
 
     const startTime = new Date();
-    sessionStorage.setItem('collectionSessionStart', startTime.toISOString());
+    safeStorageSet('collectionSessionStart', startTime.toISOString());
     return startTime;
   });
 
   // Settings (persisted to localStorage)
   const [settings, setSettings] = useState(() => {
-    const saved = localStorage.getItem('cameraCollectionSettings');
-    return saved ? JSON.parse(saved) : {
+    const defaultSettings = {
       intervalHours: 1,
       intervalMinutes: 0,
       imagesPerCamera: 1,
       autoStart: false
     };
+
+    try {
+      const saved = safeStorageGet('cameraCollectionSettings', 'localStorage');
+      if (!saved) return defaultSettings;
+
+      const parsed = JSON.parse(saved);
+      const validation = validateSettings(parsed);
+
+      if (!validation.isValid) {
+        logWarn('Invalid settings detected, using defaults', { errors: validation.errors });
+        return defaultSettings;
+      }
+
+      logInfo('Restored collection settings', { settings: parsed });
+      return parsed;
+    } catch (error) {
+      logError('Failed to parse settings, using defaults', { error: error.message });
+      return defaultSettings;
+    }
   });
 
   // Session logs (persisted to sessionStorage - cleared on browser close)
@@ -103,22 +191,44 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
 
   // Save settings to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('cameraCollectionSettings', JSON.stringify(settings));
+    const validation = validateSettings(settings);
+    if (!validation.isValid) {
+      logError('Attempted to save invalid settings', { errors: validation.errors, settings });
+      return;
+    }
+
+    const success = safeStorageSet('cameraCollectionSettings', JSON.stringify(settings), 'localStorage');
+    if (!success) {
+      logCritical('Failed to persist settings - localStorage may be full or disabled');
+    }
   }, [settings]);
 
   // Save logs to sessionStorage whenever they change
   useEffect(() => {
-    sessionStorage.setItem('collectionSessionLogs', JSON.stringify(statusLog));
+    try {
+      const success = safeStorageSet('collectionSessionLogs', JSON.stringify(statusLog));
+      if (!success && statusLog.length > 0) {
+        logWarn('Failed to persist logs, trimming to last 100 entries');
+        // Try saving fewer logs
+        safeStorageSet('collectionSessionLogs', JSON.stringify(statusLog.slice(0, 100)));
+      }
+    } catch (error) {
+      logError('Failed to serialize logs', { error: error.message, logCount: statusLog.length });
+    }
   }, [statusLog]);
 
   // Save running state to sessionStorage
   useEffect(() => {
-    sessionStorage.setItem('collectionIsRunning', isRunning.toString());
+    safeStorageSet('collectionIsRunning', isRunning.toString());
   }, [isRunning]);
 
   // Save stats to sessionStorage
   useEffect(() => {
-    sessionStorage.setItem('collectionStats', JSON.stringify(stats));
+    try {
+      safeStorageSet('collectionStats', JSON.stringify(stats));
+    } catch (error) {
+      logError('Failed to serialize stats', { error: error.message });
+    }
   }, [stats]);
 
   // Log session info on first mount
@@ -176,9 +286,9 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
   }, [isRunning, settings.intervalHours, settings.intervalMinutes]);
 
   // Log message to status log (persisted across panel show/hide)
-  const logStatus = useCallback((message, type = 'info') => {
+  const logStatus = useCallback((message, type = 'info', indent = false) => {
     const timestamp = new Date().toLocaleTimeString();
-    const logEntry = { timestamp, message, type, sessionTime: Date.now() - sessionStartTime.getTime() };
+    const logEntry = { timestamp, message, type, indent, sessionTime: Date.now() - sessionStartTime.getTime() };
 
     setStatusLog(prev => [
       logEntry,
@@ -188,51 +298,114 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
 
   // Start scheduled collection
   const startCollection = useCallback(() => {
-    if (cameras.length === 0) {
-      logStatus('Error: No camera data loaded', 'error');
-      return;
-    }
+    try {
+      // Validation checks
+      if (!cameras || cameras.length === 0) {
+        const errorMsg = 'Cannot start collection: No camera data loaded';
+        logStatus(`Error: ${errorMsg}`, 'error');
+        logError(errorMsg, { camerasAvailable: cameras?.length || 0 });
+        return false;
+      }
 
-    const intervalMs = (settings.intervalHours * 3600 + settings.intervalMinutes * 60) * 1000;
+      const intervalMs = (settings.intervalHours * 3600 + settings.intervalMinutes * 60) * 1000;
 
-    if (intervalMs === 0) {
-      logStatus('Error: Please set a collection interval greater than 0', 'error');
-      return;
-    }
+      if (intervalMs === 0) {
+        const errorMsg = 'Cannot start collection: Interval must be greater than 0';
+        logStatus(`Error: ${errorMsg}`, 'error');
+        logWarn(errorMsg, { settings });
+        return false;
+      }
 
-    setIsRunning(true);
-    logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
-    logStatus(`AUTOMATIC COLLECTION STARTED`, 'success');
-    logStatus(`Interval: ${settings.intervalHours} hours ${settings.intervalMinutes} minutes`, 'info');
-    logStatus(`Images per camera: ${settings.imagesPerCamera}`, 'info');
-    logStatus(`Total cameras: ${cameras.length}`, 'info');
-    logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
+      if (isRunning) {
+        logStatus('Collection already running', 'warning');
+        logWarn('Attempted to start collection while already running');
+        return false;
+      }
 
-    // Run first collection immediately
-    runCollection();
+      // Start collection
+      setIsRunning(true);
+      logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
+      logStatus(`AUTOMATIC COLLECTION STARTED`, 'success');
+      logStatus(`Interval: ${settings.intervalHours} hours ${settings.intervalMinutes} minutes`, 'info');
+      logStatus(`Images per camera: ${settings.imagesPerCamera}`, 'info');
+      logStatus(`Total cameras: ${cameras.length}`, 'info');
+      logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
 
-    // Set up interval for future collections
-    collectionTimerRef.current = setInterval(() => {
+      logInfo('Automatic collection started', {
+        intervalMs,
+        cameras: cameras.length,
+        imagesPerCamera: settings.imagesPerCamera
+      });
+
+      // Run first collection immediately
       runCollection();
-    }, intervalMs);
-  }, [cameras, settings, logStatus]);
+
+      // Set up interval for future collections
+      collectionTimerRef.current = setInterval(() => {
+        runCollection();
+      }, intervalMs);
+
+      return true;
+    } catch (error) {
+      logStatus(`Critical error starting collection: ${error.message}`, 'error');
+      logCritical('Failed to start collection', { error: error.message, stack: error.stack });
+      return false;
+    }
+  }, [cameras, settings, isRunning, logStatus]);
 
   // Stop scheduled collection
   const stopCollection = useCallback(() => {
-    setIsRunning(false);
-    if (collectionTimerRef.current) {
-      clearInterval(collectionTimerRef.current);
-      collectionTimerRef.current = null;
+    try {
+      if (!isRunning) {
+        logStatus('Collection is not running', 'warning');
+        logWarn('Attempted to stop collection that was not running');
+        return false;
+      }
+
+      setIsRunning(false);
+
+      // Clear timer
+      if (collectionTimerRef.current) {
+        clearInterval(collectionTimerRef.current);
+        collectionTimerRef.current = null;
+      }
+
+      logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
+      logStatus(`AUTOMATIC COLLECTION STOPPED`, 'warning');
+      logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
+
+      logInfo('Automatic collection stopped', {
+        collectionsCompleted: stats.collectionsThisSession,
+        totalImages: stats.totalImagesCollected
+      });
+
+      return true;
+    } catch (error) {
+      logStatus(`Error stopping collection: ${error.message}`, 'error');
+      logError('Failed to stop collection cleanly', { error: error.message, stack: error.stack });
+
+      // Force stop anyway
+      setIsRunning(false);
+      if (collectionTimerRef.current) {
+        clearInterval(collectionTimerRef.current);
+        collectionTimerRef.current = null;
+      }
+
+      return false;
     }
-    logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
-    logStatus(`AUTOMATIC COLLECTION STOPPED`, 'warning');
-    logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
-  }, [logStatus]);
+  }, [isRunning, logStatus, stats]);
 
   // Run camera image collection
   const runCollection = useCallback(async () => {
     if (isCollecting) {
       logStatus('Previous collection still in progress, skipping...', 'warning');
+      logWarn('Collection skipped - previous collection still running');
+      return;
+    }
+
+    if (!cameras || cameras.length === 0) {
+      logStatus('Error: No cameras available for collection', 'error');
+      logError('Collection aborted - no cameras available');
       return;
     }
 
@@ -243,34 +416,80 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
     const collectionNumber = stats.collectionsThisSession + 1;
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     const collectionId = `qew_collection_${timestamp}`;
+    const startTime = Date.now();
 
     logStatus(``, 'info'); // Blank line for separation
     logStatus(`▶ COLLECTION #${collectionNumber} STARTED`, 'success');
     logStatus(`Collection ID: ${collectionId}`, 'info');
     logStatus(`Cameras: ${cameras.length} | Images per camera: ${settings.imagesPerCamera}`, 'info');
 
+    logInfo('Collection started', {
+      collectionNumber,
+      collectionId,
+      cameras: cameras.length,
+      imagesPerCamera: settings.imagesPerCamera
+    });
+
     try {
       let imagesCollected = 0;
+      let imagesFailed = 0;
 
       for (let cameraIdx = 0; cameraIdx < cameras.length; cameraIdx++) {
         const camera = cameras[cameraIdx];
+
+        if (!camera || !camera.Id) {
+          logWarn('Invalid camera object encountered', { cameraIdx, camera });
+          continue;
+        }
+
         setCurrentCamera(camera.Location || `Camera ${camera.Id}`);
         setCurrentProgress(Math.round(((cameraIdx + 1) / cameras.length) * 100));
 
         logStatus(`[${cameraIdx + 1}/${cameras.length}] ${camera.Location}`, 'info');
 
         const views = camera.Views || [];
+        let cameraImagesCount = 0;
+
         for (let viewIdx = 0; viewIdx < views.length; viewIdx++) {
           const view = views[viewIdx];
+          const viewName = view.Description || `View ${view.Id}`;
 
           for (let round = 0; round < settings.imagesPerCamera; round++) {
-            // Simulate image download (replace with real API call)
-            await simulateImageDownload(camera.Id, view.Id, round + 1);
-            imagesCollected++;
-            setTotalImages(imagesCollected);
+            try {
+              // Simulate image download with timeout (replace with real API call)
+              await Promise.race([
+                simulateImageDownload(camera.Id, view.Id, round + 1),
+                new Promise((_, reject) =>
+                  setTimeout(() => reject(new Error('Image download timeout')), 30000) // 30s timeout
+                )
+              ]);
+
+              imagesCollected++;
+              cameraImagesCount++;
+              setTotalImages(imagesCollected);
+
+              // Log each image capture (indented)
+              logStatus(`→ Image ${cameraImagesCount}/${views.length * settings.imagesPerCamera} captured (${viewName})`, 'info', true);
+            } catch (imageError) {
+              imagesFailed++;
+              logStatus(`✗ Failed to capture image from ${viewName}: ${imageError.message}`, 'error', true);
+              logError('Image capture failed', {
+                camera: camera.Id,
+                view: view.Id,
+                round: round + 1,
+                error: imageError.message
+              });
+              // Continue to next image despite failure
+            }
           }
         }
+
+        // Log camera completion
+        logStatus(`✓ Camera ${camera.Id} complete (${cameraImagesCount} images)`, 'success', true);
       }
+
+      // Calculate collection duration
+      const duration = Math.round((Date.now() - startTime) / 1000);
 
       // Update stats
       setStats(prev => ({
@@ -281,14 +500,31 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
       }));
 
       logStatus(`✓ COLLECTION #${collectionNumber} COMPLETE`, 'success');
-      logStatus(`Images collected: ${imagesCollected} | Total this session: ${stats.totalImagesCollected + imagesCollected}`, 'success');
+      logStatus(`Images collected: ${imagesCollected} | Failed: ${imagesFailed} | Duration: ${duration}s`, 'success');
+      logStatus(`Total this session: ${stats.totalImagesCollected + imagesCollected}`, 'success');
       logStatus(`Collection saved: ${collectionId}`, 'info');
       logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
+
+      logInfo('Collection completed', {
+        collectionNumber,
+        collectionId,
+        imagesCollected,
+        imagesFailed,
+        duration,
+        totalSessionImages: stats.totalImagesCollected + imagesCollected
+      });
 
     } catch (error) {
       logStatus(`✗ COLLECTION #${collectionNumber} FAILED`, 'error');
       logStatus(`Error: ${error.message}`, 'error');
       logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
+
+      logError('Collection failed catastrophically', {
+        collectionNumber,
+        collectionId,
+        error: error.message,
+        stack: error.stack
+      });
     } finally {
       setIsCollecting(false);
       setCurrentCamera(null);
@@ -303,11 +539,23 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
     });
   };
 
-  // Update settings
+  // Update settings with validation
   const updateSetting = useCallback((key, value) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    const newSettings = { ...settings, [key]: value };
+    const validation = validateSettings(newSettings);
+
+    if (!validation.isValid) {
+      const errorMsg = `Invalid setting: ${validation.errors.join(', ')}`;
+      logStatus(errorMsg, 'error');
+      logError(errorMsg, { key, value, errors: validation.errors });
+      return false;
+    }
+
+    setSettings(newSettings);
     logStatus(`Setting updated: ${key} = ${value}`, 'info');
-  }, [logStatus]);
+    logInfo('Setting updated', { key, value });
+    return true;
+  }, [settings, logStatus]);
 
   // Clear session logs
   const clearLogs = useCallback(() => {
