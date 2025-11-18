@@ -1,196 +1,57 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Camera, Play, Square, Download, Clock, Settings, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Camera, Play, Square, Download, Clock, Settings, CheckCircle, XCircle, AlertCircle, Trash2, Info } from 'lucide-react';
+import { useCollection } from '../contexts/CollectionContext';
 
 /**
  * Camera Collection Panel - Integrates camera image collection into Digital Twin Dashboard
  *
- * Replaces standalone PyQt6 GUI (qew_camera_gui.py) with React component
- * Features:
- * - Start/Stop scheduled collection
- * - Manual "Collect Now" button
- * - Collection settings (interval, images per camera)
- * - Real-time status log
- * - Progress tracking
- * - localStorage for settings persistence
+ * NOW WITH PERSISTENT STATE:
+ * - Logs persist across panel show/hide (session storage)
+ * - Collection continues running even when panel is hidden
+ * - Settings persist across browser sessions (local storage)
+ * - Session tracking from START to END
+ * - Full history grep/tail functionality
  */
-function CameraCollectionPanel({ cameras = [], onClose }) {
-  // Settings state (persisted to localStorage)
-  const [settings, setSettings] = useState(() => {
-    const saved = localStorage.getItem('cameraCollectionSettings');
-    return saved ? JSON.parse(saved) : {
-      intervalHours: 1,
-      intervalMinutes: 0,
-      imagesPerCamera: 1,
-      autoStart: false
-    };
-  });
+function CameraCollectionPanel({ onClose }) {
+  const {
+    // Session info
+    sessionId,
+    sessionStartTime,
+    getSessionUptime,
 
-  // Collection state
-  const [isRunning, setIsRunning] = useState(false);
-  const [isCollecting, setIsCollecting] = useState(false);
-  const [statusLog, setStatusLog] = useState([]);
-  const [nextCollectionTime, setNextCollectionTime] = useState(null);
-  const [totalImages, setTotalImages] = useState(0);
-  const [currentCamera, setCurrentCamera] = useState(null);
-  const [currentProgress, setCurrentProgress] = useState(0);
+    // Settings
+    settings,
+    updateSetting,
 
-  // Refs for timers
-  const collectionTimerRef = useRef(null);
-  const nextCollectionTimerRef = useRef(null);
+    // Collection state
+    isRunning,
+    isCollecting,
+    totalImages,
+    currentCamera,
+    currentProgress,
+    nextCollectionTime,
 
-  // Save settings to localStorage whenever they change
+    // Stats
+    stats,
+
+    // Logs
+    statusLog,
+    logStatus,
+    clearLogs,
+
+    // Actions
+    startCollection,
+    stopCollection,
+    runCollection,
+
+    // Data
+    cameras
+  } = useCollection();
+
+  // Log when panel is opened
   useEffect(() => {
-    localStorage.setItem('cameraCollectionSettings', JSON.stringify(settings));
-  }, [settings]);
-
-  // Calculate next collection time
-  useEffect(() => {
-    if (isRunning) {
-      const intervalMs = (settings.intervalHours * 3600 + settings.intervalMinutes * 60) * 1000;
-      const next = new Date(Date.now() + intervalMs);
-      setNextCollectionTime(next);
-
-      // Update next collection time every second for countdown
-      nextCollectionTimerRef.current = setInterval(() => {
-        setNextCollectionTime(new Date(Date.now() + intervalMs));
-      }, 1000);
-
-      return () => {
-        if (nextCollectionTimerRef.current) {
-          clearInterval(nextCollectionTimerRef.current);
-        }
-      };
-    } else {
-      setNextCollectionTime(null);
-    }
-  }, [isRunning, settings.intervalHours, settings.intervalMinutes]);
-
-  // Log message to status log
-  const logStatus = (message, type = 'info') => {
-    const timestamp = new Date().toLocaleTimeString();
-    setStatusLog(prev => [
-      { timestamp, message, type },
-      ...prev.slice(0, 49) // Keep last 50 messages
-    ]);
-  };
-
-  // Start scheduled collection
-  const startCollection = () => {
-    if (cameras.length === 0) {
-      logStatus('Error: No camera data loaded', 'error');
-      return;
-    }
-
-    const intervalMs = (settings.intervalHours * 3600 + settings.intervalMinutes * 60) * 1000;
-
-    if (intervalMs === 0) {
-      logStatus('Error: Please set a collection interval greater than 0', 'error');
-      return;
-    }
-
-    setIsRunning(true);
-    logStatus(`Automatic collection started (every ${settings.intervalHours}h ${settings.intervalMinutes}m)`, 'success');
-
-    // Run first collection immediately
-    runCollection();
-
-    // Set up interval for future collections
-    collectionTimerRef.current = setInterval(() => {
-      runCollection();
-    }, intervalMs);
-  };
-
-  // Stop scheduled collection
-  const stopCollection = () => {
-    setIsRunning(false);
-    if (collectionTimerRef.current) {
-      clearInterval(collectionTimerRef.current);
-      collectionTimerRef.current = null;
-    }
-    logStatus('Automatic collection stopped', 'info');
-  };
-
-  // Run camera image collection
-  const runCollection = async () => {
-    if (isCollecting) {
-      logStatus('Previous collection still in progress, skipping...', 'warning');
-      return;
-    }
-
-    setIsCollecting(true);
-    setCurrentProgress(0);
-    setTotalImages(0);
-
-    logStatus(`Starting camera image collection (${cameras.length} cameras, ${settings.imagesPerCamera} images each)`, 'info');
-
-    try {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      const collectionId = `qew_collection_${timestamp}`;
-
-      logStatus(`Collection ID: ${collectionId}`, 'info');
-
-      let imagesCollected = 0;
-
-      // Simulate collection process (in production, this would call backend API)
-      for (let cameraIdx = 0; cameraIdx < cameras.length; cameraIdx++) {
-        const camera = cameras[cameraIdx];
-        setCurrentCamera(camera.Location || `Camera ${camera.Id}`);
-        setCurrentProgress(Math.round(((cameraIdx + 1) / cameras.length) * 100));
-
-        logStatus(`[${cameraIdx + 1}/${cameras.length}] ${camera.Location}`, 'info');
-
-        // Collect images from each view
-        const views = camera.Views || [];
-        for (let viewIdx = 0; viewIdx < views.length; viewIdx++) {
-          const view = views[viewIdx];
-
-          for (let round = 0; round < settings.imagesPerCamera; round++) {
-            // Simulate image download (in production, call backend API)
-            await simulateImageDownload(camera.Id, view.Id, round + 1);
-            imagesCollected++;
-            setTotalImages(imagesCollected);
-          }
-        }
-      }
-
-      logStatus(`Collection complete! ${imagesCollected} images downloaded to collection: ${collectionId}`, 'success');
-      logStatus('=' + '='.repeat(70), 'info');
-
-    } catch (error) {
-      logStatus(`Error during collection: ${error.message}`, 'error');
-    } finally {
-      setIsCollecting(false);
-      setCurrentCamera(null);
-      setCurrentProgress(0);
-    }
-  };
-
-  // Simulate image download (replace with real API call in production)
-  const simulateImageDownload = (cameraId, viewId, round) => {
-    return new Promise(resolve => {
-      setTimeout(resolve, 200); // Simulate 200ms download time
-    });
-  };
-
-  // Manual collection (one-time)
-  const handleManualCollection = () => {
-    if (cameras.length === 0) {
-      logStatus('Error: No camera data loaded', 'error');
-      return;
-    }
-
-    if (isCollecting) {
-      logStatus('Collection already in progress...', 'warning');
-      return;
-    }
-
-    runCollection();
-  };
-
-  // Update settings
-  const updateSetting = (key, value) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-  };
+    logStatus(`─── Camera Collection Panel Opened ───`, 'info');
+  }, []);
 
   // Format next collection time
   const formatNextCollection = () => {
@@ -214,14 +75,41 @@ function CameraCollectionPanel({ cameras = [], onClose }) {
       <div className="p-4 bg-gradient-to-r from-indigo-600 to-blue-700 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Camera className="w-6 h-6" />
-          <h2 className="text-xl font-bold">Camera Collection System</h2>
+          <div>
+            <h2 className="text-xl font-bold">Camera Collection System</h2>
+            <p className="text-xs text-blue-100">Session persistent • Logs retained</p>
+          </div>
         </div>
         <button
           onClick={onClose}
-          className="text-white hover:text-gray-300"
+          className="text-white hover:text-gray-300 px-2 py-1 rounded hover:bg-white/10"
         >
           ✕
         </button>
+      </div>
+
+      {/* Session Info Bar */}
+      <div className="p-3 bg-gray-900 border-b border-gray-700 text-xs">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex items-center space-x-2">
+            <Info className="w-4 h-4 text-blue-400" />
+            <span className="text-gray-400">Session:</span>
+            <span className="font-mono text-blue-400">{sessionId.slice(-8)}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Clock className="w-4 h-4 text-green-400" />
+            <span className="text-gray-400">Uptime:</span>
+            <span className="font-mono text-green-400">{getSessionUptime()}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-gray-400">Started:</span>
+            <span className="font-mono text-gray-300">{sessionStartTime.toLocaleTimeString()}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-gray-400">Collections:</span>
+            <span className="font-mono text-yellow-400">{stats.collectionsThisSession}</span>
+          </div>
+        </div>
       </div>
 
       {/* Settings Section */}
@@ -243,7 +131,7 @@ function CameraCollectionPanel({ cameras = [], onClose }) {
                 value={settings.intervalHours}
                 onChange={(e) => updateSetting('intervalHours', parseInt(e.target.value) || 0)}
                 disabled={isRunning}
-                className="w-16 px-2 py-1 bg-gray-900 border border-gray-600 rounded text-sm"
+                className="w-16 px-2 py-1 bg-gray-900 border border-gray-600 rounded text-sm disabled:opacity-50"
               />
               <span className="text-xs">hours</span>
 
@@ -254,7 +142,7 @@ function CameraCollectionPanel({ cameras = [], onClose }) {
                 value={settings.intervalMinutes}
                 onChange={(e) => updateSetting('intervalMinutes', parseInt(e.target.value) || 0)}
                 disabled={isRunning}
-                className="w-16 px-2 py-1 bg-gray-900 border border-gray-600 rounded text-sm"
+                className="w-16 px-2 py-1 bg-gray-900 border border-gray-600 rounded text-sm disabled:opacity-50"
               />
               <span className="text-xs">min</span>
             </div>
@@ -270,7 +158,7 @@ function CameraCollectionPanel({ cameras = [], onClose }) {
               value={settings.imagesPerCamera}
               onChange={(e) => updateSetting('imagesPerCamera', parseInt(e.target.value) || 1)}
               disabled={isRunning}
-              className="w-16 px-2 py-1 bg-gray-900 border border-gray-600 rounded text-sm"
+              className="w-16 px-2 py-1 bg-gray-900 border border-gray-600 rounded text-sm disabled:opacity-50"
             />
             <span className="text-xs">per camera</span>
           </div>
@@ -310,7 +198,7 @@ function CameraCollectionPanel({ cameras = [], onClose }) {
 
         {/* Manual Collection Button */}
         <button
-          onClick={handleManualCollection}
+          onClick={runCollection}
           disabled={isCollecting}
           className={`w-full py-3 rounded-lg font-bold text-sm flex items-center justify-center space-x-2 transition bg-blue-600 hover:bg-blue-700 ${
             isCollecting ? 'opacity-50 cursor-not-allowed' : ''
@@ -318,6 +206,16 @@ function CameraCollectionPanel({ cameras = [], onClose }) {
         >
           <Download className="w-5 h-5" />
           <span>COLLECT NOW</span>
+        </button>
+
+        {/* Clear Logs Button */}
+        <button
+          onClick={clearLogs}
+          disabled={isCollecting}
+          className="w-full py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-2 transition bg-gray-700 hover:bg-gray-600"
+        >
+          <Trash2 className="w-4 h-4" />
+          <span>CLEAR LOGS</span>
         </button>
       </div>
 
@@ -340,7 +238,9 @@ function CameraCollectionPanel({ cameras = [], onClose }) {
             <>
               <div className="flex items-center justify-between">
                 <span className="text-gray-400">Current Camera:</span>
-                <span className="font-semibold text-yellow-400">{currentCamera}</span>
+                <span className="font-semibold text-yellow-400 truncate max-w-[200px]" title={currentCamera}>
+                  {currentCamera}
+                </span>
               </div>
 
               <div className="flex items-center justify-between">
@@ -354,7 +254,7 @@ function CameraCollectionPanel({ cameras = [], onClose }) {
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-gray-700 rounded-full h-2">
+              <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
                 <div
                   className="bg-green-500 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${currentProgress}%` }}
@@ -362,19 +262,44 @@ function CameraCollectionPanel({ cameras = [], onClose }) {
               </div>
             </>
           )}
+
+          {/* Session Stats */}
+          {!isCollecting && stats.collectionsThisSession > 0 && (
+            <div className="pt-2 border-t border-gray-700 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">Total Collections:</span>
+                <span className="font-semibold text-purple-400">{stats.collectionsThisSession}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">Total Images:</span>
+                <span className="font-semibold text-purple-400">{stats.totalImagesCollected}</span>
+              </div>
+              {stats.lastCollectionTime && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Last Collection:</span>
+                  <span className="font-semibold text-gray-300">
+                    {new Date(stats.lastCollectionTime).toLocaleTimeString()}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Status Log */}
       <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-gray-700">
-          <h3 className="text-sm font-semibold">Status Log</h3>
+        <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+          <h3 className="text-sm font-semibold">Session Log ({statusLog.length} entries)</h3>
+          <span className="text-xs text-gray-500">Persistent since {sessionStartTime.toLocaleTimeString()}</span>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 bg-gray-900 font-mono text-xs space-y-1">
           {statusLog.length === 0 ? (
             <div className="text-gray-500 text-center py-8">
-              No activity yet. Click "START COLLECTION" or "COLLECT NOW" to begin.
+              <Info className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p>No activity yet.</p>
+              <p className="text-xs mt-2">Click "START COLLECTION" or "COLLECT NOW" to begin.</p>
             </div>
           ) : (
             statusLog.map((log, idx) => (
@@ -387,11 +312,11 @@ function CameraCollectionPanel({ cameras = [], onClose }) {
                   'text-gray-300'
                 }`}
               >
-                <span className="text-gray-500 flex-shrink-0">[{log.timestamp}]</span>
-                <span className="flex-1">{log.message}</span>
-                {log.type === 'error' && <XCircle className="w-4 h-4 flex-shrink-0" />}
-                {log.type === 'success' && <CheckCircle className="w-4 h-4 flex-shrink-0" />}
-                {log.type === 'warning' && <AlertCircle className="w-4 h-4 flex-shrink-0" />}
+                <span className="text-gray-500 flex-shrink-0 w-20">[{log.timestamp}]</span>
+                <span className="flex-1 break-words">{log.message}</span>
+                {log.type === 'error' && <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
+                {log.type === 'success' && <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
+                {log.type === 'warning' && <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
               </div>
             ))
           )}
@@ -400,7 +325,7 @@ function CameraCollectionPanel({ cameras = [], onClose }) {
 
       {/* Footer Info */}
       <div className="p-3 bg-gray-900 border-t border-gray-700 text-xs text-gray-500 text-center">
-        Integrated Camera Collection System • Replaces standalone PyQt6 GUI
+        Session Persistent Collection System • Logs Retained • Collection Runs in Background
       </div>
     </div>
   );

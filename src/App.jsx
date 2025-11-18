@@ -8,6 +8,7 @@ import { getRiskColor, getRiskLabel, generateMockBSM, generateV2XAlert } from '.
 import { QEW_ROUTE, WORK_ZONES, generateMockTrafficData } from './data/qewData';
 import WorkZoneAnalysisPanel from './components/WorkZoneAnalysisPanel';
 import CameraCollectionPanel from './components/CameraCollectionPanel';
+import { CollectionProvider } from './contexts/CollectionContext';
 import { qewPathWestbound, qewPathEastbound } from './data/qewRoutes';
 
 // Fix Leaflet default icon issue
@@ -327,7 +328,8 @@ function App() {
   // Route 2: Eastbound (Toronto → Hamilton) - 316 waypoints
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900">
+    <CollectionProvider cameras={cameras}>
+      <div className="h-screen flex flex-col bg-gray-900">
       {/* Header */}
       <header className="bg-gradient-to-r from-indigo-600 to-blue-700 text-white p-4 shadow-lg">
         <div className="flex items-center justify-between max-w-full mx-auto">
@@ -560,7 +562,6 @@ function App() {
           {/* Camera Collection Panel */}
           {showCameraCollection && (
             <CameraCollectionPanel
-              cameras={cameras}
               onClose={() => setShowCameraCollection(false)}
             />
           )}
@@ -571,7 +572,8 @@ function App() {
       <footer className="bg-gray-900 text-gray-400 text-center py-3 text-sm border-t border-gray-700">
         QEW Innovation Corridor Pilot | ADBA Labs | OVIN $150K Application | Powered by Claude AI
       </footer>
-    </div>
+      </div>
+    </CollectionProvider>
   );
 }
 
