@@ -324,62 +324,6 @@ function App() {
   // Route 1: Westbound (Hamilton → Toronto) - 364 waypoints
   // Route 2: Eastbound (Toronto → Hamilton) - 316 waypoints
 
-  // MOCK DATA - Work zones positioned ON the blue line
-  // These are simulated for demo purposes - will be replaced with real AI detections
-  const mockWorkZones = [
-    {
-      id: 'WZ_001',
-      name: 'QEW Work Zone - West Section',
-      ...qewPathWestbound[Math.floor(qewPathWestbound.length * 0.25)], // 25% along route
-      lat: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.25)][0],
-      lon: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.25)][1],
-      riskScore: 8,
-      workers: 4,
-      vehicles: 2,
-      equipment: 1,
-      barriers: false,
-      status: 'HIGH RISK',
-      hazards: [
-        'Workers within 2m of active traffic lane',
-        'Approaching vehicle speed >80 km/h',
-        'Missing advance warning signage'
-      ],
-    },
-    {
-      id: 'WZ_002',
-      name: 'QEW Work Zone - Central Section',
-      ...qewPathWestbound[Math.floor(qewPathWestbound.length * 0.50)], // 50% along route
-      lat: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.50)][0],
-      lon: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.50)][1],
-      riskScore: 5,
-      workers: 2,
-      vehicles: 1,
-      equipment: 2,
-      barriers: true,
-      status: 'MEDIUM RISK',
-      hazards: [
-        'Equipment partially obstructing sight lines',
-        'Single barrier configuration (double recommended)'
-      ],
-    },
-    {
-      id: 'WZ_003',
-      name: 'QEW Work Zone - East Section',
-      ...qewPathWestbound[Math.floor(qewPathWestbound.length * 0.75)], // 75% along route
-      lat: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.75)][0],
-      lon: qewPathWestbound[Math.floor(qewPathWestbound.length * 0.75)][1],
-      riskScore: 2,
-      workers: 3,
-      vehicles: 0,
-      equipment: 1,
-      barriers: true,
-      status: 'LOW RISK',
-      hazards: [
-        'Minor: Cones spaced 12m apart (10m recommended)'
-      ],
-    }
-  ];
-
   return (
     <div className="h-screen flex flex-col bg-gray-900">
       {/* Header */}
@@ -395,15 +339,15 @@ function App() {
           <div className="flex items-center space-x-6 text-sm">
             <div className="flex items-center space-x-2">
               <Camera className="w-5 h-5" />
-              <span>{cameras.length} Real COMPASS Cameras</span>
+              <span>{cameras.length} COMPASS Cameras</span>
             </div>
             <div className="flex items-center space-x-2">
               <AlertTriangle className="w-5 h-5" />
-              <span>{mockWorkZones.length} Work Zones (Mock)</span>
+              <span>AI Work Zone Detection</span>
             </div>
             <div className="flex items-center space-x-2">
               <Navigation className="w-5 h-5" />
-              <span>{vehicles.length} Vehicles (Mock)</span>
+              <span>{vehicles.length} Vehicles</span>
             </div>
           </div>
         </div>
@@ -444,50 +388,30 @@ function App() {
                       <span className="text-blue-600 text-xs">{camera.Source}</span>
                       <div className="mt-3 space-y-3 max-h-80 overflow-y-auto">
                         {camera.Views.map(view => {
-                          // Images are now included in the view data from the database
-                          const hasImages = view.Images && view.Images.length > 0;
-                          const primaryImage = hasImages ? view.Images[0] : null;
+                          // Check if test image exists for this camera/view
                           const basePath = import.meta.env.BASE_URL || '/';
+                          const testImagePath = `camera_scraper/test_images/test_cam${camera.Id}_view${view.Id}.jpg`;
 
                           return (
                             <div key={view.Id} className="border-t pt-2 first:border-t-0 first:pt-0">
                               <div className="font-semibold text-gray-700 mb-2 text-xs">
                                 📹 {view.Description || 'Camera View'}
                               </div>
-                              {primaryImage ? (
-                                <a
-                                  href={view.Url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="block"
-                                >
-                                  <img
-                                    src={`${basePath}${primaryImage.path}`}
-                                    alt={`${camera.Location} - ${view.Description}`}
-                                    className="w-full rounded border border-gray-300 hover:border-blue-500 transition"
-                                    style={{maxHeight: '200px', objectFit: 'cover'}}
-                                  />
-                                  <div className="text-xs text-center text-blue-600 mt-1 hover:underline">
-                                    Click for live feed →
+                              <a
+                                href={view.Url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block"
+                              >
+                                <div className="bg-blue-50 border-2 border-blue-200 rounded p-3 text-center hover:bg-blue-100 transition">
+                                  <div className="text-blue-600 font-semibold mb-1">
+                                    🎥 View Live Camera
                                   </div>
-                                </a>
-                              ) : (
-                                <a
-                                  href={view.Url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="block"
-                                >
-                                  <div className="bg-blue-50 border-2 border-blue-200 rounded p-3 text-center hover:bg-blue-100 transition">
-                                    <div className="text-blue-600 font-semibold mb-1">
-                                      🎥 View Live Camera
-                                    </div>
-                                    <div className="text-xs text-gray-600">
-                                      Click to open 511ON feed
-                                    </div>
+                                  <div className="text-xs text-gray-600">
+                                    Click to open 511ON live feed
                                   </div>
-                                </a>
-                              )}
+                                </div>
+                              </a>
                             </div>
                           );
                         })}
@@ -498,47 +422,9 @@ function App() {
               );
             })}
 
-            {/* MOCK DATA - Work Zones - Positioned ON the blue line */}
-            {/* These are simulated for demo - will be replaced with real AI detections */}
-            {mockWorkZones.map(zone => (
-              <React.Fragment key={zone.id}>
-                <Marker
-                  position={[zone.lat, zone.lon]}
-                  icon={workZoneIcon}
-                  eventHandlers={{
-                    click: () => handleWorkZoneClick(zone)
-                  }}
-                >
-                  <Popup>
-                    <div className="text-sm">
-                      <strong>{zone.name}</strong><br />
-                      <span className="text-xs text-gray-500">(MOCK DATA)</span><br />
-                      Risk Score: <span className={zone.riskScore >= 7 ? 'text-red-600 font-bold' : 'text-yellow-600'}>{zone.riskScore}/10</span><br />
-                      Workers: {zone.workers} | Vehicles: {zone.vehicles}<br />
-                      <button
-                        onClick={() => handleWorkZoneClick(zone)}
-                        className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded text-xs hover:bg-indigo-700"
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </Popup>
-                </Marker>
-                {/* Risk zone circle */}
-                <Circle
-                  center={[zone.lat, zone.lon]}
-                  radius={500}
-                  pathOptions={{
-                    color: zone.riskScore >= 7 ? 'red' : zone.riskScore >= 4 ? 'orange' : 'green',
-                    fillColor: zone.riskScore >= 7 ? 'red' : zone.riskScore >= 4 ? 'orange' : 'green',
-                    fillOpacity: 0.2
-                  }}
-                />
-              </React.Fragment>
-            ))}
 
-            {/* MOCK DATA - Simulated Vehicles - Moving along the blue line */}
-            {/* These vehicles move slowly (1 hour per direction) along the actual car routes */}
+            {/* Simulated Vehicles - Moving along the actual QEW routes */}
+            {/* These vehicles move along real OSRM car routes (1 hour per direction) */}
             {qewPathWestbound && qewPathEastbound && vehicles.map((vehicle, index) => {
               // Validate vehicle object
               if (!vehicle || !vehicle.id) {
@@ -581,7 +467,6 @@ function App() {
                   <Popup>
                     <div className="text-sm">
                       <strong>{vehicle.id}</strong><br />
-                      <span className="text-xs text-gray-500">(MOCK DATA)</span><br />
                       Speed: {vehicle.speed.toFixed(0)} km/h<br />
                       Direction: {vehicle.direction === 'westbound' ? 'Hamilton → Toronto' : 'Toronto → Hamilton'}<br />
                       Progress: {(() => {

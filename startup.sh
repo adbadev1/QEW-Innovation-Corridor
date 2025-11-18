@@ -132,6 +132,11 @@ fi
 ################################################################################
 # Port Management
 ################################################################################
+# Port Configuration: Synchronized with Universal Port Registry
+# Source: /Users/adbalabs/config/universal_port_config.md (Line 88-114)
+# QEW Innovation Corridor: Port 8200 (ACTIVE)
+# Port Range: 8200 (frontend), 8080 (backend Phase 2 - Cloud Run)
+################################################################################
 
 log_info "Checking port availability..."
 
