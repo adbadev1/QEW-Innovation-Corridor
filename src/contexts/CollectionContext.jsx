@@ -231,18 +231,39 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
     }
   }, [stats]);
 
-  // Log session info on first mount
+  // Log session info and camera loading events
   useEffect(() => {
     const sessionInfo = sessionStorage.getItem('collectionSessionInfoLogged');
     if (!sessionInfo) {
       logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
       logStatus(`SESSION START: ${sessionStartTime.toLocaleString()}`, 'success');
       logStatus(`Session ID: ${sessionId}`, 'info');
-      logStatus(`Cameras Available: ${cameras.length}`, 'info');
+      logStatus(`System Platform: ${navigator.platform} | Browser: ${navigator.userAgent.split('/').pop()}`, 'info');
+      logStatus(`Screen: ${window.screen.width}x${window.screen.height} | Viewport: ${window.innerWidth}x${window.innerHeight}`, 'info');
       logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
       sessionStorage.setItem('collectionSessionInfoLogged', 'true');
     }
-  }, []);
+  }, [sessionId, sessionStartTime]);
+
+  // Log camera data loading
+  useEffect(() => {
+    if (cameras.length > 0) {
+      logStatus(`📷 Camera data loaded: ${cameras.length} cameras available`, 'success');
+      logStatus(`→ Camera locations: ${cameras.slice(0, 3).map(c => c.Location).join(', ')}...`, 'info', true);
+
+      // Log camera views summary
+      const totalViews = cameras.reduce((sum, cam) => sum + (cam.Views?.length || 0), 0);
+      logStatus(`→ Total camera views: ${totalViews}`, 'info', true);
+
+      logInfo('Camera data loaded', {
+        totalCameras: cameras.length,
+        totalViews,
+        sampleLocations: cameras.slice(0, 5).map(c => c.Location)
+      });
+    } else {
+      logStatus(`⚠️ No camera data available - waiting for load...`, 'warning');
+    }
+  }, [cameras.length]);
 
   // Restore collection timer if it was running
   useEffect(() => {
@@ -445,17 +466,24 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
         setCurrentCamera(camera.Location || `Camera ${camera.Id}`);
         setCurrentProgress(Math.round(((cameraIdx + 1) / cameras.length) * 100));
 
-        logStatus(`[${cameraIdx + 1}/${cameras.length}] ${camera.Location}`, 'info');
+        logStatus(`[${cameraIdx + 1}/${cameras.length}] Scraping ${camera.Location} (ID: ${camera.Id})`, 'info');
+        logStatus(`→ GPS: [${camera.Latitude.toFixed(4)}, ${camera.Longitude.toFixed(4)}]`, 'info', true);
 
         const views = camera.Views || [];
         let cameraImagesCount = 0;
+
+        logStatus(`→ Processing ${views.length} camera views...`, 'info', true);
 
         for (let viewIdx = 0; viewIdx < views.length; viewIdx++) {
           const view = views[viewIdx];
           const viewName = view.Description || `View ${view.Id}`;
 
+          logStatus(`→ → View ${viewIdx + 1}/${views.length}: ${viewName}`, 'info', true);
+
           for (let round = 0; round < settings.imagesPerCamera; round++) {
             try {
+              const imageStartTime = Date.now();
+
               // Simulate image download with timeout (replace with real API call)
               await Promise.race([
                 simulateImageDownload(camera.Id, view.Id, round + 1),
@@ -464,12 +492,14 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
                 )
               ]);
 
+              const imageDownloadTime = Date.now() - imageStartTime;
+
               imagesCollected++;
               cameraImagesCount++;
               setTotalImages(imagesCollected);
 
-              // Log each image capture (indented)
-              logStatus(`→ Image ${cameraImagesCount}/${views.length * settings.imagesPerCamera} captured (${viewName})`, 'info', true);
+              // Log each image capture with detailed info (indented)
+              logStatus(`→ → → Image ${round + 1}/${settings.imagesPerCamera} captured (${imageDownloadTime}ms) - ${viewName}`, 'success', true);
             } catch (imageError) {
               imagesFailed++;
               logStatus(`✗ Failed to capture image from ${viewName}: ${imageError.message}`, 'error', true);
