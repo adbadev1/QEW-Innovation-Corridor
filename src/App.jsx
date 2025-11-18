@@ -7,6 +7,7 @@ import L from 'leaflet';
 import { getRiskColor, getRiskLabel, generateMockBSM, generateV2XAlert } from './utils/riskUtils';
 import { QEW_ROUTE, WORK_ZONES, generateMockTrafficData } from './data/qewData';
 import WorkZoneAnalysisPanel from './components/WorkZoneAnalysisPanel';
+import CameraCollectionPanel from './components/CameraCollectionPanel';
 import { qewPathWestbound, qewPathEastbound } from './data/qewRoutes';
 
 // Fix Leaflet default icon issue
@@ -39,6 +40,7 @@ function App() {
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [cameras, setCameras] = useState([]);
   const [loadingCameras, setLoadingCameras] = useState(true);
+  const [showCameraCollection, setShowCameraCollection] = useState(false);
   const vehiclesInitialized = React.useRef(false);
 
   // Load real camera data with images from database export
@@ -349,6 +351,17 @@ function App() {
               <Navigation className="w-5 h-5" />
               <span>{vehicles.length} Vehicles</span>
             </div>
+            <button
+              onClick={() => setShowCameraCollection(!showCameraCollection)}
+              className={`px-4 py-2 rounded-lg font-semibold transition ${
+                showCameraCollection
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              <Camera className="w-5 h-5 inline mr-2" />
+              {showCameraCollection ? 'Hide' : 'Show'} Collection Panel
+            </button>
           </div>
         </div>
       </header>
@@ -537,10 +550,18 @@ function App() {
           </div>
 
           {/* Work Zone Details */}
-          {selectedWorkZone && (
+          {selectedWorkZone && !showCameraCollection && (
             <WorkZoneAnalysisPanel
               workZone={selectedWorkZone}
               onClose={() => setSelectedWorkZone(null)}
+            />
+          )}
+
+          {/* Camera Collection Panel */}
+          {showCameraCollection && (
+            <CameraCollectionPanel
+              cameras={cameras}
+              onClose={() => setShowCameraCollection(false)}
             />
           )}
         </div>
