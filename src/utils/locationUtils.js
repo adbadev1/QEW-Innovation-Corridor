@@ -99,56 +99,12 @@ export function formatCameraLocation(camera) {
   };
 }
 
-/**
- * Generate location-aware AI traffic analysis
- * References actual cameras and highway markers
- *
- * @param {Array} cameras - Array of camera objects
- * @param {Array} vehicles - Array of vehicle objects
- * @returns {string} AI analysis text with location references
- */
-export function generateLocationAwareAnalysis(cameras, vehicles) {
-  if (!cameras || cameras.length === 0) {
-    return "Initializing AI analysis...";
-  }
-
-  // Select random cameras for analysis
-  const randomCamera1 = cameras[Math.floor(Math.random() * cameras.length)];
-  const randomCamera2 = cameras[Math.floor(Math.random() * cameras.length)];
-  const randomCamera3 = cameras[Math.floor(Math.random() * cameras.length)];
-
-  const loc1 = formatCameraLocation(randomCamera1);
-  const loc2 = formatCameraLocation(randomCamera2);
-  const loc3 = formatCameraLocation(randomCamera3);
-
-  const currentHour = new Date().getHours();
-  const timeOfDay = currentHour < 6 ? 'overnight' :
-                    currentHour < 9 ? 'morning peak' :
-                    currentHour < 16 ? 'midday' :
-                    currentHour < 19 ? 'evening peak' : 'evening';
-
-  const vehicleCount = vehicles?.length || 0;
-
-  const analysisTemplates = [
-    `${timeOfDay === 'morning peak' || timeOfDay === 'evening peak' ? 'Heavy' : 'Normal'} traffic flow detected across corridor. Camera #${randomCamera1.Id} at ${loc1.shortLocation} shows ${vehicleCount} active vehicles. ${loc2.exit} sector clear. All work zones nominal.`,
-
-    `Corridor-wide scan complete. ${loc1.exit} to ${loc2.exit} segment (${Math.abs(loc2.km - loc1.km).toFixed(1)}km) shows optimal conditions. Camera #${randomCamera1.Id} monitoring ${loc1.exit}. No congestion detected.`,
-
-    `Traffic velocity ${timeOfDay === 'morning peak' || timeOfDay === 'evening peak' ? 'elevated' : 'normal'} for ${timeOfDay} period. Cameras #${randomCamera1.Id} (${loc1.exit}), #${randomCamera2.Id} (${loc2.exit}) report free-flow conditions. Weather clear.`,
-
-    `Active monitoring: ${cameras.length} cameras across 40km corridor. Camera #${randomCamera3.Id} at ${loc3.shortLocation} shows ${vehicleCount} vehicles in frame. ${loc1.exit} sector normal. No safety alerts.`,
-
-    `Real-time analysis: ${loc1.exit} (${loc1.kmFormatted}) to ${loc2.exit} (${loc2.kmFormatted}) clear. Camera #${randomCamera2.Id} reports ${vehicleCount} vehicles. All work zones operating safely per MTO BOOK 7 standards.`,
-
-    `Corridor status: Camera #${randomCamera1.Id} at ${loc1.kmFormatted} near ${loc1.exit} monitoring ${vehicleCount} vehicles. ${loc3.exit} sector clear. ${timeOfDay === 'morning peak' ? 'Rush hour traffic moving steadily.' : 'Traffic flow nominal.'}`,
-
-    `AI scan: ${cameras.length} COMPASS cameras active. Focus on ${loc2.exit} area (Camera #${randomCamera2.Id}, ${loc2.kmFormatted}). No incidents detected. Weather conditions optimal for all work zones.`,
-
-    `Live feed analysis: ${loc1.exit} to ${loc3.exit} segment shows ${vehicleCount} active vehicles. Camera #${randomCamera3.Id} (${loc3.shortLocation}) clear. ${timeOfDay === 'evening peak' ? 'Evening commute steady.' : 'No congestion.'} All RSU broadcasts nominal.`
-  ];
-
-  return analysisTemplates[Math.floor(Math.random() * analysisTemplates.length)];
-}
+// NOTE: Real AI analysis is provided by Gemini 2.0 Flash
+// See: src/services/autoWorkZoneAnalysis.js
+// - Analyzes real camera images
+// - Detects work zones, workers, equipment
+// - Generates risk scores and safety recommendations
+// - No mock/templated analysis - only real AI vision results
 
 /**
  * Get cameras sorted by KM position (west to east)
