@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { info as logInfo, warn as logWarn, error as logError, critical as logCritical } from '../utils/logger';
+import { downloadCameraImage, blobToFile, uploadCameraImage, isGCPConfigured } from '../services/gcpStorage';
+import { analyzeWorkZoneImage } from '../services/geminiVision';
+import { addWorkZoneCamera } from '../utils/workZoneHistory';
+import { saveThumbnail } from '../services/thumbnailStorage';
 
 /**
  * Collection Context - Persistent Camera Collection State Management
@@ -172,6 +176,7 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
         return {
           totalCollections: 0,
           totalImagesCollected: 0,
+          totalWorkZonesDetected: 0,
           lastCollectionTime: null,
           collectionsThisSession: 0
         };
@@ -180,6 +185,7 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
     return {
       totalCollections: 0,
       totalImagesCollected: 0,
+      totalWorkZonesDetected: 0,
       lastCollectionTime: null,
       collectionsThisSession: 0
     };
@@ -456,6 +462,12 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
     try {
       let imagesCollected = 0;
       let imagesFailed = 0;
+      let workZonesDetected = 0;
+
+      // Using direct analysis workflow with optional GCP backup
+      const gcpConfigured = isGCPConfigured();
+      logStatus(`🤖 AI Analysis: Gemini 2.0 Flash`, 'info');
+      logStatus(`💾 Storage: Work zone results + ${gcpConfigured ? 'GCP backup (async)' : 'No cloud backup'}`, 'info');
 
       for (let cameraIdx = 0; cameraIdx < cameras.length; cameraIdx++) {
         const camera = cameras[cameraIdx];
@@ -486,30 +498,133 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
             try {
               const imageStartTime = Date.now();
 
-              // Simulate image download with timeout (replace with real API call)
-              await Promise.race([
-                simulateImageDownload(camera.Id, view.Id, round + 1),
+              // ========================================
+              // DIRECT GEMINI AI ANALYSIS WORKFLOW
+              // (No image storage to avoid quota issues)
+              // ========================================
+
+              // STEP 1: Download live camera image from 511ON
+              logStatus(`→ → → Round ${round + 1}/${settings.imagesPerCamera}`, 'info', true);
+              logStatus(`→ → → [1/2] Downloading from 511ON...`, 'info', true);
+              const imageBlob = await Promise.race([
+                downloadCameraImage(view.Url),
                 new Promise((_, reject) =>
-                  setTimeout(() => reject(new Error('Image download timeout')), 30000) // 30s timeout
+                  setTimeout(() => reject(new Error('Download timeout (30s)')), 30000)
                 )
               ]);
 
-              const imageDownloadTime = Date.now() - imageStartTime;
+              const downloadTime = Date.now() - imageStartTime;
+              logStatus(`→ → → → ✓ Downloaded: ${(imageBlob.size / 1024).toFixed(1)} KB (${downloadTime}ms)`, 'success', true);
+
+              // Save compressed thumbnail for map display (async, non-blocking)
+              saveThumbnail(camera.Id, view.Id, imageBlob, {
+                location: camera.Location,
+                collectionId,
+                capturedAt: new Date().toISOString()
+              }).catch(err => {
+                logWarn('Thumbnail save failed (non-critical)', { cameraId: camera.Id, viewId: view.Id, error: err.message });
+              });
+
+              // STEP 2: Automatic Gemini AI Analysis (skip localStorage save to avoid quota)
+              logStatus(`→ → → [2/2] Analyzing with Gemini 2.0 Flash...`, 'info', true);
+              const analysisStartTime = Date.now();
+
+              // Convert blob to File for Gemini AI
+              const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19).replace('T', '_');
+              const filename = `c${camera.Id}_v${view.Id}_r${round + 1}_${timestamp}.jpg`;
+              const imageFile = blobToFile(imageBlob, filename);
+
+              // Analyze with Gemini
+              const analysis = await analyzeWorkZoneImage(imageFile, {
+                synthetic: false,
+                source: 'COMPASS',
+                cameraId: camera.Id,
+                viewId: view.Id,
+                cameraLocation: camera.Location,
+                cameraLat: camera.Latitude,
+                cameraLon: camera.Longitude,
+                collectionId,
+                capturedAt: new Date().toISOString()
+              });
+
+              const analysisTime = Date.now() - analysisStartTime;
+
+              // Log analysis result and add to work zone history if detected
+              if (analysis.hasWorkZone) {
+                workZonesDetected++;
+
+                // Add to work zone history for ML Validation Panel (no image stored to save quota)
+                addWorkZoneCamera(camera.Id, camera.Location, view.Id, {
+                  riskScore: analysis.riskScore,
+                  workers: analysis.workers,
+                  vehicles: analysis.vehicles,
+                  equipment: analysis.equipment || 0,
+                  collectionId
+                });
+
+                logStatus(`→ → → → 🚧 Work Zone Detected!`, 'success', true);
+                logStatus(`→ → → → → Risk: ${analysis.riskScore}/10 | Workers: ${analysis.workers} | Vehicles: ${analysis.vehicles}`, 'success', true);
+                logStatus(`→ → → → → Barriers: ${analysis.barriers ? 'YES' : 'NO'} | Confidence: ${(analysis.confidence * 100).toFixed(0)}%`, 'success', true);
+                logStatus(`→ → → → ✓ Added to ML Validation Panel (${analysisTime}ms)`, 'success', true);
+
+                // OPTIONAL: GCP Cloud Storage backup (async, non-blocking)
+                if (gcpConfigured) {
+                  uploadCameraImage({
+                    cameraId: camera.Id,
+                    viewId: view.Id,
+                    round: round + 1,
+                    collectionId,
+                    imageBlob,
+                    metadata: {
+                      location: camera.Location,
+                      latitude: camera.Latitude,
+                      longitude: camera.Longitude,
+                      workZoneDetected: true,
+                      riskScore: analysis.riskScore,
+                      workers: analysis.workers,
+                      vehicles: analysis.vehicles,
+                      equipment: analysis.equipment || 0,
+                      barriers: analysis.barriers,
+                      confidence: analysis.confidence
+                    }
+                  })
+                    .then(() => {
+                      logStatus(`→ → → → ✓ GCP backup complete`, 'info', true);
+                      logInfo('GCP backup successful', {
+                        cameraId: camera.Id,
+                        viewId: view.Id,
+                        collectionId
+                      });
+                    })
+                    .catch(err => {
+                      logStatus(`→ → → → ⚠ GCP backup failed (non-critical): ${err.message}`, 'warning', true);
+                      logWarn('GCP backup failed (continuing collection)', {
+                        cameraId: camera.Id,
+                        viewId: view.Id,
+                        error: err.message
+                      });
+                    });
+                }
+              } else {
+                logStatus(`→ → → → ✓ No work zone (confidence: ${(analysis.confidence * 100).toFixed(0)}%) (${analysisTime}ms)`, 'info', true);
+              }
+
+              const totalTime = Date.now() - imageStartTime;
+              logStatus(`→ → → ✓ Complete: ${totalTime}ms total`, 'success', true);
 
               imagesCollected++;
               cameraImagesCount++;
               setTotalImages(imagesCollected);
 
-              // Log each image capture with detailed info (indented)
-              logStatus(`→ → → Image ${round + 1}/${settings.imagesPerCamera} captured (${imageDownloadTime}ms) - ${viewName}`, 'success', true);
             } catch (imageError) {
               imagesFailed++;
-              logStatus(`✗ Failed to capture image from ${viewName}: ${imageError.message}`, 'error', true);
-              logError('Image capture failed', {
+              logStatus(`✗ Failed: ${imageError.message}`, 'error', true);
+              logError('Image processing failed', {
                 camera: camera.Id,
                 view: view.Id,
                 round: round + 1,
-                error: imageError.message
+                error: imageError.message,
+                stack: imageError.stack
               });
               // Continue to next image despite failure
             }
@@ -527,14 +642,16 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
       setStats(prev => ({
         totalCollections: prev.totalCollections + 1,
         totalImagesCollected: prev.totalImagesCollected + imagesCollected,
+        totalWorkZonesDetected: (prev.totalWorkZonesDetected || 0) + workZonesDetected,
         lastCollectionTime: new Date().toISOString(),
         collectionsThisSession: prev.collectionsThisSession + 1
       }));
 
       logStatus(`✓ COLLECTION #${collectionNumber} COMPLETE`, 'success');
-      logStatus(`Images collected: ${imagesCollected} | Failed: ${imagesFailed} | Duration: ${duration}s`, 'success');
-      logStatus(`Total this session: ${stats.totalImagesCollected + imagesCollected}`, 'success');
-      logStatus(`Collection saved: ${collectionId}`, 'info');
+      logStatus(`Images analyzed: ${imagesCollected} | Failed: ${imagesFailed} | Duration: ${duration}s`, 'success');
+      logStatus(`🚧 Work zones detected: ${workZonesDetected}`, workZonesDetected > 0 ? 'success' : 'info');
+      logStatus(`Total this session: ${stats.totalImagesCollected + imagesCollected} images | ${(stats.totalWorkZonesDetected || 0) + workZonesDetected} work zones`, 'success');
+      logStatus(`🤖 AI Analysis complete - work zone results saved${gcpConfigured ? ' + GCP backups queued' : ''}`, 'info');
       logStatus(`════════════════════════════════════════════════════════════════════`, 'info');
 
       logInfo('Collection completed', {
@@ -542,8 +659,13 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
         collectionId,
         imagesCollected,
         imagesFailed,
+        workZonesDetected,
         duration,
-        totalSessionImages: stats.totalImagesCollected + imagesCollected
+        totalSessionImages: stats.totalImagesCollected + imagesCollected,
+        totalSessionWorkZones: (stats.totalWorkZonesDetected || 0) + workZonesDetected,
+        storageType: gcpConfigured ? 'work zone results + GCP backup' : 'work zone results only',
+        aiProvider: 'Gemini 2.0 Flash',
+        gcpBackupEnabled: gcpConfigured
       });
 
     } catch (error) {
@@ -564,12 +686,7 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
     }
   }, [cameras, settings, isCollecting, stats, logStatus]);
 
-  // Simulate image download
-  const simulateImageDownload = (cameraId, viewId, round) => {
-    return new Promise(resolve => {
-      setTimeout(resolve, 200);
-    });
-  };
+  // Removed simulateImageDownload - using real GCP + AI workflow
 
   // Update settings with validation
   const updateSetting = useCallback((key, value) => {

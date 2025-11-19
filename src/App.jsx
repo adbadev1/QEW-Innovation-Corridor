@@ -12,7 +12,8 @@ import { CollectionProvider, useCollection } from './contexts/CollectionContext'
 import { formatCameraLocation, getCameraIds } from './utils/locationUtils';
 import { qewPathWestbound, qewPathEastbound } from './data/qewRoutes';
 import { generateRealTrafficData, generateRealAIAnalysis, generateRealRSUAlerts } from './utils/realTrafficData';
-import { getAllWorkZones } from './utils/workZoneHistory';
+import { getAllWorkZones, getWorkZoneViewIds } from './utils/workZoneHistory';
+import { mergeThumbnailsIntoCameras } from './services/thumbnailStorage';
 
 // Fix Leaflet default icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -32,12 +33,14 @@ const createCustomIcon = (color) => new L.Icon({
   shadowSize: [41, 41]
 });
 
-const cameraIcon = createCustomIcon('blue');
+const normalCameraIcon = createCustomIcon('blue');
+const workZoneCameraIcon = createCustomIcon('red');
 
 // Main App component wrapped in CollectionProvider
 function AppContent() {
   const [cameras, setCameras] = useState([]);
   const [loadingCameras, setLoadingCameras] = useState(true);
+  const [workZoneViewIds, setWorkZoneViewIds] = useState([]);
   const [trafficData, setTrafficData] = useState([]);
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [alerts, setAlerts] = useState([]);
@@ -47,18 +50,50 @@ function AppContent() {
 
   // Load REAL camera data from 511ON (collected via Camera Collection System)
   useEffect(() => {
-    const basePath = import.meta.env.BASE_URL || '/';
-    fetch(`${basePath}camera_scraper/qew_cameras_with_images.json`)
-      .then(r => r.json())
-      .then(cameraData => {
-        console.log(`✅ Loaded ${cameraData.length} REAL cameras from 511ON`);
-        setCameras(cameraData);
-        setLoadingCameras(false);
-      })
-      .catch(error => {
-        console.error('Error loading camera data:', error);
-        setLoadingCameras(false);
-      });
+    const loadCameras = () => {
+      const basePath = import.meta.env.BASE_URL || '/';
+      fetch(`${basePath}camera_scraper/qew_cameras_with_images.json`)
+        .then(r => r.json())
+        .then(cameraData => {
+          console.log(`✅ Loaded ${cameraData.length} REAL cameras from 511ON`);
+
+          // Merge latest thumbnails from collection runs
+          const camerasWithThumbnails = mergeThumbnailsIntoCameras(cameraData);
+          console.log(`✅ Merged latest thumbnails into camera data`);
+
+          setCameras(camerasWithThumbnails);
+          setLoadingCameras(false);
+        })
+        .catch(error => {
+          console.error('Error loading camera data:', error);
+          setLoadingCameras(false);
+        });
+    };
+
+    // Initial load
+    loadCameras();
+
+    // Reload cameras every 10 seconds to pick up new thumbnails from collection
+    const interval = setInterval(loadCameras, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Load and refresh work zone view IDs every 3 seconds
+  useEffect(() => {
+    const updateWorkZones = () => {
+      const viewIds = getWorkZoneViewIds();
+      setWorkZoneViewIds(viewIds);
+      console.log(`✅ Updated work zone views: ${viewIds.length} views with work zones detected`);
+    };
+
+    // Initial load
+    updateWorkZones();
+
+    // Refresh every 3 seconds to pick up new work zone detections
+    const interval = setInterval(updateWorkZones, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   // Update REAL traffic data and AI analysis every 5 seconds
@@ -136,11 +171,16 @@ function AppContent() {
               const location = formatCameraLocation(camera);
               const cameraIds = getCameraIds(camera);
 
+              // Check if ANY view in this camera has a work zone detected
+              const hasWorkZone = camera.Views && camera.Views.some(view =>
+                workZoneViewIds.includes(view.Id)
+              );
+
               return (
                 <Marker
                   key={camera.Id}
                   position={[camera.Latitude, camera.Longitude]}
-                  icon={cameraIcon}
+                  icon={hasWorkZone ? workZoneCameraIcon : normalCameraIcon}
                 >
                   <Popup maxWidth={400} maxHeight={500}>
                     <div className="text-sm">
@@ -164,23 +204,54 @@ function AppContent() {
                       <div className="mt-3 space-y-3 max-h-80 overflow-y-auto">
                         {camera.Views.map(view => {
                           const basePath = import.meta.env.BASE_URL || '/';
+                          const latestThumbnail = view.LatestImage; // From collection run thumbnails
                           const lastImage = view.Images && view.Images.length > 0
                             ? view.Images[view.Images.length - 1]
                             : null;
 
+                          // Check if THIS specific view has a work zone detected
+                          const viewHasWorkZone = workZoneViewIds.includes(view.Id);
+
                           return (
-                            <div key={view.Id} className="border-t pt-2 first:border-t-0 first:pt-0">
-                              <div className="font-semibold text-gray-700 mb-2 text-xs">
-                                📹 {view.Description || 'Camera View'}
+                            <div key={view.Id} className={`border-t pt-2 first:border-t-0 first:pt-0 ${viewHasWorkZone ? 'bg-red-50 p-2 rounded' : ''}`}>
+                              <div className="font-semibold text-gray-700 mb-2 text-xs flex items-center justify-between">
+                                <span>📹 {view.Description || 'Camera View'}</span>
+                                <div className="flex items-center space-x-1">
+                                  <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                                    511ON ID: #{view.Id}
+                                  </span>
+                                  {viewHasWorkZone && (
+                                    <span className="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold animate-pulse">
+                                      🚧 WORK ZONE
+                                    </span>
+                                  )}
+                                </div>
                               </div>
 
-                              {/* REAL Collected Image Thumbnail */}
-                              {lastImage && (
+                              {/* LATEST Thumbnail from Collection Run */}
+                              {latestThumbnail && (
+                                <div className="mb-2">
+                                  <div className="text-[10px] text-green-600 mb-1 font-semibold flex items-center">
+                                    <span className="bg-green-100 px-1 rounded">🆕 LATEST FROM COLLECTION RUN</span>
+                                  </div>
+                                  <img
+                                    src={latestThumbnail.dataUrl}
+                                    alt="Latest from collection run"
+                                    className="w-full rounded border-2 border-green-400"
+                                  />
+                                  <div className="text-[9px] text-green-600 mt-1 font-semibold">
+                                    Captured: {new Date(latestThumbnail.timestamp).toLocaleString()}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Archived Collected Image (if available) */}
+                              {lastImage && !latestThumbnail && (
                                 <div className="mb-2" id={`img-container-${view.Id}`}>
-                                  <div className="text-[10px] text-gray-600 mb-1 font-semibold">Last Collected Image:</div>
+                                  <div className="text-[10px] text-gray-600 mb-1 font-semibold">Archived Image:</div>
                                   <img
                                     src={`${basePath}camera_scraper/${lastImage.path}`}
-                                    alt="Real collected camera image"
+                                    alt="Archived camera image"
                                     className="w-full rounded border border-gray-300"
                                     onError={(e) => {
                                       const container = document.getElementById(`img-container-${view.Id}`);
@@ -230,11 +301,11 @@ function AppContent() {
           {/* Real Camera Collection System */}
           <CameraCollectionPanel />
 
-          {/* Real Synthetic Testing (uses real images) */}
-          <SyntheticTestingPanel cameras={cameras} />
-
           {/* Real ML Vision Validation (Gemini 2.0 Flash analysis) */}
           <MLValidationPanel cameras={cameras} />
+
+          {/* Real Synthetic Testing (uses real images) */}
+          <SyntheticTestingPanel cameras={cameras} />
         </div>
       </div>
 

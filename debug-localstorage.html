@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug localStorage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #4a9eff;
+        }
+        h1 { color: #4a9eff; }
+        button {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #3a8edf; }
+        pre {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            border: 1px solid #444;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 5px;
+        }
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        .warning { color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 localStorage Debug Tool</h1>
+
+        <div class="section">
+            <h3>Current localStorage Contents:</h3>
+            <div id="all-storage"></div>
+        </div>
+
+        <div class="section">
+            <h3>Work Zone History:</h3>
+            <div id="workzone-data"></div>
+        </div>
+
+        <div class="section">
+            <h3>Testing workZoneHistory.js Functions:</h3>
+            <div id="function-tests"></div>
+        </div>
+
+        <button onclick="location.reload()">REFRESH</button>
+        <button onclick="viewAllStorage()">VIEW ALL LOCALSTORAGE</button>
+        <button onclick="addCamera250()">ADD CAMERA 250 (CORRECT FORMAT)</button>
+        <button onclick="clearWorkZones()">CLEAR WORK ZONES</button>
+    </div>
+
+    <script type="module">
+        // Import the workZoneHistory functions
+        import { getWorkZoneCameras, getWorkZoneCameraIds, addWorkZoneCamera, getWorkZoneStats } from '/src/utils/workZoneHistory.js';
+
+        window.getWorkZoneCameras = getWorkZoneCameras;
+        window.getWorkZoneCameraIds = getWorkZoneCameraIds;
+        window.addWorkZoneCamera = addWorkZoneCamera;
+        window.getWorkZoneStats = getWorkZoneStats;
+
+        function viewAllStorage() {
+            const output = document.getElementById('all-storage');
+            const keys = Object.keys(localStorage);
+
+            if (keys.length === 0) {
+                output.innerHTML = '<p class="warning">localStorage is empty</p>';
+                return;
+            }
+
+            let html = '<pre>';
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                html += `<strong>${key}:</strong>\n${value}\n\n`;
+            });
+            html += '</pre>';
+            output.innerHTML = html;
+        }
+
+        function testFunctions() {
+            const output = document.getElementById('function-tests');
+            let html = '<pre>';
+
+            try {
+                const cameras = window.getWorkZoneCameras();
+                const ids = window.getWorkZoneCameraIds();
+                const stats = window.getWorkZoneStats();
+
+                html += '<strong class="success">✓ Functions imported successfully</strong>\n\n';
+                html += `<strong>getWorkZoneCameras():</strong>\n${JSON.stringify(cameras, null, 2)}\n\n`;
+                html += `<strong>getWorkZoneCameraIds():</strong>\n${JSON.stringify(ids, null, 2)}\n\n`;
+                html += `<strong>getWorkZoneStats():</strong>\n${JSON.stringify(stats, null, 2)}\n\n`;
+
+                if (ids.includes(250)) {
+                    html += '<strong class="success">✓ Camera 250 IS in the IDs array!</strong>\n';
+                } else {
+                    html += '<strong class="error">✗ Camera 250 NOT in the IDs array</strong>\n';
+                }
+            } catch (e) {
+                html += `<strong class="error">Error: ${e.message}</strong>\n${e.stack}`;
+            }
+
+            html += '</pre>';
+            output.innerHTML = html;
+        }
+
+        function showWorkZoneData() {
+            const output = document.getElementById('workzone-data');
+            const key = 'qew_workzone_camera_history';
+            const data = localStorage.getItem(key);
+
+            if (!data) {
+                output.innerHTML = '<p class="warning">No work zone data in localStorage</p>';
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(data);
+                let html = `<p class="success">Found ${Array.isArray(parsed) ? parsed.length : 0} work zone(s)</p>`;
+                html += `<pre>${JSON.stringify(parsed, null, 2)}</pre>`;
+                output.innerHTML = html;
+            } catch (e) {
+                output.innerHTML = `<p class="error">Error parsing JSON: ${e.message}</p><pre>${data}</pre>`;
+            }
+        }
+
+        window.addCamera250 = function() {
+            const result = window.addWorkZoneCamera(
+                250,  // cameraId
+                "QEW near Southdown Road/Erin Mills Parkway",  // location
+                610,  // viewId
+                {
+                    riskScore: 6,
+                    workers: 0,
+                    vehicles: 1,
+                    equipment: 0
+                }
+            );
+
+            alert(result ? 'Camera 250 added successfully!' : 'Failed to add camera 250');
+            location.reload();
+        };
+
+        window.viewAllStorage = viewAllStorage;
+
+        window.clearWorkZones = function() {
+            localStorage.removeItem('qew_workzone_camera_history');
+            alert('Work zones cleared!');
+            location.reload();
+        };
+
+        // Run on load
+        window.onload = function() {
+            viewAllStorage();
+            showWorkZoneData();
+            testFunctions();
+        };
+
+        // Also expose for debugging
+        window.showWorkZoneData = showWorkZoneData;
+        window.testFunctions = testFunctions;
+    </script>
+</body>
+</html>

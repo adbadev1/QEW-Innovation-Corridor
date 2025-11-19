@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Re-analyze Images with Gemini</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        .section {
+            background: #000;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #00ff00;
+        }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #00cc00;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .image-item {
+            background: #111;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #0099ff;
+        }
+        .success {
+            color: #00ff00;
+        }
+        .error {
+            color: #ff0000;
+        }
+        .warning {
+            color: #ffaa00;
+        }
+        .info {
+            color: #0099ff;
+        }
+        #progress {
+            background: #333;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #ffaa00;
+            font-weight: bold;
+        }
+        pre {
+            background: #0a0a0a;
+            padding: 10px;
+            overflow-x: auto;
+            border-left: 3px solid #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Re-analyze Images with Gemini AI</h1>
+
+    <div class="section">
+        <h2>📊 Collection Inventory</h2>
+        <div id="inventory"></div>
+    </div>
+
+    <div class="section">
+        <h2>🖼️ Images from Latest Collection</h2>
+        <div id="imagesList"></div>
+    </div>
+
+    <div id="progress" style="display: none;"></div>
+
+    <div class="section">
+        <h2>⚙️ Actions</h2>
+        <button onclick="loadInventory()">🔄 Refresh Inventory</button>
+        <button id="reanalyzeBtn" onclick="reanalyzeAllImages()">🤖 Re-analyze All Images with Gemini</button>
+    </div>
+
+    <div class="section">
+        <h2>📋 Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <script type="module">
+        const GEMINI_API_KEY = 'AIzaSyCgWfldgG8-c7gXRQBS-MpFmipZJ0KNqd0';
+        const STORAGE_KEY = 'qew_workzone_camera_history';
+
+        let latestCollectionId = null;
+        let allImages = [];
+
+        window.loadInventory = function() {
+            // Get all collection index keys
+            const collectionKeys = Object.keys(localStorage)
+                .filter(key => key.startsWith('qew_collection_index_'))
+                .sort()
+                .reverse();
+
+            if (collectionKeys.length === 0) {
+                document.getElementById('inventory').innerHTML = '<p class="error">❌ No collections found</p>';
+                return;
+            }
+
+            latestCollectionId = collectionKeys[0].replace('qew_collection_index_', '');
+
+            let html = `<p class="info">Found ${collectionKeys.length} collection(s)</p>`;
+
+            collectionKeys.forEach((key, index) => {
+                const collectionId = key.replace('qew_collection_index_', '');
+                const collectionIndex = JSON.parse(localStorage.getItem(key) || '[]');
+
+                html += `
+                    <div class="image-item">
+                        <p><strong>${index === 0 ? '🟢 LATEST: ' : ''}Collection:</strong> ${collectionId}</p>
+                        <p><strong>Images:</strong> ${collectionIndex.length}</p>
+                        <p><strong>Date:</strong> ${new Date(collectionId).toLocaleString()}</p>
+                    </div>
+                `;
+            });
+
+            document.getElementById('inventory').innerHTML = html;
+            loadLatestCollectionImages();
+        };
+
+        function loadLatestCollectionImages() {
+            if (!latestCollectionId) {
+                document.getElementById('imagesList').innerHTML = '<p class="error">❌ No collection selected</p>';
+                return;
+            }
+
+            const indexKey = `qew_collection_index_${latestCollectionId}`;
+            const index = JSON.parse(localStorage.getItem(indexKey) || '[]');
+
+            if (index.length === 0) {
+                document.getElementById('imagesList').innerHTML = '<p class="error">❌ No images in latest collection</p>';
+                return;
+            }
+
+            allImages = index.map(item => {
+                const imageKey = `qew_image_${item.filename}`;
+                const imageData = localStorage.getItem(imageKey);
+                return imageData ? JSON.parse(imageData) : null;
+            }).filter(Boolean);
+
+            let html = `<p class="success">✅ Found ${allImages.length} images in latest collection</p>`;
+
+            allImages.forEach((img, index) => {
+                html += `
+                    <div class="image-item">
+                        <p><strong>Image ${index + 1}:</strong> ${img.filename}</p>
+                        <p><strong>Camera ID:</strong> ${img.cameraId} | <strong>View ID:</strong> ${img.viewId} | <strong>Round:</strong> ${img.round}</p>
+                        <p><strong>Location:</strong> ${img.metadata.cameraLocation || 'Unknown'}</p>
+                        <p><strong>Size:</strong> ${(img.size / 1024).toFixed(1)} KB</p>
+                        <p><strong>Captured:</strong> ${new Date(img.timestamp).toLocaleString()}</p>
+                    </div>
+                `;
+            });
+
+            document.getElementById('imagesList').innerHTML = html;
+        }
+
+        window.reanalyzeAllImages = async function() {
+            if (allImages.length === 0) {
+                alert('No images to analyze. Please refresh inventory first.');
+                return;
+            }
+
+            if (!confirm(`Re-analyze ${allImages.length} images with Gemini AI?\n\nThis will:\n- Send each image to Gemini 2.0 Flash\n- Update work zone detection results\n- Replace existing work zone history\n\nContinue?`)) {
+                return;
+            }
+
+            const progressDiv = document.getElementById('progress');
+            const resultsDiv = document.getElementById('results');
+            const reanalyzeBtn = document.getElementById('reanalyzeBtn');
+
+            progressDiv.style.display = 'block';
+            reanalyzeBtn.disabled = true;
+            resultsDiv.innerHTML = '';
+
+            // Clear existing work zone history
+            localStorage.removeItem(STORAGE_KEY);
+
+            let workZonesDetected = 0;
+            let workZoneHistory = [];
+            let resultsHtml = '<h3>Analysis Results:</h3>';
+
+            for (let i = 0; i < allImages.length; i++) {
+                const img = allImages[i];
+
+                progressDiv.innerHTML = `
+                    <p class="warning">🔄 Analyzing image ${i + 1} of ${allImages.length}...</p>
+                    <p class="info">📷 Camera ${img.cameraId} | View ${img.viewId} | ${img.metadata.cameraLocation}</p>
+                `;
+
+                try {
+                    // Analyze with Gemini
+                    const analysis = await analyzeImageWithGemini(img);
+
+                    if (analysis.hasWorkZone) {
+                        workZonesDetected++;
+
+                        // Add to work zone history
+                        const existingCamera = workZoneHistory.find(
+                            item => item.cameraId === img.cameraId && item.viewId === img.viewId
+                        );
+
+                        if (existingCamera) {
+                            existingCamera.detectionCount++;
+                            existingCamera.lastUpdated = new Date().toISOString();
+                        } else {
+                            workZoneHistory.push({
+                                cameraId: img.cameraId,
+                                viewId: img.viewId,
+                                location: img.metadata.cameraLocation,
+                                detectedAt: img.metadata.savedAt,
+                                firstDetectedAt: img.metadata.savedAt,
+                                lastUpdated: new Date().toISOString(),
+                                detectionCount: 1,
+                                riskScore: analysis.riskScore,
+                                workers: analysis.workers,
+                                vehicles: analysis.vehicles,
+                                equipment: analysis.equipment || 0,
+                                collectionId: latestCollectionId,
+                                localImageId: img.id
+                            });
+                        }
+
+                        resultsHtml += `
+                            <div class="image-item">
+                                <p class="success"><strong>✅ Image ${i + 1}: WORK ZONE DETECTED</strong></p>
+                                <p>Camera ${img.cameraId} | View ${img.viewId} | ${img.metadata.cameraLocation}</p>
+                                <p>Risk: ${analysis.riskScore}/10 | Workers: ${analysis.workers} | Vehicles: ${analysis.vehicles} | Equipment: ${analysis.equipment || 0}</p>
+                                <p>Confidence: ${(analysis.confidence * 100).toFixed(0)}%</p>
+                                <p><em>${analysis.summary}</em></p>
+                            </div>
+                        `;
+                    } else {
+                        resultsHtml += `
+                            <div class="image-item">
+                                <p class="info"><strong>ℹ️ Image ${i + 1}: No work zone</strong></p>
+                                <p>Camera ${img.cameraId} | View ${img.viewId} | ${img.metadata.cameraLocation}</p>
+                                <p>Confidence: ${(analysis.confidence * 100).toFixed(0)}%</p>
+                            </div>
+                        `;
+                    }
+
+                } catch (error) {
+                    resultsHtml += `
+                        <div class="image-item">
+                            <p class="error"><strong>❌ Image ${i + 1}: Analysis failed</strong></p>
+                            <p>Camera ${img.cameraId} | View ${img.viewId}</p>
+                            <p>Error: ${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Save updated work zone history
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(workZoneHistory));
+
+            progressDiv.innerHTML = `
+                <p class="success">✅ Re-analysis complete!</p>
+                <p class="info">Total images analyzed: ${allImages.length}</p>
+                <p class="success">Work zones detected: ${workZonesDetected}</p>
+                <p class="info">Unique cameras with work zones: ${new Set(workZoneHistory.map(w => w.cameraId)).size}</p>
+            `;
+
+            resultsDiv.innerHTML = resultsHtml;
+            reanalyzeBtn.disabled = false;
+
+            // Offer to reload main app
+            if (confirm('Re-analysis complete! Reload main application to see updated results?')) {
+                window.location.href = '/QEW-Innovation-Corridor/';
+            }
+        };
+
+        async function analyzeImageWithGemini(imageRecord) {
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                {
+                                    text: `Analyze this highway camera image for construction work zones. Look for:
+- Construction workers (people in safety vests/hard hats)
+- Construction vehicles (dump trucks, cement mixers, excavators)
+- Construction equipment (cones, barriers, signs, excavators, cranes)
+- Lane closures or restrictions
+- Any active construction activity
+
+Return a JSON response with:
+{
+  "hasWorkZone": boolean,
+  "confidence": 0.0-1.0,
+  "riskScore": 0-10,
+  "workers": number of workers visible,
+  "vehicles": number of construction vehicles,
+  "equipment": number of equipment items,
+  "summary": "brief description"
+}
+
+Be strict: only return hasWorkZone=true if there is CLEAR evidence of active construction.`
+                                },
+                                {
+                                    inline_data: {
+                                        mime_type: 'image/jpeg',
+                                        data: imageRecord.data.split(',')[1] // Remove data:image/jpeg;base64, prefix
+                                    }
+                                }
+                            ]
+                        }],
+                        generationConfig: {
+                            temperature: 0.4,
+                            topK: 32,
+                            topP: 1,
+                            maxOutputTokens: 1024,
+                        }
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Gemini API error: ${response.status}`);
+            }
+
+            const result = await response.json();
+            const textContent = result.candidates[0].content.parts[0].text;
+
+            // Extract JSON from response
+            const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) {
+                throw new Error('No JSON found in Gemini response');
+            }
+
+            return JSON.parse(jsonMatch[0]);
+        }
+
+        // Load inventory on page load
+        loadInventory();
+    </script>
+</body>
+</html>

@@ -153,3 +153,23 @@ export function getWorkZoneStats() {
 export function getAllWorkZones() {
   return getWorkZoneCameras();
 }
+
+/**
+ * Get unique view IDs that have detected work zones
+ * @returns {Array<number>} Array of view IDs (511ON Camera IDs)
+ */
+export function getWorkZoneViewIds() {
+  const history = getWorkZoneCameras();
+  const uniqueViewIds = [...new Set(history.map(item => item.viewId))];
+  return uniqueViewIds;
+}
+
+/**
+ * Check if a specific view has a work zone detected
+ * @param {number} viewId - View ID (511ON Camera ID)
+ * @returns {boolean}
+ */
+export function hasWorkZoneInView(viewId) {
+  const viewIds = getWorkZoneViewIds();
+  return viewIds.includes(viewId);
+}

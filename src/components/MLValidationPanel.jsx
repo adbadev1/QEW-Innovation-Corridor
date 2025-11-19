@@ -3,6 +3,8 @@ import { Microscope, Camera, Loader, CheckCircle, AlertTriangle, Radio, ChevronD
 import { getCurrentConditions, formatConditions, formatCameraInfo } from '../utils/imageMetadata';
 import { analyzeWorkZoneImage, formatWorkZoneForDashboard } from '../services/geminiVision';
 import { useV2X } from '../contexts/V2XContext';
+import { addWorkZoneCamera, getWorkZoneCameraIds, getWorkZoneStats, getAllWorkZones } from '../utils/workZoneHistory';
+import { downloadCameraImage, blobToFile } from '../services/gcpStorage';
 
 /**
  * ML Vision Model Validation Panel
@@ -20,24 +22,52 @@ function MLValidationPanel({ cameras }) {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
+  const [workZoneCameraIds, setWorkZoneCameraIds] = useState([]);
+  const [workZoneHistory, setWorkZoneHistory] = useState([]);
+  const [workZoneStats, setWorkZoneStats] = useState(null);
 
   const { registerBroadcast } = useV2X();
+
+  // Load work zone camera history and poll for changes every 3 seconds
+  useEffect(() => {
+    const loadWorkZones = () => {
+      const ids = getWorkZoneCameraIds();
+      const history = getAllWorkZones();
+      const stats = getWorkZoneStats();
+      setWorkZoneCameraIds(ids);
+      setWorkZoneHistory(history);
+      setWorkZoneStats(stats);
+      console.log('[MLValidationPanel] Loaded work zone cameras:', ids.length, 'cameras,', history.length, 'total detections');
+    };
+
+    // Load immediately
+    loadWorkZones();
+
+    // Poll for changes every 3 seconds
+    const interval = setInterval(loadWorkZones, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('mlValidationExpanded', isExpanded.toString());
   }, [isExpanded]);
 
+  // Filter cameras to only those with detected work zones
+  const workZoneCameras = cameras.filter(camera => workZoneCameraIds.includes(camera.Id));
+
   useEffect(() => {
     const currentConditions = getCurrentConditions();
     setConditions(currentConditions);
 
-    if (cameras && cameras.length > 0) {
-      setSelectedCamera(cameras[0]);
-      if (cameras[0].Views && cameras[0].Views.length > 0) {
-        setSelectedView(cameras[0].Views[0]);
+    // Select first camera with work zone detection
+    if (workZoneCameras && workZoneCameras.length > 0) {
+      setSelectedCamera(workZoneCameras[0]);
+      if (workZoneCameras[0].Views && workZoneCameras[0].Views.length > 0) {
+        setSelectedView(workZoneCameras[0].Views[0]);
       }
     }
-  }, [cameras]);
+  }, [cameras, workZoneCameraIds.length]);
 
   const handleAnalyzeCamera = async () => {
     if (!selectedCamera || !selectedView) {
@@ -51,10 +81,9 @@ function MLValidationPanel({ cameras }) {
     setImageUrl(selectedView.Url);
 
     try {
-      // Fetch live camera image
-      const response = await fetch(selectedView.Url);
-      const blob = await response.blob();
-      const file = new File([blob], `camera_${selectedCamera.Id}_view_${selectedView.Id}.jpg`, { type: 'image/jpeg' });
+      // Download live camera image (handles CORS via server-side fetch)
+      const blob = await downloadCameraImage(selectedView.Url);
+      const file = blobToFile(blob, `camera_${selectedCamera.Id}_view_${selectedView.Id}.jpg`);
 
       // Create real camera metadata
       const metadata = {
@@ -97,6 +126,28 @@ function MLValidationPanel({ cameras }) {
       setAnalysisResult(workZone);
       setAnalyzing(false);
 
+      // Add camera to work zone history
+      const added = addWorkZoneCamera(
+        selectedCamera.Id,
+        selectedCamera.Location,
+        selectedView.Id,
+        {
+          riskScore: workZone.riskScore,
+          workers: workZone.workers,
+          vehicles: workZone.vehicles,
+          equipment: workZone.equipment
+        }
+      );
+
+      if (added) {
+        // Refresh work zone camera list
+        const updatedIds = getWorkZoneCameraIds();
+        const updatedStats = getWorkZoneStats();
+        setWorkZoneCameraIds(updatedIds);
+        setWorkZoneStats(updatedStats);
+        console.log('[MLValidationPanel] Camera added to work zone history:', selectedCamera.Id);
+      }
+
     } catch (err) {
       console.error('Error analyzing camera:', err);
       setError(err.message || 'Failed to fetch or analyze camera image');
@@ -137,36 +188,61 @@ function MLValidationPanel({ cameras }) {
             <div className="p-3 bg-gray-900 border-b border-gray-700">
               <h3 className="text-xs font-semibold mb-2">Current Corridor Conditions</h3>
               <p className="text-[10px] text-gray-300">{formatConditions(conditions)}</p>
-              <p className="text-[9px] text-gray-500 mt-1">Active COMPASS cameras: {cameras.length}</p>
+              <p className="text-[9px] text-gray-500 mt-1">
+                Unique cameras with work zones: {workZoneCameras.length} / {cameras.length}
+              </p>
+              {workZoneStats && workZoneStats.totalDetections > 0 && (
+                <p className="text-[9px] text-cyan-400 mt-0.5">
+                  Total work zone detections: {workZoneStats.totalDetections} (across {workZoneCameras.length} camera{workZoneCameras.length !== 1 ? 's' : ''})
+                </p>
+              )}
             </div>
           )}
 
           {/* Camera Selection */}
           {!analysisResult && (
             <div className="p-3 border-b border-gray-700 space-y-2">
-              <div>
-                <h3 className="text-xs font-semibold mb-1 flex items-center">
-                  <Camera className="w-3 h-3 mr-1" />
-                  Select REAL WORK ZONES IDENTIFIED BY COMPASS Camera
-                </h3>
-                <select
-                  value={selectedCamera ? selectedCamera.Id : ''}
-                  onChange={(e) => {
-                    const camera = cameras.find(c => c.Id === parseInt(e.target.value));
-                    setSelectedCamera(camera);
-                    if (camera && camera.Views && camera.Views.length > 0) {
-                      setSelectedView(camera.Views[0]);
-                    }
-                  }}
-                  className="w-full px-2 py-1 bg-gray-900 border border-gray-600 rounded text-[10px]"
-                >
-                  {cameras.map(camera => (
-                    <option key={camera.Id} value={camera.Id}>
-                      Camera {camera.Id}: {camera.Location}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {workZoneCameras.length === 0 ? (
+                <div className="p-3 bg-yellow-900/30 border border-yellow-600 rounded">
+                  <p className="text-xs text-yellow-200 font-semibold mb-1">⚠️ No Work Zone Cameras Yet</p>
+                  <p className="text-[10px] text-yellow-300 leading-tight">
+                    No cameras have detected work zones yet. Use any camera from the map to analyze, and successfully detected work zones will appear here for re-testing.
+                  </p>
+                  <p className="text-[10px] text-yellow-300 mt-2 leading-tight">
+                    Tip: Try analyzing cameras near active construction sites during the camera collection cycle.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <h3 className="text-xs font-semibold mb-1 flex items-center">
+                    <Camera className="w-3 h-3 mr-1" />
+                    Select REAL WORK ZONES IDENTIFIED BY COMPASS Camera
+                  </h3>
+                  <select
+                    value={selectedCamera ? selectedCamera.Id : ''}
+                    onChange={(e) => {
+                      const camera = workZoneCameras.find(c => c.Id === parseInt(e.target.value));
+                      setSelectedCamera(camera);
+                      if (camera && camera.Views && camera.Views.length > 0) {
+                        setSelectedView(camera.Views[0]);
+                      }
+                    }}
+                    className="w-full px-2 py-1 bg-gray-900 border border-gray-600 rounded text-[10px]"
+                  >
+                    {workZoneCameras.map(camera => {
+                      // Find work zone history for this camera to get viewId
+                      const workZone = workZoneHistory.find(wz => wz.cameraId === camera.Id);
+                      const viewId = workZone ? workZone.viewId : (camera.Views && camera.Views[0] ? camera.Views[0].Id : '?');
+
+                      return (
+                        <option key={camera.Id} value={camera.Id}>
+                          511ON Camera ID: #{viewId} - {camera.Location}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              )}
 
               {/* View Selection */}
               {selectedCamera && selectedCamera.Views && selectedCamera.Views.length > 1 && (
@@ -192,7 +268,7 @@ function MLValidationPanel({ cameras }) {
           )}
 
           {/* Analyze Button */}
-          {!analysisResult && (
+          {!analysisResult && workZoneCameras.length > 0 && (
             <div className="p-3 border-b border-gray-700">
               <button
                 onClick={handleAnalyzeCamera}
@@ -259,10 +335,13 @@ function MLValidationPanel({ cameras }) {
               <div className="p-2 bg-cyan-900/30 border border-cyan-600 rounded">
                 <p className="text-xs font-bold text-cyan-200">🎥 REAL COMPASS CAMERA</p>
                 <p className="text-[9px] text-cyan-300 mt-0.5">
-                  Camera #{selectedCamera.Id}: {selectedCamera.Location}
+                  511ON Camera ID: #{selectedView.Id}
                 </p>
                 <p className="text-[9px] text-cyan-300">
-                  View: {selectedView.Description}
+                  Location: {selectedCamera.Location}
+                </p>
+                <p className="text-[9px] text-cyan-300">
+                  View: {selectedView.Description || 'Main View'}
                 </p>
                 <p className="text-[9px] text-cyan-300">
                   Captured: {new Date(analysisResult.realCamera.capturedAt).toLocaleTimeString()}

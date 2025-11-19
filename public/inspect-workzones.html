@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Work Zone Inspector</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #000;
+            border: 1px solid #00ff00;
+        }
+        th, td {
+            border: 1px solid #00ff00;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #003300;
+        }
+        .error { color: #ff0000; }
+        pre {
+            background: #0a0a0a;
+            padding: 10px;
+            border-left: 3px solid #00ff00;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Work Zone Data Inspector</h1>
+
+    <h2>Work Zone History (from localStorage)</h2>
+    <div id="workzoneTable"></div>
+
+    <h2>Raw JSON</h2>
+    <pre id="rawJson"></pre>
+
+    <script>
+        const STORAGE_KEY = 'qew_workzone_camera_history';
+
+        function loadWorkZones() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+
+            if (!stored) {
+                document.getElementById('workzoneTable').innerHTML = '<p class="error">No work zone data found in localStorage</p>';
+                document.getElementById('rawJson').textContent = 'null';
+                return;
+            }
+
+            const workZones = JSON.parse(stored);
+            document.getElementById('rawJson').textContent = JSON.stringify(workZones, null, 2);
+
+            if (!Array.isArray(workZones) || workZones.length === 0) {
+                document.getElementById('workzoneTable').innerHTML = '<p class="error">Work zone data is empty or invalid</p>';
+                return;
+            }
+
+            // Build table
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Internal DB ID<br/>(cameraId)</th>
+                            <th>511ON Camera ID<br/>(viewId)</th>
+                            <th>Location</th>
+                            <th>Risk Score</th>
+                            <th>Workers</th>
+                            <th>Vehicles</th>
+                            <th>Detected At</th>
+                            <th>Detection Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            workZones.forEach(wz => {
+                html += `
+                    <tr>
+                        <td><strong>${wz.cameraId}</strong></td>
+                        <td><strong>${wz.viewId}</strong></td>
+                        <td>${wz.location || 'N/A'}</td>
+                        <td>${wz.riskScore || 'N/A'}</td>
+                        <td>${wz.workers || 0}</td>
+                        <td>${wz.vehicles || 0}</td>
+                        <td>${new Date(wz.detectedAt).toLocaleString()}</td>
+                        <td>${wz.detectionCount || 1}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('workzoneTable').innerHTML = html;
+
+            // Summary
+            console.log('Work Zone Summary:');
+            console.log('- Total work zones:', workZones.length);
+            console.log('- Unique camera IDs (Internal):', [...new Set(workZones.map(wz => wz.cameraId))]);
+            console.log('- Unique view IDs (511ON):', [...new Set(workZones.map(wz => wz.viewId))]);
+        }
+
+        loadWorkZones();
+    </script>
+</body>
+</html>

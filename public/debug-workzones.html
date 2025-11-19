@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Work Zone History Debug</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        .section {
+            background: #000;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #00ff00;
+        }
+        h2 {
+            color: #00ff00;
+            margin-top: 0;
+        }
+        pre {
+            background: #0a0a0a;
+            padding: 10px;
+            overflow-x: auto;
+            border-left: 3px solid #00ff00;
+        }
+        .camera {
+            background: #111;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #0099ff;
+        }
+        .stats {
+            color: #ffff00;
+        }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #00cc00;
+        }
+        .error {
+            color: #ff0000;
+        }
+        .success {
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Work Zone History Debug Tool</h1>
+
+    <div class="section">
+        <h2>📊 Statistics</h2>
+        <div id="stats"></div>
+    </div>
+
+    <div class="section">
+        <h2>📷 All Work Zone Detections</h2>
+        <div id="detections"></div>
+    </div>
+
+    <div class="section">
+        <h2>🎯 Unique Cameras</h2>
+        <div id="uniqueCameras"></div>
+    </div>
+
+    <div class="section">
+        <h2>🗄️ Raw Data</h2>
+        <pre id="rawData"></pre>
+    </div>
+
+    <div class="section">
+        <h2>⚙️ Actions</h2>
+        <button onclick="refreshData()">🔄 Refresh Data</button>
+        <button onclick="clearHistory()">🗑️ Clear All History</button>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'qew_workzone_camera_history';
+
+        function getWorkZoneData() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (!stored) return [];
+                return JSON.parse(stored);
+            } catch (error) {
+                console.error('Failed to load work zone data:', error);
+                return [];
+            }
+        }
+
+        function refreshData() {
+            const data = getWorkZoneData();
+
+            // Statistics
+            const uniqueCameras = new Set(data.map(item => item.cameraId));
+            const totalDetections = data.reduce((sum, item) => sum + (item.detectionCount || 1), 0);
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stats">
+                    <p><strong>Unique Cameras with Work Zones:</strong> ${uniqueCameras.size}</p>
+                    <p><strong>Total Detection Records:</strong> ${data.length}</p>
+                    <p><strong>Total Detections (cumulative):</strong> ${totalDetections}</p>
+                    <p><strong>Last Detection:</strong> ${data.length > 0 ? new Date(data[0].lastUpdated).toLocaleString() : 'N/A'}</p>
+                </div>
+            `;
+
+            // All detections
+            if (data.length === 0) {
+                document.getElementById('detections').innerHTML = '<p class="error">❌ No work zone detections found</p>';
+            } else {
+                const detectionsHTML = data.map(item => `
+                    <div class="camera">
+                        <p><strong>Camera ID:</strong> ${item.cameraId} | <strong>View ID:</strong> ${item.viewId}</p>
+                        <p><strong>Location:</strong> ${item.location}</p>
+                        <p><strong>First Detected:</strong> ${new Date(item.firstDetectedAt || item.detectedAt).toLocaleString()}</p>
+                        <p><strong>Last Updated:</strong> ${new Date(item.lastUpdated).toLocaleString()}</p>
+                        <p><strong>Detection Count:</strong> ${item.detectionCount || 1}</p>
+                        <p><strong>Risk Score:</strong> ${item.riskScore || 'N/A'}/10</p>
+                        <p><strong>Workers:</strong> ${item.workers || 0} | <strong>Vehicles:</strong> ${item.vehicles || 0} | <strong>Equipment:</strong> ${item.equipment || 0}</p>
+                    </div>
+                `).join('');
+                document.getElementById('detections').innerHTML = detectionsHTML;
+            }
+
+            // Unique cameras
+            const camerasHTML = Array.from(uniqueCameras).map(cameraId => {
+                const cameraDetections = data.filter(item => item.cameraId === cameraId);
+                const totalDetectionCount = cameraDetections.reduce((sum, item) => sum + (item.detectionCount || 1), 0);
+                return `
+                    <div class="camera">
+                        <p><strong>Camera ID:</strong> ${cameraId}</p>
+                        <p><strong>Location:</strong> ${cameraDetections[0].location}</p>
+                        <p><strong>Views with work zones:</strong> ${cameraDetections.length}</p>
+                        <p><strong>Total detections:</strong> ${totalDetectionCount}</p>
+                        <p><strong>Views:</strong> ${cameraDetections.map(d => d.viewId).join(', ')}</p>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('uniqueCameras').innerHTML = camerasHTML || '<p class="error">❌ No unique cameras found</p>';
+
+            // Raw data
+            document.getElementById('rawData').textContent = JSON.stringify(data, null, 2);
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear ALL work zone history? This cannot be undone.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                alert('Work zone history cleared!');
+                refreshData();
+            }
+        }
+
+        // Initial load
+        refreshData();
+
+        // Auto-refresh every 3 seconds
+        setInterval(refreshData, 3000);
+    </script>
+</body>
+</html>

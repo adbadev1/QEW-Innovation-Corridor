@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Test Data</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        .section {
+            background: #000;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #00ff00;
+        }
+        button {
+            background: #ff0000;
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #cc0000;
+        }
+        .success {
+            color: #00ff00;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🗑️ Clear Test Data</h1>
+
+    <div class="section">
+        <h2>⚠️ Warning</h2>
+        <p>This will clear ALL manually added test data from localStorage.</p>
+        <p>Only data from REAL camera collection runs will remain.</p>
+        <br>
+        <button onclick="clearAllTestData()">🗑️ CLEAR ALL WORK ZONE HISTORY</button>
+    </div>
+
+    <div class="section">
+        <h2>📊 Current Data</h2>
+        <pre id="currentData"></pre>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        const STORAGE_KEY = 'qew_workzone_camera_history';
+
+        function displayCurrentData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (!stored) {
+                document.getElementById('currentData').textContent = 'No work zone data found';
+                return;
+            }
+
+            try {
+                const data = JSON.parse(stored);
+                document.getElementById('currentData').textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                document.getElementById('currentData').textContent = 'Error parsing data: ' + e.message;
+            }
+        }
+
+        function clearAllTestData() {
+            if (confirm('Are you ABSOLUTELY SURE you want to clear ALL work zone history?\n\nThis will remove all data including:\n- Manual test entries (Camera #250)\n- Real detection data\n\nThis action CANNOT be undone!')) {
+                localStorage.removeItem(STORAGE_KEY);
+
+                document.getElementById('result').innerHTML = `
+                    <div class="section">
+                        <p class="success">✅ All work zone history has been cleared!</p>
+                        <p>The system will now start fresh.</p>
+                        <p>Run a new camera collection to detect work zones automatically.</p>
+                    </div>
+                `;
+
+                displayCurrentData();
+
+                // Reload main app after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '/QEW-Innovation-Corridor/';
+                }, 2000);
+            }
+        }
+
+        // Display current data on load
+        displayCurrentData();
+    </script>
+</body>
+</html>

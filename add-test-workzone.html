@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Test Work Zone to localStorage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #4a9eff;
+        }
+        h1 {
+            color: #4a9eff;
+            margin-top: 0;
+        }
+        button {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #3a8edf;
+        }
+        .success {
+            background: #22c55e;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none;
+        }
+        .info {
+            background: #3a3a3a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #fbbf24;
+        }
+        pre {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .camera-info {
+            background: #1e40af;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚧 Add Test Work Zone to ML Validation Panel</h1>
+
+        <div class="camera-info">
+            <h3>Camera 250 (511ON View 465)</h3>
+            <p><strong>Location:</strong> QEW near Southdown Road/Erin Mills Parkway</p>
+            <p><strong>Status:</strong> ✅ Confirmed work zone detected by Gemini AI (90% confidence)</p>
+            <p><strong>Risk Score:</strong> 6/10 (Medium-risk)</p>
+            <p><strong>Detected Elements:</strong> Barriers, flashing lights, vehicles</p>
+        </div>
+
+        <div class="info">
+            <p><strong>⚠️ What This Does:</strong></p>
+            <p>This will add Camera 250 to your localStorage work zone history, making it appear in the ML Validation Panel dropdown.</p>
+            <p>This simulates what would happen if you ran a camera collection cycle and Gemini AI detected the work zone.</p>
+        </div>
+
+        <button onclick="addTestWorkZone()">ADD CAMERA 250 TO ML PANEL</button>
+        <button onclick="viewLocalStorage()">VIEW CURRENT LOCALSTORAGE</button>
+        <button onclick="clearWorkZones()">CLEAR ALL WORK ZONES</button>
+
+        <div class="success" id="success">
+            <h3>✅ Success!</h3>
+            <p>Camera 250 has been added to work zone history.</p>
+            <p><strong>Next Steps:</strong></p>
+            <ol>
+                <li>Refresh your dashboard: <a href="http://localhost:8200/QEW-Innovation-Corridor/" target="_blank" style="color: #4a9eff;">http://localhost:8200/QEW-Innovation-Corridor/</a></li>
+                <li>Scroll to "ML Vision Model Validation" panel</li>
+                <li>You should see: "Cameras with detected work zones: 1 / 46"</li>
+                <li>Dropdown should show: "Camera 250: QEW near Southdown Road/Erin Mills Parkway"</li>
+            </ol>
+        </div>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function addTestWorkZone() {
+            const workZoneHistory = {
+                cameraId: 250,
+                location: "QEW near Southdown Road/Erin Mills Parkway",
+                viewId: 610,
+                detectedAt: new Date().toISOString(),
+                riskScore: 6,
+                workers: 0,
+                vehicles: 1,
+                equipment: 0,
+                lastUpdated: new Date().toISOString()
+            };
+
+            // Get existing history or create new array
+            let history = [];
+            try {
+                const existing = localStorage.getItem('qew_workzone_camera_history');
+                if (existing) {
+                    history = JSON.parse(existing);
+                }
+            } catch (e) {
+                console.error('Error reading localStorage:', e);
+            }
+
+            // Check if camera already exists
+            const existingIndex = history.findIndex(item => item.cameraId === 250);
+            if (existingIndex >= 0) {
+                // Update existing entry
+                history[existingIndex] = workZoneHistory;
+            } else {
+                // Add new entry
+                history.push(workZoneHistory);
+            }
+
+            // Save to localStorage
+            localStorage.setItem('qew_workzone_camera_history', JSON.stringify(history));
+
+            // Show success message
+            document.getElementById('success').style.display = 'block';
+
+            // Show updated localStorage
+            viewLocalStorage();
+        }
+
+        function viewLocalStorage() {
+            const history = localStorage.getItem('qew_workzone_camera_history');
+            const output = document.getElementById('output');
+
+            if (history) {
+                const parsed = JSON.parse(history);
+                output.innerHTML = `
+                    <h3>Current Work Zone History:</h3>
+                    <p><strong>Total Cameras:</strong> ${parsed.length}</p>
+                    <pre>${JSON.stringify(parsed, null, 2)}</pre>
+                `;
+            } else {
+                output.innerHTML = `
+                    <h3>Current Work Zone History:</h3>
+                    <p style="color: #fbbf24;">No work zones in localStorage yet.</p>
+                `;
+            }
+        }
+
+        function clearWorkZones() {
+            localStorage.removeItem('qew_workzone_camera_history');
+            document.getElementById('output').innerHTML = `
+                <h3>Cleared!</h3>
+                <p style="color: #22c55e;">All work zones have been removed from localStorage.</p>
+            `;
+            document.getElementById('success').style.display = 'none';
+        }
+
+        // Show current state on load
+        window.onload = function() {
+            viewLocalStorage();
+        };
+    </script>
+</body>
+</html>

@@ -226,6 +226,53 @@ function getFallbackImages(conditions) {
 }
 
 /**
+ * Download image from URL via canvas (CORS-friendly fallback)
+ *
+ * @param {string} imageUrl - URL of image to download
+ * @param {string} filename - Filename for the downloaded image
+ * @returns {Promise<File>} File object
+ */
+async function downloadViaCanvas(imageUrl, filename) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous'; // Enable CORS
+
+    img.onload = () => {
+      try {
+        // Create canvas and draw image
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        // Convert to blob
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('Failed to convert image to blob'));
+            return;
+          }
+
+          const file = new File([blob], filename, { type: 'image/jpeg' });
+          console.log('[Image Download] ✅ Canvas conversion successful');
+          resolve(file);
+        }, 'image/jpeg', 0.95);
+
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    img.onerror = () => {
+      reject(new Error('CORS blocked - image source does not allow cross-origin access. Try using Pixabay images.'));
+    };
+
+    img.src = imageUrl;
+  });
+}
+
+/**
  * Download image from URL and convert to File object
  *
  * @param {string} imageUrl - URL of image to download
@@ -234,20 +281,37 @@ function getFallbackImages(conditions) {
  */
 export async function downloadImageAsFile(imageUrl, filename = 'workzone.jpg') {
   try {
-    // Fetch image with CORS mode
-    const response = await fetch(imageUrl);
+    console.log('[Image Download] Attempting to download:', imageUrl);
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image: ${response.status}`);
+    // Try direct fetch with CORS (works for Pixabay, some other sources)
+    try {
+      const response = await fetch(imageUrl, {
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-cache'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+
+      console.log('[Image Download] ✅ Direct fetch successful');
+      return file;
+
+    } catch (fetchError) {
+      console.warn('[Image Download] Direct fetch failed, trying canvas fallback:', fetchError.message);
+
+      // Fallback: Load via Image element and convert to blob via canvas
+      // This works for images with CORS headers (like Pixabay)
+      return await downloadViaCanvas(imageUrl, filename);
     }
 
-    const blob = await response.blob();
-    const file = new File([blob], filename, { type: blob.type });
-
-    return file;
   } catch (error) {
-    console.error('Error downloading image:', error);
-    throw error;
+    console.error('[Image Download] ❌ Failed to download image:', error);
+    throw new Error(`Unable to download image: ${error.message}`);
   }
 }
 

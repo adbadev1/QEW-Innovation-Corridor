@@ -52,7 +52,16 @@ Perform a comprehensive safety analysis following Ontario's MTO BOOK 7 standards
 ANALYZE THE IMAGE FOR:
 
 1. WORK ZONE PRESENCE
-   - Is there an active construction work zone visible? (yes/no)
+   - Is there ANY construction work zone visible? (yes/no)
+   - Include BOTH active (workers present) AND inactive (equipment/barriers only) work zones
+   - A work zone includes ANY of the following:
+     * Construction workers visible
+     * Construction vehicles (dump trucks, cement mixers, excavators, work trucks)
+     * Safety barriers, traffic cones, or barrels
+     * Construction equipment (even if stationary)
+     * Lane closures or traffic restrictions
+     * Construction signage or arrow boards
+     * Work zone setup equipment
    - Confidence level (0-100%)
 
 2. WORKER SAFETY ELEMENTS (if work zone present)
@@ -88,6 +97,15 @@ ANALYZE THE IMAGE FOR:
 7. RECOMMENDATIONS
    - Immediate actions required (if risk score ≥ 7)
    - Long-term improvements
+
+IMPORTANT: A work zone includes ANY of the following:
+- Construction workers visible
+- Construction vehicles (dump trucks, cement mixers, excavators)
+- Safety barriers, cones, or barrels
+- Construction equipment
+- Lane closures or restrictions
+- Construction signage
+Set hasWorkZone=true if you see ANY of the above, even without active workers.
 
 OUTPUT FORMAT (JSON only, no markdown):
 {

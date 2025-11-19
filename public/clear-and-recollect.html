@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear & Re-collect</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #00cc00;
+        }
+        button.danger {
+            background: #ff0000;
+            color: #fff;
+        }
+        button.danger:hover {
+            background: #cc0000;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .warning { color: #ffaa00; }
+        .info { color: #0099ff; }
+        pre {
+            background: #0a0a0a;
+            padding: 10px;
+            border-left: 3px solid #00ff00;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .section {
+            background: #000;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Clear Old Data & Re-collect with Updated Prompt</h1>
+
+    <div class="section">
+        <h2>Step 1: Clear Old Work Zone History</h2>
+        <p class="info">This will remove all old work zone detections that were made with the old "active only" prompt.</p>
+        <button class="danger" onclick="clearWorkZones()">❌ Clear Work Zone History</button>
+        <div id="clearStatus"></div>
+    </div>
+
+    <div class="section">
+        <h2>Step 2: View Current Work Zones</h2>
+        <p class="info">See what work zones are currently stored:</p>
+        <button onclick="viewWorkZones()">👁️ View Work Zones</button>
+        <div id="workZoneList"></div>
+    </div>
+
+    <div class="section">
+        <h2>Step 3: Run New Collection</h2>
+        <p class="warning">⚠️ You must do this manually on the main dashboard!</p>
+        <p class="info">The updated prompt will now detect:</p>
+        <ul>
+            <li>✅ Active work zones (workers present)</li>
+            <li>✅ Inactive work zones (equipment/barriers only)</li>
+            <li>✅ Construction vehicles</li>
+            <li>✅ Safety barriers, cones, or barrels</li>
+            <li>✅ Lane closures</li>
+        </ul>
+        <button onclick="openDashboard()">🚀 Open Dashboard to Start Collection</button>
+    </div>
+
+    <script>
+        function clearWorkZones() {
+            const confirmed = confirm('Are you sure you want to clear ALL work zone history?\n\nThis will remove all detected work zones and allow fresh detection with the updated prompt.');
+
+            if (!confirmed) {
+                document.getElementById('clearStatus').innerHTML = '<p class="warning">❌ Cancelled</p>';
+                return;
+            }
+
+            try {
+                localStorage.removeItem('qew_workzone_camera_history');
+                document.getElementById('clearStatus').innerHTML = '<p class="success">✅ Work zone history cleared! Now run a new collection on the main dashboard.</p>';
+
+                // Auto-refresh work zone list
+                setTimeout(() => {
+                    viewWorkZones();
+                }, 500);
+            } catch (error) {
+                document.getElementById('clearStatus').innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        function viewWorkZones() {
+            try {
+                const stored = localStorage.getItem('qew_workzone_camera_history');
+
+                if (!stored) {
+                    document.getElementById('workZoneList').innerHTML = '<p class="warning">📭 No work zones found in history</p>';
+                    return;
+                }
+
+                const workZones = JSON.parse(stored);
+
+                if (!Array.isArray(workZones) || workZones.length === 0) {
+                    document.getElementById('workZoneList').innerHTML = '<p class="warning">📭 Work zone history is empty</p>';
+                    return;
+                }
+
+                let html = `<p class="success">Found ${workZones.length} work zones:</p><ul>`;
+                workZones.forEach(wz => {
+                    html += `<li><strong>511ON Camera ID: #${wz.viewId}</strong> at ${wz.location}</li>`;
+                });
+                html += '</ul>';
+
+                document.getElementById('workZoneList').innerHTML = html;
+            } catch (error) {
+                document.getElementById('workZoneList').innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        function openDashboard() {
+            window.open('/', '_blank');
+        }
+
+        // Auto-load work zones on page load
+        viewWorkZones();
+    </script>
+</body>
+</html>
