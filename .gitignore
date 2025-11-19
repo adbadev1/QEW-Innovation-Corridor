@@ -8,7 +8,7 @@ __pycache__/
 *.pyd
 .Python
 
-# Environment variables
+# Environment variables (keep .env.example)
 .env
 .env.local
 .env.*.local
@@ -61,7 +61,5 @@ camera_scraper/quick_test_db/
 camera_scraper/test_images_db/
 public/camera_images/qew_collection_*/
 
-# Database files
-*.db
-camera_scraper/*.db
-ai_camera_direction/data/*.db
+# Partner's separate project directory (don't push)
+QEW-Innovation-Corridor-main/

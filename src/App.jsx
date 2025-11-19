@@ -7,6 +7,7 @@ import L from 'leaflet';
 import { getRiskColor, getRiskLabel, generateMockBSM, generateV2XAlert } from './utils/riskUtils';
 import { QEW_ROUTE, WORK_ZONES, generateMockTrafficData } from './data/qewData';
 import WorkZoneAnalysisPanel from './components/WorkZoneAnalysisPanel';
+import CameraSpotlightLayer from './components/CameraSpotlightLayer';
 import { qewPathWestbound, qewPathEastbound } from './data/qewRoutes';
 
 // Fix Leaflet default icon issue
@@ -39,6 +40,7 @@ function App() {
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [cameras, setCameras] = useState([]);
   const [loadingCameras, setLoadingCameras] = useState(true);
+  const [cameraDirections, setCameraDirections] = useState({});
   const vehiclesInitialized = React.useRef(false);
 
   // Load real camera data with images from database export
@@ -53,6 +55,33 @@ function App() {
       .catch(error => {
         console.error('Error loading camera data:', error);
         setLoadingCameras(false);
+      });
+  }, []);
+
+  // Load camera direction data from FastAPI backend
+  useEffect(() => {
+    fetch('http://localhost:8000/api/camera-directions/')
+      .then(r => r.json())
+      .then(directionData => {
+        // Create a lookup map: camera_id -> direction info
+        const directionMap = {};
+        directionData.forEach(location => {
+          location.cameras.forEach(cam => {
+            if (!directionMap[cam.cameraId]) {
+              directionMap[cam.cameraId] = [];
+            }
+            directionMap[cam.cameraId].push({
+              viewId: cam.viewId,
+              direction: cam.direction,
+              heading: cam.heading,
+              lanes: cam.lanes
+            });
+          });
+        });
+        setCameraDirections(directionMap);
+      })
+      .catch(error => {
+        console.error('Error loading camera directions:', error);
       });
   }, []);
 
@@ -430,6 +459,9 @@ function App() {
             {/* Eastbound: Toronto → Hamilton (316 waypoints) */}
             <Polyline positions={qewPathEastbound} color="blue" weight={3} opacity={0.6} />
 
+            {/* Camera Direction Spotlights */}
+            <CameraSpotlightLayer />
+
             {/* Real QEW Cameras */}
             {cameras.map(camera => {
               return (
@@ -438,22 +470,60 @@ function App() {
                   position={[camera.Latitude, camera.Longitude]}
                   icon={cameraIcon}
                 >
-                  <Popup maxWidth={400} maxHeight={500}>
-                    <div className="text-sm">
-                      <strong className="text-base block mb-1">{camera.Location}</strong>
-                      <span className="text-blue-600 text-xs">{camera.Source}</span>
-                      <div className="mt-3 space-y-3 max-h-80 overflow-y-auto">
+                  <Popup maxWidth={250} maxHeight={300}>
+                    <div className="text-xs">
+                      <strong className="text-sm block mb-0.5">{camera.Location}</strong>
+                      <span className="text-blue-600" style={{fontSize: '10px'}}>{camera.Source}</span>
+
+                      {/* Camera Technical Details */}
+                      <div className="mt-1 p-1 bg-gray-50 rounded border border-gray-200">
+                        <div className="grid grid-cols-2 gap-1" style={{fontSize: '9px'}}>
+                          <div>
+                            <span className="font-semibold text-gray-600">Camera ID:</span>
+                            <span className="ml-0.5 text-gray-800">#{camera.Id}</span>
+                          </div>
+                          <div>
+                            <span className="font-semibold text-gray-600">Views:</span>
+                            <span className="ml-0.5 text-gray-800">{camera.Views.length}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="font-semibold text-gray-600">📍 GPS:</span>
+                            <span className="ml-0.5 text-gray-800 font-mono">
+                              {camera.Latitude.toFixed(6)}, {camera.Longitude.toFixed(6)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-1.5 space-y-1.5 max-h-40 overflow-y-auto">
                         {camera.Views.map(view => {
                           // Images are now included in the view data from the database
                           const hasImages = view.Images && view.Images.length > 0;
                           const primaryImage = hasImages ? view.Images[0] : null;
                           const basePath = import.meta.env.BASE_URL || '/';
 
+                          // Get direction info for this view
+                          const viewDirections = cameraDirections[camera.Id] || [];
+                          const viewDirection = viewDirections.find(d => d.viewId === view.Id);
+
                           return (
-                            <div key={view.Id} className="border-t pt-2 first:border-t-0 first:pt-0">
-                              <div className="font-semibold text-gray-700 mb-2 text-xs">
+                            <div key={view.Id} className="border-t pt-1 first:border-t-0 first:pt-0">
+                              <div className="font-semibold text-gray-700 mb-1" style={{fontSize: '10px'}}>
                                 📹 {view.Description || 'Camera View'}
                               </div>
+
+                              {/* Direction Information */}
+                              {viewDirection && (
+                                <div className="mb-1 p-1 bg-blue-50 rounded" style={{fontSize: '9px'}}>
+                                  <span className="font-semibold text-blue-700">🧭 Facing:</span>
+                                  <span className="ml-1 text-blue-900">
+                                    {viewDirection.direction} ({viewDirection.heading.toFixed(0)}°)
+                                  </span>
+                                  {viewDirection.lanes && (
+                                    <span className="ml-1 text-gray-600">• {viewDirection.lanes}</span>
+                                  )}
+                                </div>
+                              )}
                               {primaryImage ? (
                                 <a
                                   href={view.Url}
@@ -465,9 +535,9 @@ function App() {
                                     src={`${basePath}${primaryImage.path}`}
                                     alt={`${camera.Location} - ${view.Description}`}
                                     className="w-full rounded border border-gray-300 hover:border-blue-500 transition"
-                                    style={{maxHeight: '200px', objectFit: 'cover'}}
+                                    style={{maxHeight: '100px', objectFit: 'cover'}}
                                   />
-                                  <div className="text-xs text-center text-blue-600 mt-1 hover:underline">
+                                  <div className="text-center text-blue-600 mt-0.5 hover:underline" style={{fontSize: '9px'}}>
                                     Click for live feed →
                                   </div>
                                 </a>
@@ -478,11 +548,11 @@ function App() {
                                   rel="noopener noreferrer"
                                   className="block"
                                 >
-                                  <div className="bg-blue-50 border-2 border-blue-200 rounded p-3 text-center hover:bg-blue-100 transition">
-                                    <div className="text-blue-600 font-semibold mb-1">
+                                  <div className="bg-blue-50 border border-blue-200 rounded p-1.5 text-center hover:bg-blue-100 transition">
+                                    <div className="text-blue-600 font-semibold mb-0.5" style={{fontSize: '10px'}}>
                                       🎥 View Live Camera
                                     </div>
-                                    <div className="text-xs text-gray-600">
+                                    <div className="text-gray-600" style={{fontSize: '9px'}}>
                                       Click to open 511ON feed
                                     </div>
                                   </div>

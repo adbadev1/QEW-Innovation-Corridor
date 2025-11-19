@@ -1,0 +1,37 @@
+# FastAPI Backend
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+pydantic==2.5.0
+
+# Background Task Scheduling
+apscheduler==3.10.4
+
+# HTTP Requests
+requests>=2.31.0
+
+# AI/ML APIs
+anthropic>=0.39.0
+google-generativeai>=0.3.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# PyQt6 for GUIs
+PyQt6>=6.6.0
+
+# Timezone Support
+pytz>=2023.3
+
+# Database
+# SQLite is built into Python, no need to install
+
+# File System Monitoring
+watchdog>=3.0.0
+
+# CORS Support
+fastapi-cors==0.0.6
+

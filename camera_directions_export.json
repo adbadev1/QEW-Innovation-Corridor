@@ -1,0 +1,624 @@
+[
+  {
+    "location": "QEW West of Fifty Road",
+    "latitude": 43.2201,
+    "longitude": -79.65143,
+    "cameras": [
+      {
+        "camera_id": 210,
+        "view_id": 570,
+        "direction": "WNW",
+        "heading": 290.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Millen Road",
+    "latitude": 43.239493,
+    "longitude": -79.716024,
+    "cameras": [
+      {
+        "camera_id": 211,
+        "view_id": 571,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Grays Road",
+    "latitude": 43.241952,
+    "longitude": -79.736366,
+    "cameras": [
+      {
+        "camera_id": 212,
+        "view_id": 572,
+        "direction": "NNW",
+        "heading": 330.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Centennial Parkway",
+    "latitude": 43.246828,
+    "longitude": -79.756794,
+    "cameras": [
+      {
+        "camera_id": 213,
+        "view_id": 573,
+        "direction": "NE",
+        "heading": 45.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Red Hill Valley Parkway",
+    "latitude": 43.248234,
+    "longitude": -79.761738,
+    "cameras": [
+      {
+        "camera_id": 214,
+        "view_id": 574,
+        "direction": "ENE",
+        "heading": 68.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Nikola Tesla Boulevard",
+    "latitude": 43.258518,
+    "longitude": -79.767008,
+    "cameras": [
+      {
+        "camera_id": 215,
+        "view_id": 575,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Woodward Avenue",
+    "latitude": 43.264956,
+    "longitude": -79.772243,
+    "cameras": [
+      {
+        "camera_id": 216,
+        "view_id": 576,
+        "direction": "SSW",
+        "heading": 202.0
+      }
+    ]
+  },
+  {
+    "location": "QEW West of Eastport Drive",
+    "latitude": 43.284453,
+    "longitude": -79.787521,
+    "cameras": [
+      {
+        "camera_id": 217,
+        "view_id": 577,
+        "direction": "SW",
+        "heading": 225.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Eastport Drive - Toronto Bound",
+    "latitude": 43.294075,
+    "longitude": -79.793444,
+    "cameras": [
+      {
+        "camera_id": 218,
+        "view_id": 578,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW Burlington Skyway - Toronto Side",
+    "latitude": 43.299637,
+    "longitude": -79.797852,
+    "cameras": [
+      {
+        "camera_id": 220,
+        "view_id": 580,
+        "direction": "NNE",
+        "heading": 20.0
+      }
+    ]
+  },
+  {
+    "location": "QEW Burlington Skyway - Hamilton Side",
+    "latitude": 43.301446,
+    "longitude": -79.797735,
+    "cameras": [
+      {
+        "camera_id": 219,
+        "view_id": 579,
+        "direction": "NNW",
+        "heading": 335.0
+      }
+    ]
+  },
+  {
+    "location": "QEW at Burlington Skyway",
+    "latitude": 43.30917,
+    "longitude": -79.803,
+    "cameras": [
+      {
+        "camera_id": 4,
+        "view_id": 10,
+        "direction": "N",
+        "heading": 360.0
+      },
+      {
+        "camera_id": 4,
+        "view_id": 11,
+        "direction": "NW",
+        "heading": 315.0
+      },
+      {
+        "camera_id": 4,
+        "view_id": 12,
+        "direction": "NNW",
+        "heading": 337.0
+      }
+    ]
+  },
+  {
+    "location": "QEW Ramp to Northshore Boulevard",
+    "latitude": 43.314687,
+    "longitude": -79.805717,
+    "cameras": [
+      {
+        "camera_id": 221,
+        "view_id": 581,
+        "direction": "N",
+        "heading": 0.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Northshore Boulevard",
+    "latitude": 43.316623,
+    "longitude": -79.808464,
+    "cameras": [
+      {
+        "camera_id": 222,
+        "view_id": 582,
+        "direction": "SSE",
+        "heading": 160.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Fairview Street",
+    "latitude": 43.327831,
+    "longitude": -79.824901,
+    "cameras": [
+      {
+        "camera_id": 224,
+        "view_id": 584,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Highway 403/407 IC",
+    "latitude": 43.336509,
+    "longitude": -79.828291,
+    "cameras": [
+      {
+        "camera_id": 225,
+        "view_id": 585,
+        "direction": "NNW",
+        "heading": 0.0
+      }
+    ]
+  },
+  {
+    "location": "QEW West of Brant Street",
+    "latitude": 43.339974,
+    "longitude": -79.824729,
+    "cameras": [
+      {
+        "camera_id": 226,
+        "view_id": 586,
+        "direction": "NNE",
+        "heading": 20.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Brant Street",
+    "latitude": 43.342596,
+    "longitude": -79.819322,
+    "cameras": [
+      {
+        "camera_id": 227,
+        "view_id": 587,
+        "direction": "WNW",
+        "heading": 290.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Guelph Line",
+    "latitude": 43.350991,
+    "longitude": -79.804387,
+    "cameras": [
+      {
+        "camera_id": 228,
+        "view_id": 588,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Guelph Line",
+    "latitude": 43.358979,
+    "longitude": -79.795504,
+    "cameras": [
+      {
+        "camera_id": 229,
+        "view_id": 589,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Walkers Line",
+    "latitude": 43.365999,
+    "longitude": -79.787822,
+    "cameras": [
+      {
+        "camera_id": 230,
+        "view_id": 590,
+        "direction": "NNE",
+        "heading": 20.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Walkers Line",
+    "latitude": 43.37567,
+    "longitude": -79.77705,
+    "cameras": [
+      {
+        "camera_id": 231,
+        "view_id": 591,
+        "direction": "W",
+        "heading": 270.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Appleby Line",
+    "latitude": 43.380567,
+    "longitude": -79.771857,
+    "cameras": [
+      {
+        "camera_id": 232,
+        "view_id": 592,
+        "direction": "ESE",
+        "heading": 115.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Appleby Line",
+    "latitude": 43.387741,
+    "longitude": -79.763918,
+    "cameras": [
+      {
+        "camera_id": 233,
+        "view_id": 593,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Burloak Drive",
+    "latitude": 43.39482,
+    "longitude": -79.756279,
+    "cameras": [
+      {
+        "camera_id": 234,
+        "view_id": 594,
+        "direction": "ESE",
+        "heading": 115.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Burloak Drive",
+    "latitude": 43.402927,
+    "longitude": -79.74761,
+    "cameras": [
+      {
+        "camera_id": 235,
+        "view_id": 595,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Bronte Road",
+    "latitude": 43.409256,
+    "longitude": -79.740829,
+    "cameras": [
+      {
+        "camera_id": 236,
+        "view_id": 596,
+        "direction": "NE",
+        "heading": 45.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Bronte Road",
+    "latitude": 43.413839,
+    "longitude": -79.735937,
+    "cameras": [
+      {
+        "camera_id": 237,
+        "view_id": 597,
+        "direction": "SSW",
+        "heading": 202.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Third Line",
+    "latitude": 43.423658,
+    "longitude": -79.724908,
+    "cameras": [
+      {
+        "camera_id": 238,
+        "view_id": 598,
+        "direction": "NNE",
+        "heading": 20.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Third Line",
+    "latitude": 43.432844,
+    "longitude": -79.714764,
+    "cameras": [
+      {
+        "camera_id": 239,
+        "view_id": 599,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Fourth Line",
+    "latitude": 43.437966,
+    "longitude": -79.709307,
+    "cameras": [
+      {
+        "camera_id": 240,
+        "view_id": 600,
+        "direction": "NE",
+        "heading": 45.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Dorval Drive",
+    "latitude": 43.446158,
+    "longitude": -79.699845,
+    "cameras": [
+      {
+        "camera_id": 241,
+        "view_id": 601,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Dorval Drive",
+    "latitude": 43.453417,
+    "longitude": -79.691777,
+    "cameras": [
+      {
+        "camera_id": 242,
+        "view_id": 602,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Trafalgar Road",
+    "latitude": 43.460956,
+    "longitude": -79.683623,
+    "cameras": [
+      {
+        "camera_id": 223,
+        "view_id": 583,
+        "direction": "NE",
+        "heading": 45.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Royal Windsor Drive",
+    "latitude": 43.473415,
+    "longitude": -79.671822,
+    "cameras": [
+      {
+        "camera_id": 243,
+        "view_id": 603,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Royal Windsor Drive",
+    "latitude": 43.481701,
+    "longitude": -79.672352,
+    "cameras": [
+      {
+        "camera_id": 244,
+        "view_id": 604,
+        "direction": "NNE",
+        "heading": 20.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Ford Drive",
+    "latitude": 43.494589,
+    "longitude": -79.672165,
+    "cameras": [
+      {
+        "camera_id": 245,
+        "view_id": 605,
+        "direction": "E",
+        "heading": 90.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Highway 403 (Oakville)",
+    "latitude": 43.501126,
+    "longitude": -79.678602,
+    "cameras": [
+      {
+        "camera_id": 246,
+        "view_id": 606,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW West of Winston Churchill Boulevard",
+    "latitude": 43.504197,
+    "longitude": -79.66958,
+    "cameras": [
+      {
+        "camera_id": 247,
+        "view_id": 607,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Winston Churchill Boulevard",
+    "latitude": 43.509095,
+    "longitude": -79.663153,
+    "cameras": [
+      {
+        "camera_id": 1159,
+        "view_id": 2261,
+        "direction": "NNW",
+        "heading": 330.0
+      }
+    ]
+  },
+  {
+    "location": "QEW West of Erin Mills Parkway",
+    "latitude": 43.516564,
+    "longitude": -79.655514,
+    "cameras": [
+      {
+        "camera_id": 249,
+        "view_id": 609,
+        "direction": "SSE",
+        "heading": 157.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Southbound Road/Erin Mills Parkway",
+    "latitude": 43.523846,
+    "longitude": -79.647446,
+    "cameras": [
+      {
+        "camera_id": 250,
+        "view_id": 610,
+        "direction": "NNW",
+        "heading": 330.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Erin Mills Parkway",
+    "latitude": 43.535794,
+    "longitude": -79.634228,
+    "cameras": [
+      {
+        "camera_id": 251,
+        "view_id": 611,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Mississauga Road (2)",
+    "latitude": 43.550471,
+    "longitude": -79.617523,
+    "cameras": [
+      {
+        "camera_id": 5,
+        "view_id": 13,
+        "direction": "E",
+        "heading": 90.0
+      },
+      {
+        "camera_id": 5,
+        "view_id": 14,
+        "direction": "N",
+        "heading": 0.0
+      },
+      {
+        "camera_id": 5,
+        "view_id": 15,
+        "direction": "SW",
+        "heading": 225.0
+      }
+    ]
+  },
+  {
+    "location": "QEW near Mississauga Road (1)",
+    "latitude": 43.552218,
+    "longitude": -79.612513,
+    "cameras": [
+      {
+        "camera_id": 252,
+        "view_id": 612,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  },
+  {
+    "location": "QEW East of Mississauga Road",
+    "latitude": 43.558128,
+    "longitude": -79.607964,
+    "cameras": [
+      {
+        "camera_id": 253,
+        "view_id": 613,
+        "direction": "NW",
+        "heading": 315.0
+      }
+    ]
+  }
+]

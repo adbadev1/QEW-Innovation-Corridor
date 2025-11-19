@@ -67,10 +67,11 @@ def update_webapp_with_latest_data():
         views = cursor.fetchall()
         
         # Get images for this camera from the latest collection
+        # Order by timestamp DESC to get most recent images first
         cursor.execute("""
-            SELECT * FROM images 
+            SELECT * FROM images
             WHERE camera_id = ? AND collection_id = ?
-            ORDER BY view_id, capture_round
+            ORDER BY view_id, timestamp DESC, capture_round DESC
         """, (camera_id, collection_id))
         images = cursor.fetchall()
         
