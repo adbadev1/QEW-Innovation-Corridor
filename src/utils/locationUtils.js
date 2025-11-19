@@ -164,3 +164,24 @@ export function getCamerasByKm(cameras) {
     }))
     .sort((a, b) => a.location.km - b.location.km);
 }
+
+/**
+ * Extract real 511ON camera ID from SourceId field
+ *
+ * SourceId format: "468-QEW E/of MISSISSAUGA Rd"
+ * Real Camera ID: 468
+ *
+ * @param {Object} camera - Camera object with SourceId field
+ * @returns {Object} Camera IDs (real 511ON ID and internal ID)
+ */
+export function getCameraIds(camera) {
+  // Extract real camera ID from SourceId (e.g., "468-QEW E/of MISSISSAUGA Rd" → 468)
+  const realCameraId = camera.SourceId ? camera.SourceId.split('-')[0] : null;
+
+  return {
+    realId: realCameraId,           // Real 511ON camera ID (e.g., "468")
+    internalId: camera.Id,          // Our internal database ID (e.g., 253)
+    sourceId: camera.SourceId,      // Full SourceId string
+    displayId: realCameraId || camera.Id  // Prefer real ID for display
+  };
+}

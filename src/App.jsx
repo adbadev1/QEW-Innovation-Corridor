@@ -13,7 +13,7 @@ import TrafficMonitoringPanel from './components/TrafficMonitoringPanel';
 import { CollectionProvider } from './contexts/CollectionContext';
 import { useV2X } from './contexts/V2XContext';
 import { calculateDistance } from './utils/geoUtils';
-import { generateLocationAwareAnalysis, formatCameraLocation } from './utils/locationUtils';
+import { generateLocationAwareAnalysis, formatCameraLocation, getCameraIds } from './utils/locationUtils';
 import { qewPathWestbound, qewPathEastbound } from './data/qewRoutes';
 
 // Fix Leaflet default icon issue
@@ -405,6 +405,8 @@ function App() {
             {cameras.map(camera => {
               // Get location metadata
               const location = formatCameraLocation(camera);
+              // Get camera IDs (real 511ON ID vs internal ID)
+              const cameraIds = getCameraIds(camera);
 
               return (
                 <Marker
@@ -424,9 +426,12 @@ function App() {
                         </span>
                       </div>
                       <div className="mt-2 space-y-1 text-xs">
-                        <div><strong>Camera ID:</strong> #{camera.Id}</div>
+                        <div><strong>511ON Camera ID:</strong> #{cameraIds.realId}</div>
+                        {cameraIds.realId !== cameraIds.internalId.toString() && (
+                          <div className="text-[10px] text-gray-500">Internal DB ID: #{cameraIds.internalId}</div>
+                        )}
                         <div><strong>Source:</strong> {camera.Source}</div>
-                        <div><strong>Coordinates:</strong> {camera.Latitude.toFixed(4)}, {camera.Longitude.toFixed(4)}</div>
+                        <div><strong>GPS Coordinates:</strong> {camera.Latitude.toFixed(6)}°N, {camera.Longitude.toFixed(6)}°W</div>
                       </div>
                       <div className="mt-3 space-y-3 max-h-80 overflow-y-auto">
                         {camera.Views.map(view => {
