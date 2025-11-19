@@ -8,9 +8,11 @@ import CameraCollectionPanel from './components/CameraCollectionPanel';
 import SyntheticTestingPanel from './components/SyntheticTestingPanel';
 import MLValidationPanel from './components/MLValidationPanel';
 import TrafficMonitoringPanel from './components/TrafficMonitoringPanel';
-import { CollectionProvider } from './contexts/CollectionContext';
+import { CollectionProvider, useCollection } from './contexts/CollectionContext';
 import { formatCameraLocation, getCameraIds } from './utils/locationUtils';
 import { qewPathWestbound, qewPathEastbound } from './data/qewRoutes';
+import { generateRealTrafficData, generateRealAIAnalysis, generateRealRSUAlerts } from './utils/realTrafficData';
+import { getAllWorkZones } from './utils/workZoneHistory';
 
 // Fix Leaflet default icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -32,9 +34,16 @@ const createCustomIcon = (color) => new L.Icon({
 
 const cameraIcon = createCustomIcon('blue');
 
-function App() {
+// Main App component wrapped in CollectionProvider
+function AppContent() {
   const [cameras, setCameras] = useState([]);
   const [loadingCameras, setLoadingCameras] = useState(true);
+  const [trafficData, setTrafficData] = useState([]);
+  const [aiAnalysis, setAiAnalysis] = useState('');
+  const [alerts, setAlerts] = useState([]);
+
+  // Get REAL collection stats from CollectionContext
+  const { stats: collectionStats } = useCollection();
 
   // Load REAL camera data from 511ON (collected via Camera Collection System)
   useEffect(() => {
@@ -52,9 +61,36 @@ function App() {
       });
   }, []);
 
+  // Update REAL traffic data and AI analysis every 5 seconds
+  useEffect(() => {
+    const updateRealData = () => {
+      // Get REAL work zone history from localStorage
+      const workZoneHistory = getAllWorkZones();
+
+      // Generate REAL traffic data from actual collection stats
+      const realTrafficData = generateRealTrafficData(collectionStats, workZoneHistory);
+      setTrafficData(realTrafficData);
+
+      // Generate REAL AI analysis from Gemini detections
+      const realAIAnalysis = generateRealAIAnalysis(cameras.length, workZoneHistory, collectionStats);
+      setAiAnalysis(realAIAnalysis);
+
+      // Generate REAL RSU alerts from work zone detections
+      const realAlerts = generateRealRSUAlerts(workZoneHistory);
+      setAlerts(realAlerts);
+    };
+
+    // Initial update
+    updateRealData();
+
+    // Update every 5 seconds with fresh REAL data
+    const interval = setInterval(updateRealData, 5000);
+
+    return () => clearInterval(interval);
+  }, [cameras.length, collectionStats]);
+
   return (
-    <CollectionProvider cameras={cameras}>
-      <div className="h-screen flex flex-col bg-gray-900">
+    <div className="h-screen flex flex-col bg-gray-900">
       {/* Header */}
       <header className="bg-gradient-to-r from-indigo-600 to-blue-700 text-white p-4 shadow-lg">
         <div className="flex items-center justify-between max-w-full mx-auto">
@@ -184,6 +220,13 @@ function App() {
         <div className="w-1/3 bg-gray-800 text-white overflow-y-auto">
           {/* REAL DATA PANELS ONLY */}
 
+          {/* Real Traffic Monitoring (real metrics from camera collections) */}
+          <TrafficMonitoringPanel
+            aiAnalysis={aiAnalysis}
+            alerts={alerts}
+            trafficData={trafficData}
+          />
+
           {/* Real Camera Collection System */}
           <CameraCollectionPanel />
 
@@ -199,7 +242,30 @@ function App() {
       <footer className="bg-gray-900 text-gray-400 text-center py-3 text-sm border-t border-gray-700">
         🟢 REAL DATA ONLY | QEW Innovation Corridor | OVIN $150K Application | Powered by Claude AI & Gemini 2.0 Flash
       </footer>
-      </div>
+    </div>
+  );
+}
+
+// Wrapper component with CollectionProvider
+function App() {
+  const [cameras, setCameras] = useState([]);
+
+  // Load cameras once at app level
+  useEffect(() => {
+    const basePath = import.meta.env.BASE_URL || '/';
+    fetch(`${basePath}camera_scraper/qew_cameras_with_images.json`)
+      .then(r => r.json())
+      .then(cameraData => {
+        setCameras(cameraData);
+      })
+      .catch(error => {
+        console.error('Error loading camera data:', error);
+      });
+  }, []);
+
+  return (
+    <CollectionProvider cameras={cameras}>
+      <AppContent />
     </CollectionProvider>
   );
 }
