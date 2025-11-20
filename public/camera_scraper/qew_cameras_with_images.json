@@ -85,9 +85,9 @@
     "Source": "COMPASS - Central",
     "SourceId": "428-QEW Centennial Pkwy",
     "Roadway": "QEW",
-    "Direction": "Unknown",
-    "Latitude": 43.246828,
-    "Longitude": -79.756794,
+    "Direction": "W",
+    "Latitude": 43.246800,
+    "Longitude": -79.756403,
     "Location": "QEW near Centennial Parkway",
     "SortOrder": 100,
     "Views": [
