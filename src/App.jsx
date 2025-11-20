@@ -8,6 +8,7 @@ import CameraCollectionPanel from './components/CameraCollectionPanel';
 import SyntheticTestingPanel from './components/SyntheticTestingPanel';
 import MLValidationPanel from './components/MLValidationPanel';
 import TrafficMonitoringPanel from './components/TrafficMonitoringPanel';
+import CameraSpotlightLayer from './components/CameraSpotlightLayer';
 import { CollectionProvider, useCollection } from './contexts/CollectionContext';
 import { formatCameraLocation, getCameraIds } from './utils/locationUtils';
 import { qewPathWestbound, qewPathEastbound } from './data/qewRoutes';
@@ -165,6 +166,9 @@ function AppContent() {
             {/* QEW Route Polylines - REAL OSRM Routes */}
             <Polyline positions={qewPathWestbound} color="blue" weight={3} opacity={0.6} />
             <Polyline positions={qewPathEastbound} color="blue" weight={3} opacity={0.6} />
+
+            {/* Camera Direction Spotlights - Backend Integrated */}
+            <CameraSpotlightLayer />
 
             {/* REAL 511ON Cameras */}
             {cameras.map(camera => {
