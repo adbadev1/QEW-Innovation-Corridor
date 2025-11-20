@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini API Quota Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .container {
+      background: white;
+      color: #333;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    .status {
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .success { background: #d4edda; border: 2px solid #28a745; color: #155724; }
+    .warning { background: #fff3cd; border: 2px solid #ffc107; color: #856404; }
+    .error { background: #f8d7da; border: 2px solid #dc3545; color: #721c24; }
+    .info { background: #d1ecf1; border: 2px solid #17a2b8; color: #0c5460; }
+
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      margin: 10px 5px;
+    }
+    button:hover { background: #5568d3; }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    #log {
+      background: #1e1e1e;
+      color: #00ff00;
+      padding: 20px;
+      border-radius: 5px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+
+    .metric {
+      display: inline-block;
+      margin: 10px 20px 10px 0;
+      font-size: 18px;
+    }
+    .metric strong {
+      color: #667eea;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Gemini API Quota Test</h1>
+    <p>Test your Gemini API rate limits to verify paid tier upgrade</p>
+
+    <div id="status" class="status info">
+      Click "Start Test" to verify your API quota
+    </div>
+
+    <div>
+      <button id="startBtn" onclick="startTest()">Start Test</button>
+      <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div style="margin: 20px 0;">
+      <div class="metric"><strong>Requests:</strong> <span id="requests">0</span></div>
+      <div class="metric"><strong>Success:</strong> <span id="success">0</span></div>
+      <div class="metric"><strong>Failed:</strong> <span id="failed">0</span></div>
+      <div class="metric"><strong>Rate:</strong> <span id="rate">0</span>/min</div>
+    </div>
+
+    <div id="log"></div>
+  </div>
+
+  <script type="module">
+    import { GoogleGenerativeAI } from 'https://esm.run/@google/generative-ai';
+
+    let apiKey = null;
+    let requestCount = 0;
+    let successCount = 0;
+    let failedCount = 0;
+    let startTime = null;
+
+    // Try to get API key from various sources
+    async function getApiKey() {
+      // Try from URL parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const keyFromUrl = urlParams.get('apiKey');
+      if (keyFromUrl) return keyFromUrl;
+
+      // Try from localStorage
+      const keyFromStorage = localStorage.getItem('GEMINI_API_KEY');
+      if (keyFromStorage) return keyFromStorage;
+
+      // Prompt user
+      const key = prompt('Enter your Gemini API key (starts with AIza...):\n\n' +
+        'Find it at: https://aistudio.google.com/apikey');
+
+      if (key && key.trim()) {
+        localStorage.setItem('GEMINI_API_KEY', key.trim());
+        return key.trim();
+      }
+
+      return null;
+    }
+
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('log');
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : '📝';
+      logEl.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function updateMetrics() {
+      document.getElementById('requests').textContent = requestCount;
+      document.getElementById('success').textContent = successCount;
+      document.getElementById('failed').textContent = failedCount;
+
+      if (startTime) {
+        const elapsedMinutes = (Date.now() - startTime) / 60000;
+        const rate = Math.round(requestCount / elapsedMinutes);
+        document.getElementById('rate').textContent = rate;
+      }
+    }
+
+    function updateStatus(message, type) {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = message;
+      statusEl.className = `status ${type}`;
+    }
+
+    async function testSingleRequest(genAI, modelName) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent('Reply with just: OK');
+        await result.response;
+        return { success: true };
+      } catch (error) {
+        return {
+          success: false,
+          error: error.message,
+          isRateLimit: error.message.includes('429')
+        };
+      }
+    }
+
+    async function rapidFireTest(genAI) {
+      log('Starting rapid fire test (15 requests)...', 'info');
+
+      // Use gemini-2.0-flash-exp (the one that works with v1beta API)
+      const modelName = 'gemini-2.0-flash-exp';
+
+      for (let i = 1; i <= 15; i++) {
+        requestCount++;
+        updateMetrics();
+
+        log(`Request ${i}/15...`, 'info');
+        const result = await testSingleRequest(genAI, modelName);
+
+        if (result.success) {
+          successCount++;
+          log(`  Success`, 'success');
+        } else {
+          failedCount++;
+          if (result.isRateLimit) {
+            log(`  Rate limit hit at request ${i}`, 'error');
+            return { rateLimitAt: i, totalSuccess: successCount };
+          } else {
+            log(`  Failed: ${result.error}`, 'error');
+          }
+        }
+
+        updateMetrics();
+        await new Promise(resolve => setTimeout(resolve, 200)); // Small delay
+      }
+
+      return { rateLimitAt: null, totalSuccess: successCount };
+    }
+
+    window.startTest = async function() {
+      const startBtn = document.getElementById('startBtn');
+      startBtn.disabled = true;
+
+      try {
+        // Get API key
+        if (!apiKey) {
+          apiKey = await getApiKey();
+          if (!apiKey) {
+            updateStatus('❌ No API key provided', 'error');
+            log('No API key provided. Test cancelled.', 'error');
+            startBtn.disabled = false;
+            return;
+          }
+        }
+
+        log(`Using API key: ${apiKey.substring(0, 10)}...`, 'info');
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+
+        // Reset counters
+        requestCount = 0;
+        successCount = 0;
+        failedCount = 0;
+        startTime = Date.now();
+        updateMetrics();
+
+        updateStatus('🔄 Testing API quota...', 'info');
+
+        // Run rapid fire test
+        const result = await rapidFireTest(genAI);
+
+        // Analyze results
+        const duration = (Date.now() - startTime) / 1000;
+        log(`\n${'='.repeat(50)}`, 'info');
+        log(`Test completed in ${duration.toFixed(1)}s`, 'info');
+        log(`Total requests: ${requestCount}`, 'info');
+        log(`Successful: ${successCount}`, 'info');
+        log(`Failed: ${failedCount}`, 'info');
+
+        if (result.rateLimitAt === null && successCount >= 15) {
+          updateStatus('🎉 PAID TIER CONFIRMED! High rate limits active (2000/min)', 'success');
+          log('\n✅ PAID TIER CONFIRMED!', 'success');
+          log('You have high rate limits (2000 requests/min)', 'success');
+          log('Gemini analysis can continue without restrictions!', 'success');
+        } else if (result.rateLimitAt && result.rateLimitAt <= 10) {
+          updateStatus('⚠️ FREE TIER DETECTED - Rate limit: 10/min', 'warning');
+          log('\n⚠️ FREE TIER DETECTED', 'warning');
+          log(`Rate limit hit at request ${result.rateLimitAt}`, 'warning');
+          log('Upgrade to paid tier for high-volume analysis', 'warning');
+        } else if (result.rateLimitAt && result.rateLimitAt <= 15) {
+          updateStatus('✅ UPGRADED! Better limits (15-60/min)', 'success');
+          log('\n✅ Some upgrade detected', 'success');
+          log(`Rate limit hit at request ${result.rateLimitAt}`, 'info');
+          log('You have better limits than free tier', 'success');
+        }
+
+        log(`${'='.repeat(50)}`, 'info');
+
+      } catch (error) {
+        updateStatus(`❌ Test failed: ${error.message}`, 'error');
+        log(`Test error: ${error.message}`, 'error');
+      }
+
+      startBtn.disabled = false;
+    };
+
+    window.clearLog = function() {
+      document.getElementById('log').textContent = '';
+      requestCount = 0;
+      successCount = 0;
+      failedCount = 0;
+      updateMetrics();
+    };
+
+    // Auto-start if API key in URL or localStorage
+    window.addEventListener('load', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('autostart') === 'true') {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        window.startTest();
+      }
+    });
+  </script>
+</body>
+</html>
