@@ -139,9 +139,9 @@
     "Source": "COMPASS - Central",
     "SourceId": "430-QEW NIKOLA TESLA",
     "Roadway": "QEW",
-    "Direction": "Unknown",
-    "Latitude": 43.258518,
-    "Longitude": -79.767008,
+    "Direction": "NNE",
+    "Latitude": 43.259267,
+    "Longitude": -79.768127,
     "Location": "QEW near Nikola Tesla Boulevard",
     "SortOrder": 110,
     "Views": [
