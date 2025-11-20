@@ -57,8 +57,8 @@ const CameraSpotlightLayer = () => {
   return (
     <>
       {cameraDirections.map((camera) => {
-        // Only render if camera has heading data
-        if (!camera.heading) {
+        // Only render if camera has direction views with heading data
+        if (!camera.direction_views || camera.direction_views.length === 0) {
           return null;
         }
 
