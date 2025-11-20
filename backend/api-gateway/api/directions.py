@@ -38,8 +38,8 @@ class CameraDirectionCreate(BaseModel):
     confidence: str = Field(default="medium", pattern="^(high|medium|low)$")
     eastbound_heading: Optional[float] = Field(None, ge=0, le=360)
     westbound_heading: Optional[float] = Field(None, ge=0, le=360)
-    source: str = Field(default="ai_analysis", description="Data source (ai_analysis, manual, csv_import)")
-    notes: Optional[str] = None
+    model: str = Field(default="manual", description="AI model used for analysis")
+    analysis_method: str = Field(default="manual_entry", description="Analysis method used")
 
 
 class CameraDirectionUpdate(BaseModel):
@@ -49,7 +49,6 @@ class CameraDirectionUpdate(BaseModel):
     confidence: Optional[str] = Field(None, pattern="^(high|medium|low)$")
     eastbound_heading: Optional[float] = Field(None, ge=0, le=360)
     westbound_heading: Optional[float] = Field(None, ge=0, le=360)
-    notes: Optional[str] = None
 
 
 class CameraDirectionResponse(BaseModel):
@@ -62,9 +61,8 @@ class CameraDirectionResponse(BaseModel):
     confidence: str
     eastbound_heading: Optional[float]
     westbound_heading: Optional[float]
-    source: str
-    notes: Optional[str]
-    analyzed_at: str
+    model: Optional[str] = None
+    analysis_method: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -376,8 +374,8 @@ async def import_directions_csv(
                 confidence=row.get('confidence', 'medium'),
                 eastbound_heading=float(row['eastbound_heading']) if row.get('eastbound_heading') else None,
                 westbound_heading=float(row['westbound_heading']) if row.get('westbound_heading') else None,
-                source='csv_import',
-                notes=row.get('notes')
+                model='csv_import',
+                analysis_method='manual_import'
             )
 
             direction = CameraDirection(**direction_data.model_dump())
