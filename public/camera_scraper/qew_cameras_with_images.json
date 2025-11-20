@@ -1058,9 +1058,9 @@
     "Source": "COMPASS - Central",
     "SourceId": "462-QEW W/of WINSTON CHURCHILL",
     "Roadway": "QEW",
-    "Direction": "Unknown",
-    "Latitude": 43.504197,
-    "Longitude": -79.66958,
+    "Direction": "SW",
+    "Latitude": 43.503986,
+    "Longitude": -79.669653,
     "Location": "QEW West of Winston Churchill Boulevard",
     "SortOrder": 275,
     "Views": [
