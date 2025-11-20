@@ -193,9 +193,9 @@
     "Source": "COMPASS - Central",
     "SourceId": "432-QEW W/of EASTPORT",
     "Roadway": "QEW",
-    "Direction": "Unknown",
-    "Latitude": 43.284453,
-    "Longitude": -79.787521,
+    "Direction": "NE",
+    "Latitude": 43.277950,
+    "Longitude": -79.785427,
     "Location": "QEW West of Eastport Drive",
     "SortOrder": 120,
     "Views": [
