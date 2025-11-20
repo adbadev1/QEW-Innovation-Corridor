@@ -1,0 +1,39 @@
+# QEW Innovation Corridor - Main API Gateway
+# FastAPI Backend for Work Zone Safety System
+
+# FastAPI framework
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.9.2
+pydantic-settings==2.6.0
+
+# Database (PostgreSQL + SQLAlchemy)
+sqlalchemy==2.0.35
+alembic==1.14.0
+psycopg2-binary==2.9.10
+asyncpg==0.30.0
+
+# HTTP clients
+httpx==0.27.2
+requests==2.32.3
+aiohttp==3.10.10
+
+# Google Cloud Platform
+google-cloud-storage==2.18.2
+google-generative-ai==0.8.3
+
+# Environment & Config
+python-dotenv==1.0.1
+python-multipart==0.0.12
+
+# Logging & Monitoring
+python-json-logger==2.0.7
+
+# Utilities
+python-dateutil==2.9.0
+pillow==11.0.0
+
+# Testing (development only)
+pytest==8.3.3
+pytest-asyncio==0.24.0
+httpx==0.27.2
