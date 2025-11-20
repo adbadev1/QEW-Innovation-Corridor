@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QEW Auto-Analysis Monitor</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #e0e0e0;
+    }
+    .container {
+      background: #2d2d2d;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    h1 {
+      color: #4FC3F7;
+      margin-bottom: 10px;
+    }
+    .status-bar {
+      background: #3d3d3d;
+      padding: 20px;
+      border-radius: 5px;
+      margin: 20px 0;
+      border-left: 4px solid #4FC3F7;
+    }
+    .metric {
+      display: inline-block;
+      margin: 10px 30px 10px 0;
+      font-size: 18px;
+    }
+    .metric strong {
+      color: #4FC3F7;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 30px;
+      background: #3d3d3d;
+      border-radius: 15px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4FC3F7, #29B6F6);
+      width: 0%;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+    button {
+      background: #4FC3F7;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      margin: 10px 5px;
+    }
+    button:hover { background: #29B6F6; }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    button.danger {
+      background: #f44336;
+    }
+    button.danger:hover {
+      background: #d32f2f;
+    }
+    #log {
+      background: #1e1e1e;
+      color: #00ff00;
+      padding: 20px;
+      border-radius: 5px;
+      max-height: 500px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      border: 1px solid #3d3d3d;
+    }
+    .work-zone-card {
+      background: #3d3d3d;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border-left: 4px solid #f44336;
+    }
+    .work-zone-card h3 {
+      margin: 0 0 10px 0;
+      color: #f44336;
+    }
+    .camera-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .camera-item {
+      background: #3d3d3d;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    .camera-item.analyzed {
+      border-left: 3px solid #4CAF50;
+    }
+    .camera-item.work-zone {
+      border-left: 3px solid #f44336;
+      background: #4d2d2d;
+    }
+    .camera-item.pending {
+      border-left: 3px solid #FFC107;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚧 QEW Auto-Analysis Monitor</h1>
+    <p>Monitor real-time Gemini AI analysis of 50 scraped camera images</p>
+
+    <div class="status-bar">
+      <div id="status">⏸️ Ready to start analysis</div>
+    </div>
+
+    <div>
+      <button id="startBtn" onclick="startAnalysis()">🚀 Start Auto-Analysis</button>
+      <button onclick="clearHistory()" class="danger">🗑️ Clear History</button>
+      <button onclick="viewResults()">📊 View Results</button>
+      <button onclick="clearLog()">🧹 Clear Log</button>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress">0%</div>
+    </div>
+
+    <div style="margin: 20px 0;">
+      <div class="metric"><strong>Total:</strong> <span id="total">0</span></div>
+      <div class="metric"><strong>Analyzed:</strong> <span id="analyzed">0</span></div>
+      <div class="metric"><strong>Work Zones:</strong> <span id="workZones">0</span></div>
+      <div class="metric"><strong>Errors:</strong> <span id="errors">0</span></div>
+      <div class="metric"><strong>ETA:</strong> <span id="eta">--:--</span></div>
+    </div>
+
+    <div id="cameraGrid" class="camera-grid"></div>
+
+    <div id="log"></div>
+
+    <div id="workZoneResults"></div>
+  </div>
+
+  <script type="module">
+    import { autoAnalyzeScrapedImages, checkScrapedImagesStatus } from './scraped-image-analysis-module.js';
+
+    let analysisRunning = false;
+    let startTime = null;
+
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('log');
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = type === 'error' ? '❌' :
+                     type === 'success' ? '✅' :
+                     type === 'warning' ? '⚠️' :
+                     type === 'work-zone' ? '🚧' : '📝';
+      logEl.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function updateStatus(message) {
+      document.getElementById('status').textContent = message;
+    }
+
+    function updateMetrics(stats) {
+      document.getElementById('total').textContent = stats.total || 0;
+      document.getElementById('analyzed').textContent = stats.analyzed || 0;
+      document.getElementById('workZones').textContent = stats.workZonesDetected || 0;
+      document.getElementById('errors').textContent = stats.errors || 0;
+
+      if (stats.total > 0 && stats.analyzed > 0) {
+        const percentage = Math.round((stats.analyzed / stats.total) * 100);
+        const progressBar = document.getElementById('progress');
+        progressBar.style.width = `${percentage}%`;
+        progressBar.textContent = `${percentage}%`;
+
+        // Calculate ETA
+        if (startTime) {
+          const elapsed = (Date.now() - startTime) / 1000; // seconds
+          const rate = stats.analyzed / elapsed;
+          const remaining = stats.total - stats.analyzed;
+          const etaSeconds = remaining / rate;
+          const etaMinutes = Math.floor(etaSeconds / 60);
+          const etaSecondsRem = Math.floor(etaSeconds % 60);
+          document.getElementById('eta').textContent =
+            `${etaMinutes}:${etaSecondsRem.toString().padStart(2, '0')}`;
+        }
+      }
+    }
+
+    function updateCameraGrid(cameraId, viewId, status, hasWorkZone = false) {
+      const grid = document.getElementById('cameraGrid');
+      const itemId = `cam-${cameraId}-${viewId}`;
+      let item = document.getElementById(itemId);
+
+      if (!item) {
+        item = document.createElement('div');
+        item.id = itemId;
+        item.className = 'camera-item pending';
+        item.innerHTML = `<strong>Camera ${cameraId}</strong><br>View ${viewId}<br><span class="status">Pending...</span>`;
+        grid.appendChild(item);
+      }
+
+      const statusEl = item.querySelector('.status');
+      if (status === 'analyzing') {
+        item.className = 'camera-item pending';
+        statusEl.textContent = '🔄 Analyzing...';
+      } else if (status === 'complete') {
+        if (hasWorkZone) {
+          item.className = 'camera-item work-zone';
+          statusEl.textContent = '🚧 Work Zone Detected';
+        } else {
+          item.className = 'camera-item analyzed';
+          statusEl.textContent = '✅ No Work Zone';
+        }
+      } else if (status === 'error') {
+        item.className = 'camera-item';
+        statusEl.textContent = '❌ Error';
+      }
+    }
+
+    window.startAnalysis = async function() {
+      if (analysisRunning) {
+        alert('Analysis already running!');
+        return;
+      }
+
+      const startBtn = document.getElementById('startBtn');
+      startBtn.disabled = true;
+      analysisRunning = true;
+      startTime = Date.now();
+
+      try {
+        log('🚀 Starting auto-analysis of scraped camera images...', 'info');
+        updateStatus('🔄 Loading camera metadata...');
+
+        // Load cameras from JSON
+        const basePath = window.location.origin + '/';
+        const response = await fetch(`${basePath}camera_scraper/qew_cameras_with_images.json`);
+        const cameras = await response.json();
+
+        log(`✅ Loaded ${cameras.length} cameras`, 'success');
+        updateStatus(`🔄 Analyzing ${cameras.length} cameras...`);
+
+        // Start auto-analysis
+        const results = await autoAnalyzeScrapedImages(cameras, (progress) => {
+          log(`Progress: ${progress.current}/${progress.total} (${progress.percentage}%)`, 'info');
+
+          if (progress.cameraId && progress.viewId) {
+            updateCameraGrid(progress.cameraId, progress.viewId, 'analyzing');
+          }
+
+          updateMetrics({
+            total: progress.total,
+            analyzed: progress.current,
+            workZonesDetected: progress.workZonesDetected || 0,
+            errors: 0
+          });
+
+          if (progress.hasWorkZone) {
+            log(`🚧 Work zone detected at Camera ${progress.cameraId}!`, 'work-zone');
+            updateCameraGrid(progress.cameraId, progress.viewId, 'complete', true);
+          } else if (progress.complete) {
+            updateCameraGrid(progress.cameraId, progress.viewId, 'complete', false);
+          }
+        });
+
+        const duration = ((Date.now() - startTime) / 1000 / 60).toFixed(1);
+
+        log('\n' + '='.repeat(60), 'info');
+        log('🎉 ANALYSIS COMPLETE!', 'success');
+        log(`Total Time: ${duration} minutes`, 'info');
+        log(`Images Analyzed: ${results.analyzed}`, 'info');
+        log(`Work Zones Detected: ${results.workZonesDetected}`, 'success');
+        log(`Errors: ${results.errors}`, results.errors > 0 ? 'error' : 'info');
+        log('='.repeat(60), 'info');
+
+        updateStatus(`✅ Analysis complete! Found ${results.workZonesDetected} work zones in ${duration} min`);
+        updateMetrics(results);
+
+        // Display work zone results
+        displayWorkZones();
+
+      } catch (error) {
+        log(`❌ Analysis failed: ${error.message}`, 'error');
+        updateStatus(`❌ Analysis failed: ${error.message}`);
+      }
+
+      analysisRunning = false;
+      startBtn.disabled = false;
+    };
+
+    function displayWorkZones() {
+      const resultsEl = document.getElementById('workZoneResults');
+      const history = JSON.parse(localStorage.getItem('qew_workzone_camera_history') || '[]');
+
+      if (history.length === 0) {
+        resultsEl.innerHTML = '<p>No work zones detected</p>';
+        return;
+      }
+
+      resultsEl.innerHTML = '<h2>🚧 Detected Work Zones</h2>';
+
+      history.forEach(wz => {
+        const card = document.createElement('div');
+        card.className = 'work-zone-card';
+        card.innerHTML = `
+          <h3>Camera ${wz.cameraId} - ${wz.location}</h3>
+          <div><strong>View ID:</strong> ${wz.viewId}</div>
+          <div><strong>Risk Score:</strong> ${wz.riskScore}/10</div>
+          <div><strong>Workers:</strong> ${wz.workers || 0}</div>
+          <div><strong>Vehicles:</strong> ${wz.vehicles || 0}</div>
+          <div><strong>Detected:</strong> ${new Date(wz.detectedAt).toLocaleString()}</div>
+        `;
+        resultsEl.appendChild(card);
+      });
+    }
+
+    window.clearHistory = function() {
+      if (confirm('Clear all work zone detection history?')) {
+        localStorage.removeItem('qew_workzone_camera_history');
+        log('🗑️ Work zone history cleared', 'warning');
+        document.getElementById('workZoneResults').innerHTML = '';
+        document.getElementById('cameraGrid').innerHTML = '';
+        document.getElementById('workZones').textContent = '0';
+      }
+    };
+
+    window.viewResults = function() {
+      displayWorkZones();
+    };
+
+    window.clearLog = function() {
+      document.getElementById('log').textContent = '';
+    };
+
+    // Check status on load
+    window.addEventListener('load', () => {
+      const history = JSON.parse(localStorage.getItem('qew_workzone_camera_history') || '[]');
+      if (history.length > 0) {
+        log(`📊 Found ${history.length} work zones in history`, 'info');
+        document.getElementById('workZones').textContent = history.length;
+        displayWorkZones();
+      }
+    });
+  </script>
+</body>
+</html>
