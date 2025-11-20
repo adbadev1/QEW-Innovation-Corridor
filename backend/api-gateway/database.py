@@ -17,17 +17,31 @@ from config import settings
 logger = logging.getLogger(__name__)
 
 # Convert postgresql:// to postgresql+asyncpg:// for async support
-DATABASE_URL = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
+DATABASE_URL = settings.DATABASE_URL
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
 
-# Create async engine
-engine = create_async_engine(
-    DATABASE_URL,
-    echo=settings.LOG_LEVEL == "DEBUG",
-    pool_size=settings.DATABASE_POOL_SIZE,
-    max_overflow=settings.DATABASE_MAX_OVERFLOW,
-    pool_pre_ping=True,  # Verify connections before using
-    future=True
-)
+# Determine if using SQLite or PostgreSQL
+is_sqlite = DATABASE_URL.startswith("sqlite")
+
+# Create async engine with database-specific configuration
+engine_kwargs = {
+    "echo": settings.LOG_LEVEL == "DEBUG",
+    "future": True
+}
+
+# PostgreSQL-specific connection pooling (not supported by SQLite)
+if not is_sqlite:
+    engine_kwargs.update({
+        "pool_size": settings.DATABASE_POOL_SIZE,
+        "max_overflow": settings.DATABASE_MAX_OVERFLOW,
+        "pool_pre_ping": True,  # Verify connections before using
+    })
+else:
+    # SQLite uses NullPool (no connection pooling)
+    engine_kwargs["poolclass"] = NullPool
+
+engine = create_async_engine(DATABASE_URL, **engine_kwargs)
 
 # Create async session factory
 AsyncSessionLocal = async_sessionmaker(

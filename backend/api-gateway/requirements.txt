@@ -12,6 +12,8 @@ sqlalchemy==2.0.35
 alembic==1.14.0
 psycopg2-binary==2.9.10
 asyncpg==0.30.0
+aiosqlite==0.20.0  # SQLite async support for local development
+greenlet==3.2.4  # Required for async alembic migrations
 
 # HTTP clients
 httpx==0.27.2
