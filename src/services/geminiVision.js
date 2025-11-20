@@ -12,6 +12,58 @@ import { broadcastIfHighRisk } from './vRSUClient.js';
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
+// Rate limiting configuration
+const RATE_LIMIT_CONFIG = {
+  maxRequestsPerMinute: 9, // Stay below 10 to be safe
+  retryDelay: 40000, // 40 seconds as suggested by API
+  maxRetries: 3
+};
+
+// Request queue for rate limiting
+class RateLimiter {
+  constructor(maxRequestsPerMinute) {
+    this.maxRequests = maxRequestsPerMinute;
+    this.requests = [];
+    this.queue = [];
+  }
+
+  async acquire() {
+    // Clean up old requests (older than 1 minute)
+    const now = Date.now();
+    this.requests = this.requests.filter(time => now - time < 60000);
+
+    // If under limit, allow immediately
+    if (this.requests.length < this.maxRequests) {
+      this.requests.push(now);
+      return Promise.resolve();
+    }
+
+    // Otherwise, wait until oldest request expires
+    const oldestRequest = this.requests[0];
+    const waitTime = 60000 - (now - oldestRequest) + 1000; // +1s buffer
+    console.log(`[Rate Limiter] Waiting ${Math.round(waitTime / 1000)}s for rate limit...`);
+
+    return new Promise(resolve => {
+      setTimeout(() => {
+        this.requests.push(Date.now());
+        resolve();
+      }, waitTime);
+    });
+  }
+}
+
+const rateLimiter = new RateLimiter(RATE_LIMIT_CONFIG.maxRequestsPerMinute);
+
+// Model fallback configuration
+const GEMINI_MODELS = [
+  'gemini-2.0-flash-exp',           // Fastest, but lowest quota (10/min)
+  'gemini-1.5-flash',               // Good balance (15/min)
+  'gemini-1.5-flash-latest',        // Alternative flash model
+  'gemini-1.5-pro-latest'           // Slowest, but most accurate
+];
+
+let currentModelIndex = 0;
+
 /**
  * Convert File object to base64 string
  */
@@ -35,14 +87,22 @@ async function fileToBase64(file) {
  * @returns {Promise<Object>} Work zone analysis results
  */
 export async function analyzeWorkZoneImage(imageFile, metadata = {}) {
-  try {
-    // Get Gemini model (use 2.0 Flash for speed, or 1.5 Pro for accuracy)
-    const model = genAI.getGenerativeModel({
-      model: import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash-exp'
-    });
+  let retries = 0;
+  let lastError = null;
 
-    // Convert image to base64
-    const imageBase64 = await fileToBase64(imageFile);
+  while (retries <= RATE_LIMIT_CONFIG.maxRetries) {
+    try {
+      // Wait for rate limiter
+      await rateLimiter.acquire();
+
+      // Get Gemini model with fallback
+      const modelName = import.meta.env.VITE_GEMINI_MODEL || GEMINI_MODELS[currentModelIndex];
+      console.log(`[Gemini Vision] Using model: ${modelName} (attempt ${retries + 1}/${RATE_LIMIT_CONFIG.maxRetries + 1})`);
+
+      const model = genAI.getGenerativeModel({ model: modelName });
+
+      // Convert image to base64
+      const imageBase64 = await fileToBase64(imageFile);
 
     // Construct the prompt for MTO BOOK 7 compliance analysis
     const prompt = `You are an MTO-certified work zone safety inspector analyzing this highway construction zone image.
@@ -153,59 +213,118 @@ Respond ONLY with valid JSON. No markdown, no code blocks, just raw JSON.`;
 
     const analysis = JSON.parse(cleanedText);
 
-    // Add metadata
-    analysis.analysisTimestamp = new Date().toISOString();
-    analysis.model = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash-exp';
+      // Add metadata
+      analysis.analysisTimestamp = new Date().toISOString();
+      analysis.model = modelName;
+      analysis.retries = retries;
 
-    // Add source tracking (COMPASS real vs SYNTHETIC test)
-    analysis.synthetic = metadata.synthetic || false;
-    analysis.source = metadata.source || 'COMPASS';
+      // Add source tracking (COMPASS real vs SYNTHETIC test)
+      analysis.synthetic = metadata.synthetic || false;
+      analysis.source = metadata.source || 'COMPASS';
 
-    // Include full synthetic metadata if present
-    if (metadata.synthetic && metadata) {
-      analysis.syntheticMetadata = metadata;
+      // Include full synthetic metadata if present
+      if (metadata.synthetic && metadata) {
+        analysis.syntheticMetadata = metadata;
+      }
+
+      console.log(`[Gemini Vision] ✅ Analysis complete (model: ${modelName}, retries: ${retries})`);
+      return analysis;
+
+    } catch (error) {
+      lastError = error;
+      console.error(`[Gemini Vision] ❌ Attempt ${retries + 1} failed:`, error.message);
+
+      // Check if it's a rate limit error (429)
+      if (error.message && error.message.includes('429')) {
+        console.warn(`[Gemini Vision] Rate limit exceeded. Waiting ${RATE_LIMIT_CONFIG.retryDelay / 1000}s before retry...`);
+
+        // Wait the suggested retry delay
+        await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_CONFIG.retryDelay));
+        retries++;
+        continue;
+      }
+
+      // Check if it's a model error - try fallback model
+      if (error.message && (error.message.includes('model') || error.message.includes('404'))) {
+        currentModelIndex = (currentModelIndex + 1) % GEMINI_MODELS.length;
+        console.warn(`[Gemini Vision] Switching to fallback model: ${GEMINI_MODELS[currentModelIndex]}`);
+        retries++;
+        continue;
+      }
+
+      // For other errors, retry with exponential backoff
+      const backoffDelay = Math.min(1000 * Math.pow(2, retries), 30000);
+      console.warn(`[Gemini Vision] Retrying in ${backoffDelay / 1000}s...`);
+      await new Promise(resolve => setTimeout(resolve, backoffDelay));
+      retries++;
     }
-
-    return analysis;
-
-  } catch (error) {
-    console.error('Gemini Vision API Error:', error);
-
-    // Return error response
-    return {
-      error: true,
-      message: error.message || 'Failed to analyze image',
-      hasWorkZone: false,
-      riskScore: 0,
-      confidence: 0
-    };
   }
+
+  // All retries exhausted
+  console.error('[Gemini Vision] ❌ All retries exhausted');
+
+  // Return user-friendly error response
+  return {
+    error: true,
+    message: lastError?.message?.includes('429')
+      ? `⚠️ Rate limit exceeded. Please wait 1 minute and try again. (Free tier: ${RATE_LIMIT_CONFIG.maxRequestsPerMinute}/min)`
+      : lastError?.message || 'Failed to analyze image after multiple attempts',
+    hasWorkZone: false,
+    riskScore: 0,
+    confidence: 0,
+    retries: retries
+  };
 }
 
 /**
  * Batch analyze multiple images (for backend processing)
+ * NOW WITH RATE LIMITING: Automatically spaces requests to avoid quota errors
  *
  * @param {Array<File>} imageFiles - Array of image files
+ * @param {Function} progressCallback - Optional progress callback (current, total, percentage)
  * @returns {Promise<Array<Object>>} Array of analysis results
  */
-export async function batchAnalyzeWorkZones(imageFiles) {
+export async function batchAnalyzeWorkZones(imageFiles, progressCallback = null) {
   const results = [];
 
-  for (const imageFile of imageFiles) {
+  console.log(`[Batch Analysis] Starting batch analysis of ${imageFiles.length} images (rate limited)`);
+
+  for (let i = 0; i < imageFiles.length; i++) {
+    const imageFile = imageFiles[i];
+
     try {
+      console.log(`[Batch Analysis] Processing ${i + 1}/${imageFiles.length}: ${imageFile.name}`);
+
+      // Rate limiter is built into analyzeWorkZoneImage
       const analysis = await analyzeWorkZoneImage(imageFile);
+
       results.push({
         filename: imageFile.name,
+        success: !analysis.error,
         analysis
       });
+
+      // Progress callback
+      if (progressCallback) {
+        progressCallback({
+          current: i + 1,
+          total: imageFiles.length,
+          percentage: Math.round(((i + 1) / imageFiles.length) * 100),
+          currentFile: imageFile.name
+        });
+      }
+
     } catch (error) {
+      console.error(`[Batch Analysis] Error on ${imageFile.name}:`, error.message);
       results.push({
         filename: imageFile.name,
+        success: false,
         error: error.message
       });
     }
   }
 
+  console.log(`[Batch Analysis] ✅ Complete: ${results.filter(r => r.success).length}/${imageFiles.length} succeeded`);
   return results;
 }
 
