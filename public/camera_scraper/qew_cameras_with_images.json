@@ -247,9 +247,9 @@
     "Source": "COMPASS - Central",
     "SourceId": "434-QEW Burlington Skyway (Hamilton Side)",
     "Roadway": "QEW",
-    "Direction": "Unknown",
-    "Latitude": 43.301446,
-    "Longitude": -79.797735,
+    "Direction": "NE",
+    "Latitude": 43.296992,
+    "Longitude": -79.796003,
     "Location": "QEW Burlington Skyway - Hamilton Side",
     "SortOrder": 130,
     "Views": [
