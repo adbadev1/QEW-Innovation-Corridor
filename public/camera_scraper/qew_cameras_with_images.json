@@ -653,9 +653,9 @@
     "Source": "COMPASS - Central",
     "SourceId": "447-QEW E/of Appleby Line",
     "Roadway": "QEW",
-    "Direction": "Unknown",
-    "Latitude": 43.387741,
-    "Longitude": -79.763918,
+    "Direction": "SW",
+    "Latitude": 43.380536,
+    "Longitude": -79.771689,
     "Location": "QEW East of Appleby Line",
     "SortOrder": 205,
     "Views": [
