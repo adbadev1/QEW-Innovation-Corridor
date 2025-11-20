@@ -166,9 +166,9 @@
     "Source": "COMPASS - Central",
     "SourceId": "431-QEW WOODWARD",
     "Roadway": "QEW",
-    "Direction": "Unknown",
-    "Latitude": 43.264956,
-    "Longitude": -79.772243,
+    "Direction": "NE",
+    "Latitude": 43.267644,
+    "Longitude": -79.775542,
     "Location": "QEW near Woodward Avenue",
     "SortOrder": 115,
     "Views": [
