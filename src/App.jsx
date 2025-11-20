@@ -15,6 +15,7 @@ import { qewPathWestbound, qewPathEastbound } from './data/qewRoutes';
 import { generateRealTrafficData, generateRealAIAnalysis, generateRealRSUAlerts } from './utils/realTrafficData';
 import { getAllWorkZones, getWorkZoneViewIds } from './utils/workZoneHistory';
 import { mergeThumbnailsIntoCameras } from './services/thumbnailStorage';
+import { autoAnalyzeScrapedImages } from './services/scrapedImageAnalysis';
 
 // Fix Leaflet default icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -51,24 +52,35 @@ function AppContent() {
 
   // Load REAL camera data from 511ON (collected via Camera Collection System)
   useEffect(() => {
-    const loadCameras = () => {
+    const loadCameras = async () => {
       const basePath = import.meta.env.BASE_URL || '/';
-      fetch(`${basePath}camera_scraper/qew_cameras_with_images.json`)
-        .then(r => r.json())
-        .then(cameraData => {
-          console.log(`✅ Loaded ${cameraData.length} REAL cameras from 511ON`);
+      try {
+        const response = await fetch(`${basePath}camera_scraper/qew_cameras_with_images.json`);
+        const cameraData = await response.json();
+        console.log(`✅ Loaded ${cameraData.length} REAL cameras from 511ON`);
 
-          // Merge latest thumbnails from collection runs
-          const camerasWithThumbnails = mergeThumbnailsIntoCameras(cameraData);
-          console.log(`✅ Merged latest thumbnails into camera data`);
+        // Merge latest thumbnails from collection runs
+        const camerasWithThumbnails = mergeThumbnailsIntoCameras(cameraData);
+        console.log(`✅ Merged latest thumbnails into camera data`);
 
-          setCameras(camerasWithThumbnails);
-          setLoadingCameras(false);
-        })
-        .catch(error => {
-          console.error('Error loading camera data:', error);
-          setLoadingCameras(false);
-        });
+        setCameras(camerasWithThumbnails);
+        setLoadingCameras(false);
+
+        // AUTO-ANALYZE scraped images on first load only
+        if (cameraData.length > 0) {
+          // Check if this is first load (cameras array was empty)
+          // This prevents re-running analysis every 10 seconds
+          if (cameras.length === 0) {
+            console.log('🔍 Starting auto-analysis of scraped camera images...');
+            autoAnalyzeScrapedImages(cameraData).catch(error => {
+              console.error('❌ Auto-analysis failed:', error);
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading camera data:', error);
+        setLoadingCameras(false);
+      }
     };
 
     // Initial load
