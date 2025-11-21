@@ -4,10 +4,18 @@
  * AI-powered work zone safety analysis using Google Gemini 2.0 Flash
  * Analyzes highway camera images for MTO BOOK 7 compliance
  * Integrated with vRSU (Virtual Roadside Unit) for V2X broadcasting
+ *
+ * COST PROTECTION:
+ * - Monthly budget: $3.00 (enforced by costProtection.js)
+ * - Daily limit: 50 requests
+ * - Monthly limit: 400 requests
+ * - Demo mode support for zero-cost demos
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { broadcastIfHighRisk } from './vRSUClient.js';
+import { canMakeAPIRequest, recordAPIRequest } from './costProtection.js';
+import { getDemoMode, DEMO_MODES } from '../utils/demoMode.js';
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
@@ -87,6 +95,40 @@ async function fileToBase64(file) {
  * @returns {Promise<Object>} Work zone analysis results
  */
 export async function analyzeWorkZoneImage(imageFile, metadata = {}) {
+  // COST PROTECTION: Check demo mode before making API calls
+  const demoMode = getDemoMode();
+
+  if (demoMode === DEMO_MODES.CACHED) {
+    console.warn('[Gemini Vision] 🚫 API calls disabled in CACHED demo mode');
+    console.warn('[Gemini Vision] 💡 Switch to LIVE or FULL mode to enable API calls');
+    console.warn('[Gemini Vision] 💡 Run: qewDemoMode.setLive() or qewDemoMode.setFull()');
+
+    return {
+      error: true,
+      message: 'API calls disabled in CACHED demo mode. Switch to LIVE or FULL mode to analyze images.',
+      hasWorkZone: false,
+      riskScore: 0,
+      confidence: 0,
+      demoMode: demoMode
+    };
+  }
+
+  // COST PROTECTION: Check budget limits before API call
+  if (!canMakeAPIRequest()) {
+    console.error('[Gemini Vision] 🚫 API request blocked by cost protection');
+    console.error('[Gemini Vision] 💡 Daily/monthly limit reached or budget exhausted');
+    console.error('[Gemini Vision] 💡 View usage: qewCostProtection.printReport()');
+
+    return {
+      error: true,
+      message: 'API request blocked: Daily/monthly limit reached or budget exhausted. Check cost dashboard.',
+      hasWorkZone: false,
+      riskScore: 0,
+      confidence: 0,
+      costProtection: 'blocked'
+    };
+  }
+
   let retries = 0;
   let lastError = null;
 
@@ -226,6 +268,9 @@ Respond ONLY with valid JSON. No markdown, no code blocks, just raw JSON.`;
       if (metadata.synthetic && metadata) {
         analysis.syntheticMetadata = metadata;
       }
+
+      // COST PROTECTION: Record successful API request
+      recordAPIRequest();
 
       console.log(`[Gemini Vision] ✅ Analysis complete (model: ${modelName}, retries: ${retries})`);
       return analysis;
