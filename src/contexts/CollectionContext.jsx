@@ -118,7 +118,8 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
       intervalHours: 1,
       intervalMinutes: 0,
       imagesPerCamera: 1,
-      autoStart: false
+      autoStart: false,
+      aiModel: 'gemini' // 'gemini' or 'claude'
     };
 
     try {
@@ -178,7 +179,10 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
           totalImagesCollected: 0,
           totalWorkZonesDetected: 0,
           lastCollectionTime: null,
-          collectionsThisSession: 0
+          collectionsThisSession: 0,
+          currentRunId: null,
+          currentRunComplete: false,
+          currentRunWorkZones: 0
         };
       }
     }
@@ -187,7 +191,10 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
       totalImagesCollected: 0,
       totalWorkZonesDetected: 0,
       lastCollectionTime: null,
-      collectionsThisSession: 0
+      collectionsThisSession: 0,
+      currentRunId: null,
+      currentRunComplete: false,
+      currentRunWorkZones: 0
     };
   });
 
@@ -447,9 +454,18 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
     const collectionId = `qew_collection_${timestamp}`;
     const startTime = Date.now();
 
+    // Set current run ID and mark as not complete
+    setStats(prev => ({
+      ...prev,
+      currentRunId: collectionId,
+      currentRunComplete: false,
+      currentRunWorkZones: 0
+    }));
+
     logStatus(``, 'info'); // Blank line for separation
     logStatus(`▶ COLLECTION #${collectionNumber} STARTED`, 'success');
     logStatus(`Collection ID: ${collectionId}`, 'info');
+    logStatus(`AI Model: ${settings.aiModel.toUpperCase()}`, 'info');
     logStatus(`Cameras: ${cameras.length} | Images per camera: ${settings.imagesPerCamera}`, 'info');
 
     logInfo('Collection started', {
@@ -638,13 +654,16 @@ export const CollectionProvider = ({ children, cameras = [] }) => {
       // Calculate collection duration
       const duration = Math.round((Date.now() - startTime) / 1000);
 
-      // Update stats
+      // Update stats - mark current run as complete
       setStats(prev => ({
         totalCollections: prev.totalCollections + 1,
         totalImagesCollected: prev.totalImagesCollected + imagesCollected,
         totalWorkZonesDetected: (prev.totalWorkZonesDetected || 0) + workZonesDetected,
         lastCollectionTime: new Date().toISOString(),
-        collectionsThisSession: prev.collectionsThisSession + 1
+        collectionsThisSession: prev.collectionsThisSession + 1,
+        currentRunId: collectionId,
+        currentRunComplete: true,
+        currentRunWorkZones: workZonesDetected
       }));
 
       logStatus(`✓ COLLECTION #${collectionNumber} COMPLETE`, 'success');
