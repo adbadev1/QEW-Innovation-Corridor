@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clear Work Zone History - Fresh Start</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #eee;
+    }
+    .card {
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 8px;
+      padding: 30px;
+      margin: 20px 0;
+    }
+    h1 {
+      color: #00d4ff;
+      margin: 0 0 10px 0;
+    }
+    .subtitle {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+    .info {
+      background: #0f3460;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+    }
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #0f3460;
+    }
+    .stat:last-child {
+      border-bottom: none;
+    }
+    .stat-label {
+      color: #888;
+    }
+    .stat-value {
+      color: #00d4ff;
+      font-weight: bold;
+    }
+    button {
+      background: #e63946;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+    }
+    button:hover {
+      background: #d62828;
+    }
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    .success {
+      background: #2a9d8f;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      display: none;
+    }
+    .warning {
+      background: #e76f51;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .badge-success { background: #2a9d8f; }
+    .badge-warning { background: #f4a261; }
+    .badge-danger { background: #e76f51; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🗑️ Clear Work Zone History</h1>
+    <p class="subtitle">Reset work zone tracking to show only FRESH detections from camera collection</p>
+
+    <div class="warning">
+      <strong>⚠️ Why Clear Work Zones?</strong><br>
+      <small>
+        Work zones are persisted in localStorage for historical tracking. If you're running a new camera collection cycle,
+        clear old data to see only CURRENT, REAL-TIME detections from your latest run.
+      </small>
+    </div>
+
+    <div class="info">
+      <h3 style="margin-top: 0; color: #00d4ff;">Current Work Zone Statistics</h3>
+      <div class="stat">
+        <span class="stat-label">Unique Cameras with Work Zones:</span>
+        <span class="stat-value" id="uniqueCameras">-</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Total Detections:</span>
+        <span class="stat-value" id="totalDetections">-</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Last Detection:</span>
+        <span class="stat-value" id="lastDetection">-</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Storage Used:</span>
+        <span class="stat-value" id="storageSize">-</span>
+      </div>
+    </div>
+
+    <div id="workZoneList"></div>
+
+    <button onclick="clearWorkZones()" id="clearBtn">
+      🗑️ CLEAR ALL WORK ZONE HISTORY
+    </button>
+
+    <div class="success" id="successMsg">
+      ✅ Work zone history cleared! Refresh your dashboard to see only new detections from camera collection.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="color: #00d4ff;">📋 What Happens After Clearing?</h3>
+    <ul style="line-height: 1.8;">
+      <li>Dashboard will show "0 cameras with work zones" until new images are collected</li>
+      <li>Camera collection will run and analyze images with Gemini AI</li>
+      <li>Only REAL work zones detected in THIS session will appear</li>
+      <li>ML Validation Panel will populate with fresh detections</li>
+      <li>Map will highlight only cameras with current work zone alerts</li>
+    </ul>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'qew_workzone_camera_history';
+
+    function loadStats() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) {
+          document.getElementById('uniqueCameras').textContent = '0';
+          document.getElementById('totalDetections').textContent = '0';
+          document.getElementById('lastDetection').textContent = 'Never';
+          document.getElementById('storageSize').textContent = '0 bytes';
+          document.getElementById('clearBtn').disabled = true;
+          return;
+        }
+
+        const history = JSON.parse(stored);
+        const uniqueCameras = new Set(history.map(item => item.cameraId));
+        const totalDetections = history.reduce((sum, item) => sum + (item.detectionCount || 1), 0);
+        const lastItem = history.length > 0
+          ? history.reduce((latest, item) =>
+              new Date(item.lastUpdated) > new Date(latest.lastUpdated) ? item : latest
+            )
+          : null;
+
+        document.getElementById('uniqueCameras').textContent = uniqueCameras.size;
+        document.getElementById('totalDetections').textContent = totalDetections;
+        document.getElementById('lastDetection').textContent = lastItem
+          ? new Date(lastItem.lastUpdated).toLocaleString()
+          : 'Never';
+        document.getElementById('storageSize').textContent = new Blob([stored]).size + ' bytes';
+
+        // Show work zone list
+        const listHtml = history.map((item, idx) => `
+          <div class="info" style="margin: 10px 0; padding: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong>Camera #${item.cameraId}</strong> - View #${item.viewId}<br>
+                <small style="color: #888;">${item.location}</small>
+              </div>
+              <div style="text-align: right;">
+                <span class="badge ${item.riskScore >= 7 ? 'badge-danger' : item.riskScore >= 4 ? 'badge-warning' : 'badge-success'}">
+                  Risk: ${item.riskScore || 'N/A'}/10
+                </span><br>
+                <small style="color: #888;">${item.detectionCount || 1} detection(s)</small>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        document.getElementById('workZoneList').innerHTML = `
+          <h3 style="color: #00d4ff; margin-top: 30px;">Stored Work Zones (${history.length})</h3>
+          ${listHtml}
+        `;
+
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      }
+    }
+
+    function clearWorkZones() {
+      if (!confirm('Are you sure you want to clear ALL work zone history?\n\nThis will remove all stored detections and reset tracking for a fresh camera collection run.')) {
+        return;
+      }
+
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        document.getElementById('successMsg').style.display = 'block';
+        document.getElementById('clearBtn').disabled = true;
+        loadStats();
+
+        console.log('✅ Work zone history cleared');
+        console.log('ℹ️ Run camera collection to detect new work zones');
+
+      } catch (error) {
+        console.error('Failed to clear work zones:', error);
+        alert('Error clearing work zones: ' + error.message);
+      }
+    }
+
+    // Load stats on page load
+    loadStats();
+
+    // Auto-refresh stats every 3 seconds
+    setInterval(loadStats, 3000);
+  </script>
+</body>
+</html>
