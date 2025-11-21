@@ -178,6 +178,20 @@ function CameraCollectionPanel() {
             <span className="text-[10px]">per camera</span>
           </div>
 
+          {/* AI Model Selection */}
+          <div className="flex items-center space-x-2">
+            <label className="text-[10px] text-gray-400 w-16">AI Model:</label>
+            <select
+              value={settings.aiModel || 'gemini'}
+              onChange={(e) => updateSetting('aiModel', e.target.value)}
+              disabled={isRunning}
+              className="flex-1 px-1.5 py-0.5 bg-gray-900 border border-gray-600 rounded text-[10px] disabled:opacity-50"
+            >
+              <option value="gemini">Gemini 2.0 Flash (Fast, $0.0002/img)</option>
+              <option value="claude">Claude 3.5 Sonnet (Accurate, $0.003/img)</option>
+            </select>
+          </div>
+
           {/* Camera Count */}
           <div className="flex items-center space-x-2">
             <label className="text-[10px] text-gray-400 w-16">Cameras:</label>
