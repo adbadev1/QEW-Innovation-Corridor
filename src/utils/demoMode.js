@@ -60,9 +60,9 @@ const DEMO_MODE_DESCRIPTIONS = {
 export function getDemoMode() {
   const mode = localStorage.getItem('qew_demo_mode');
 
-  // Default to CACHED for cost safety
+  // Default to CACHED for cost safety (set directly to avoid recursion)
   if (!mode || !Object.values(DEMO_MODES).includes(mode)) {
-    setDemoMode(DEMO_MODES.CACHED);
+    localStorage.setItem('qew_demo_mode', DEMO_MODES.CACHED);
     return DEMO_MODES.CACHED;
   }
 
@@ -78,7 +78,7 @@ export function setDemoMode(mode) {
     throw new Error(`Invalid demo mode: ${mode}. Must be one of: ${Object.values(DEMO_MODES).join(', ')}`);
   }
 
-  const prevMode = getDemoMode();
+  const prevMode = localStorage.getItem('qew_demo_mode') || DEMO_MODES.CACHED;
   localStorage.setItem('qew_demo_mode', mode);
 
   const modeInfo = DEMO_MODE_DESCRIPTIONS[mode];
@@ -243,8 +243,8 @@ if (typeof window !== 'undefined') {
   console.log('  qewDemoMode.setFull()   // Switch to FULL mode');
 }
 
-// Initialize with safe default on first load
+// Initialize with safe default on first load (direct set to avoid recursion)
 if (!localStorage.getItem('qew_demo_mode')) {
   console.log('[Demo Mode] ⚙️ Initializing with CACHED mode (zero cost)');
-  setDemoMode(DEMO_MODES.CACHED);
+  localStorage.setItem('qew_demo_mode', DEMO_MODES.CACHED);
 }
