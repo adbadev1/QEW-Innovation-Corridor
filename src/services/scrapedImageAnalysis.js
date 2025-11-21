@@ -149,6 +149,18 @@ export async function analyzeScrapedImages(cameras, progressCallback = null) {
   console.log(`  ├─ Errors: ${results.errors}`);
   console.log(`  └─ Skipped: ${results.skipped}`);
 
+  // Generate comprehensive report
+  const report = generateCollectionRunReport(results);
+  saveCollectionRunReport(report);
+
+  // Display report link
+  console.log('\n' + '='.repeat(70));
+  console.log('📊 COLLECTION RUN REPORT GENERATED');
+  console.log('='.repeat(70));
+  console.log('📄 View detailed report at: http://localhost:8200/collection-run-report.html');
+  console.log('📥 Export options: JSON, CSV, or copy to clipboard');
+  console.log('='.repeat(70) + '\n');
+
   return results;
 }
 
@@ -238,4 +250,102 @@ export async function autoAnalyzeScrapedImages(cameras) {
   }).catch(error => {
     console.error('[Scraped Image Analysis] ❌ Auto-analysis failed:', error);
   });
+}
+
+/**
+ * Generate comprehensive collection run report
+ *
+ * @param {Object} results - Analysis results
+ * @returns {Object} Formatted report
+ */
+function generateCollectionRunReport(results) {
+  // Get work zone history from localStorage
+  const workZones = JSON.parse(localStorage.getItem('qew_workzone_camera_history') || '[]');
+
+  // Calculate summary statistics
+  const summary = {
+    timestamp: new Date().toISOString(),
+    runDate: new Date().toLocaleString(),
+    totalImages: results.total,
+    imagesAnalyzed: results.analyzed,
+    imagesSkipped: results.skipped,
+    errors: results.errors,
+    workZonesDetected: results.workZonesDetected,
+    successRate: results.total > 0 ? Math.round((results.analyzed / results.total) * 100) : 0,
+    detectionRate: results.analyzed > 0 ? Math.round((results.workZonesDetected / results.analyzed) * 100) : 0
+  };
+
+  // Calculate risk statistics
+  const riskStats = {
+    highRisk: workZones.filter(wz => wz.riskScore >= 7).length,
+    mediumRisk: workZones.filter(wz => wz.riskScore >= 4 && wz.riskScore < 7).length,
+    lowRisk: workZones.filter(wz => wz.riskScore < 4).length,
+    averageRiskScore: workZones.length > 0
+      ? (workZones.reduce((sum, wz) => sum + wz.riskScore, 0) / workZones.length).toFixed(2)
+      : 0,
+    totalWorkers: workZones.reduce((sum, wz) => sum + (wz.workers || 0), 0),
+    totalVehicles: workZones.reduce((sum, wz) => sum + (wz.vehicles || 0), 0)
+  };
+
+  // Breakdown by camera
+  const cameraBreakdown = {};
+  results.details.forEach(detail => {
+    if (!cameraBreakdown[detail.cameraId]) {
+      cameraBreakdown[detail.cameraId] = {
+        cameraId: detail.cameraId,
+        analyzed: 0,
+        workZones: 0,
+        errors: 0
+      };
+    }
+
+    if (detail.success) {
+      cameraBreakdown[detail.cameraId].analyzed++;
+      if (detail.hasWorkZone) {
+        cameraBreakdown[detail.cameraId].workZones++;
+      }
+    } else {
+      cameraBreakdown[detail.cameraId].errors++;
+    }
+  });
+
+  const report = {
+    reportId: `run-${Date.now()}`,
+    generatedAt: summary.timestamp,
+    summary,
+    riskStatistics: riskStats,
+    cameraBreakdown: Object.values(cameraBreakdown),
+    detectedWorkZones: workZones,
+    detailedResults: results.details
+  };
+
+  return report;
+}
+
+/**
+ * Save collection run report to localStorage
+ *
+ * @param {Object} report - Report to save
+ */
+function saveCollectionRunReport(report) {
+  try {
+    // Get existing reports
+    const reports = JSON.parse(localStorage.getItem('qew_collection_run_reports') || '[]');
+
+    // Add new report
+    reports.push(report);
+
+    // Keep only last 10 reports to avoid storage limits
+    const recentReports = reports.slice(-10);
+
+    // Save to localStorage
+    localStorage.setItem('qew_collection_run_reports', JSON.stringify(recentReports));
+
+    // Also save as "latest report" for quick access
+    localStorage.setItem('qew_latest_collection_run', JSON.stringify(report));
+
+    console.log(`[Scraped Image Analysis] 💾 Report saved (ID: ${report.reportId})`);
+  } catch (error) {
+    console.error('[Scraped Image Analysis] ❌ Failed to save report:', error);
+  }
 }

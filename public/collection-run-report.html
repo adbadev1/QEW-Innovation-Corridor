@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QEW Collection Run Report</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .container {
+      background: white;
+      color: #333;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    h2 {
+      color: #764ba2;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+      margin-top: 30px;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .metric-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .metric-value {
+      font-size: 36px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .metric-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .work-zone-card {
+      background: #f8f9fa;
+      border-left: 4px solid #dc3545;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 5px;
+    }
+    .work-zone-card h3 {
+      color: #dc3545;
+      margin: 0 0 10px 0;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-top: 10px;
+    }
+    .detail-item {
+      display: flex;
+      align-items: center;
+    }
+    .detail-label {
+      font-weight: bold;
+      color: #667eea;
+      margin-right: 8px;
+    }
+    .risk-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      color: white;
+    }
+    .risk-high { background: #dc3545; }
+    .risk-medium { background: #ffc107; color: #333; }
+    .risk-low { background: #28a745; }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      margin: 10px 5px;
+    }
+    button:hover { background: #5568d3; }
+    .timestamp {
+      color: #6c757d;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+      font-size: 18px;
+    }
+    .export-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: #e7f3ff;
+      border-radius: 5px;
+    }
+    pre {
+      background: #1e1e1e;
+      color: #00ff00;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚧 QEW Collection Run Report</h1>
+    <p>Comprehensive analysis of detected work zones from camera collection run</p>
+    <p class="timestamp" id="reportTime"></p>
+
+    <h2>📊 Summary Statistics</h2>
+    <div class="summary" id="summary">
+      <!-- Populated by JavaScript -->
+    </div>
+
+    <h2>🚨 Detected Work Zones</h2>
+    <div id="workZonesList">
+      <!-- Populated by JavaScript -->
+    </div>
+
+    <div class="export-section">
+      <h2>💾 Export Options</h2>
+      <button onclick="exportJSON()">📥 Download JSON Report</button>
+      <button onclick="exportCSV()">📊 Download CSV Report</button>
+      <button onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+      <button onclick="clearData()">🗑️ Clear All Data</button>
+    </div>
+
+    <h2>📄 Raw JSON Data</h2>
+    <pre id="rawData"></pre>
+  </div>
+
+  <script>
+    let workZones = [];
+
+    function loadData() {
+      const history = JSON.parse(localStorage.getItem('qew_workzone_camera_history') || '[]');
+      workZones = history;
+
+      document.getElementById('reportTime').textContent =
+        `Report Generated: ${new Date().toLocaleString()}`;
+
+      renderSummary();
+      renderWorkZones();
+      renderRawData();
+    }
+
+    function renderSummary() {
+      const total = workZones.length;
+      const highRisk = workZones.filter(wz => wz.riskScore >= 7).length;
+      const mediumRisk = workZones.filter(wz => wz.riskScore >= 4 && wz.riskScore < 7).length;
+      const lowRisk = workZones.filter(wz => wz.riskScore < 4).length;
+
+      const totalWorkers = workZones.reduce((sum, wz) => sum + (wz.workers || 0), 0);
+      const totalVehicles = workZones.reduce((sum, wz) => sum + (wz.vehicles || 0), 0);
+      const avgRiskScore = total > 0
+        ? (workZones.reduce((sum, wz) => sum + wz.riskScore, 0) / total).toFixed(1)
+        : 0;
+
+      const summaryHTML = `
+        <div class="metric-card">
+          <div class="metric-value">${total}</div>
+          <div class="metric-label">Work Zones Detected</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">${highRisk}</div>
+          <div class="metric-label">High Risk (7-10)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">${mediumRisk}</div>
+          <div class="metric-label">Medium Risk (4-6)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">${lowRisk}</div>
+          <div class="metric-label">Low Risk (0-3)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">${avgRiskScore}</div>
+          <div class="metric-label">Avg Risk Score</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">${totalWorkers}</div>
+          <div class="metric-label">Total Workers</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">${totalVehicles}</div>
+          <div class="metric-label">Total Vehicles</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">${new Set(workZones.map(wz => wz.cameraId)).size}</div>
+          <div class="metric-label">Unique Cameras</div>
+        </div>
+      `;
+
+      document.getElementById('summary').innerHTML = summaryHTML;
+    }
+
+    function renderWorkZones() {
+      const container = document.getElementById('workZonesList');
+
+      if (workZones.length === 0) {
+        container.innerHTML = '<div class="no-data">No work zones detected yet. Run a collection to see results.</div>';
+        return;
+      }
+
+      const workZonesHTML = workZones
+        .sort((a, b) => b.riskScore - a.riskScore)
+        .map((wz, index) => {
+          const riskClass = wz.riskScore >= 7 ? 'risk-high' :
+                           wz.riskScore >= 4 ? 'risk-medium' : 'risk-low';
+          const riskLabel = wz.riskScore >= 7 ? 'HIGH RISK' :
+                           wz.riskScore >= 4 ? 'MEDIUM RISK' : 'LOW RISK';
+
+          return `
+            <div class="work-zone-card">
+              <h3>🚧 Work Zone ${index + 1}: Camera ${wz.cameraId} (View ${wz.viewId})</h3>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Location:</span>
+                  <span>${wz.location || 'Unknown'}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Risk Level:</span>
+                  <span class="risk-badge ${riskClass}">${riskLabel} (${wz.riskScore}/10)</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Workers Detected:</span>
+                  <span>${wz.workers || 0} workers</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Vehicles Detected:</span>
+                  <span>${wz.vehicles || 0} vehicles</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Detected At:</span>
+                  <span>${new Date(wz.detectedAt).toLocaleString()}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Camera ID:</span>
+                  <span>${wz.cameraId}</span>
+                </div>
+              </div>
+              ${wz.hazards && wz.hazards.length > 0 ? `
+                <div style="margin-top: 10px;">
+                  <span class="detail-label">⚠️ Hazards:</span> ${wz.hazards.join(', ')}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        })
+        .join('');
+
+      container.innerHTML = workZonesHTML;
+    }
+
+    function renderRawData() {
+      document.getElementById('rawData').textContent =
+        JSON.stringify(workZones, null, 2);
+    }
+
+    function exportJSON() {
+      const report = {
+        generatedAt: new Date().toISOString(),
+        summary: {
+          totalWorkZones: workZones.length,
+          highRisk: workZones.filter(wz => wz.riskScore >= 7).length,
+          mediumRisk: workZones.filter(wz => wz.riskScore >= 4 && wz.riskScore < 7).length,
+          lowRisk: workZones.filter(wz => wz.riskScore < 4).length,
+          averageRiskScore: workZones.length > 0
+            ? (workZones.reduce((sum, wz) => sum + wz.riskScore, 0) / workZones.length).toFixed(2)
+            : 0,
+          totalWorkers: workZones.reduce((sum, wz) => sum + (wz.workers || 0), 0),
+          totalVehicles: workZones.reduce((sum, wz) => sum + (wz.vehicles || 0), 0),
+          uniqueCameras: new Set(workZones.map(wz => wz.cameraId)).size
+        },
+        workZones: workZones
+      };
+
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `qew-collection-run-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      alert('✅ JSON report downloaded!');
+    }
+
+    function exportCSV() {
+      const headers = [
+        'Work Zone ID',
+        'Camera ID',
+        'View ID',
+        'Location',
+        'Risk Score',
+        'Risk Level',
+        'Workers',
+        'Vehicles',
+        'Detected At',
+        'Hazards'
+      ];
+
+      const rows = workZones.map((wz, index) => {
+        const riskLevel = wz.riskScore >= 7 ? 'HIGH' : wz.riskScore >= 4 ? 'MEDIUM' : 'LOW';
+        return [
+          `WZ-${String(index + 1).padStart(3, '0')}`,
+          wz.cameraId,
+          wz.viewId,
+          `"${wz.location || 'Unknown'}"`,
+          wz.riskScore,
+          riskLevel,
+          wz.workers || 0,
+          wz.vehicles || 0,
+          `"${new Date(wz.detectedAt).toISOString()}"`,
+          `"${(wz.hazards || []).join('; ')}"`
+        ].join(',');
+      });
+
+      const csv = [headers.join(','), ...rows].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `qew-collection-run-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      alert('✅ CSV report downloaded!');
+    }
+
+    function copyToClipboard() {
+      const reportText = workZones.map((wz, index) => {
+        const riskLevel = wz.riskScore >= 7 ? 'HIGH RISK' : wz.riskScore >= 4 ? 'MEDIUM RISK' : 'LOW RISK';
+        return `
+Work Zone ${index + 1}: Camera ${wz.cameraId} (View ${wz.viewId})
+  Location: ${wz.location || 'Unknown'}
+  Risk Score: ${wz.riskScore}/10 (${riskLevel})
+  Workers: ${wz.workers || 0}
+  Vehicles: ${wz.vehicles || 0}
+  Detected: ${new Date(wz.detectedAt).toLocaleString()}
+  ${wz.hazards && wz.hazards.length > 0 ? `Hazards: ${wz.hazards.join(', ')}` : ''}
+        `.trim();
+      }).join('\n\n');
+
+      const summary = `
+QEW Collection Run Report
+Generated: ${new Date().toLocaleString()}
+
+SUMMARY:
+- Total Work Zones: ${workZones.length}
+- High Risk (7-10): ${workZones.filter(wz => wz.riskScore >= 7).length}
+- Medium Risk (4-6): ${workZones.filter(wz => wz.riskScore >= 4 && wz.riskScore < 7).length}
+- Low Risk (0-3): ${workZones.filter(wz => wz.riskScore < 4).length}
+- Total Workers: ${workZones.reduce((sum, wz) => sum + (wz.workers || 0), 0)}
+- Total Vehicles: ${workZones.reduce((sum, wz) => sum + (wz.vehicles || 0), 0)}
+- Unique Cameras: ${new Set(workZones.map(wz => wz.cameraId)).size}
+
+DETECTED WORK ZONES:
+${reportText}
+      `.trim();
+
+      navigator.clipboard.writeText(summary).then(() => {
+        alert('✅ Report copied to clipboard!');
+      }).catch(err => {
+        alert('❌ Failed to copy: ' + err.message);
+      });
+    }
+
+    function clearData() {
+      if (confirm('⚠️ Are you sure you want to clear all work zone data? This cannot be undone.')) {
+        localStorage.removeItem('qew_workzone_camera_history');
+        location.reload();
+      }
+    }
+
+    // Load data on page load
+    window.addEventListener('load', loadData);
+
+    // Auto-refresh every 10 seconds to catch new detections
+    setInterval(loadData, 10000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Latest Collection Run Report</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1e1e1e;
+      color: #00ff00;
+      padding: 20px;
+      margin: 0;
+    }
+    .header {
+      color: #00ffff;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #00ff00;
+      border-radius: 5px;
+    }
+    .section-title {
+      color: #ffff00;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .metric {
+      margin: 5px 0;
+      padding-left: 20px;
+    }
+    .label {
+      color: #00ffff;
+      display: inline-block;
+      width: 200px;
+    }
+    .value {
+      color: #00ff00;
+      font-weight: bold;
+    }
+    .work-zone {
+      background: #2a2a2a;
+      padding: 10px;
+      margin: 10px 0;
+      border-left: 3px solid #ff0000;
+    }
+    .high-risk { border-left-color: #ff0000; }
+    .medium-risk { border-left-color: #ffff00; }
+    .low-risk { border-left-color: #00ff00; }
+    .no-data {
+      text-align: center;
+      color: #ff0000;
+      font-size: 18px;
+      padding: 40px;
+    }
+    .buttons {
+      text-align: center;
+      margin: 20px 0;
+    }
+    button {
+      background: #00ff00;
+      color: #1e1e1e;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      border-radius: 3px;
+    }
+    button:hover {
+      background: #00ffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">🚧 LATEST COLLECTION RUN REPORT 🚧</div>
+
+  <div class="buttons">
+    <button onclick="location.href='collection-run-report.html'">📊 Full Visual Report</button>
+    <button onclick="copyReport()">📋 Copy Text Report</button>
+    <button onclick="location.reload()">🔄 Refresh</button>
+  </div>
+
+  <div id="report"></div>
+
+  <script>
+    function loadReport() {
+      const latestReport = JSON.parse(localStorage.getItem('qew_latest_collection_run') || 'null');
+      const workZones = JSON.parse(localStorage.getItem('qew_workzone_camera_history') || '[]');
+
+      const reportDiv = document.getElementById('report');
+
+      if (!latestReport || workZones.length === 0) {
+        reportDiv.innerHTML = `
+          <div class="no-data">
+            ⚠️ NO COLLECTION RUN DATA FOUND ⚠️<br><br>
+            Run a collection to generate a report.
+          </div>
+        `;
+        return;
+      }
+
+      const summary = latestReport.summary;
+      const riskStats = latestReport.riskStatistics;
+
+      let html = `
+        <div class="section">
+          <div class="section-title">📅 RUN INFORMATION</div>
+          <div class="metric"><span class="label">Report ID:</span><span class="value">${latestReport.reportId}</span></div>
+          <div class="metric"><span class="label">Run Date:</span><span class="value">${summary.runDate}</span></div>
+          <div class="metric"><span class="label">Generated:</span><span class="value">${new Date(latestReport.generatedAt).toLocaleString()}</span></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">📊 SUMMARY STATISTICS</div>
+          <div class="metric"><span class="label">Total Images:</span><span class="value">${summary.totalImages}</span></div>
+          <div class="metric"><span class="label">Images Analyzed:</span><span class="value">${summary.imagesAnalyzed}</span></div>
+          <div class="metric"><span class="label">Images Skipped:</span><span class="value">${summary.imagesSkipped}</span></div>
+          <div class="metric"><span class="label">Errors:</span><span class="value">${summary.errors}</span></div>
+          <div class="metric"><span class="label">Work Zones Detected:</span><span class="value">${summary.workZonesDetected}</span></div>
+          <div class="metric"><span class="label">Success Rate:</span><span class="value">${summary.successRate}%</span></div>
+          <div class="metric"><span class="label">Detection Rate:</span><span class="value">${summary.detectionRate}%</span></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">🚨 RISK STATISTICS</div>
+          <div class="metric"><span class="label">High Risk (7-10):</span><span class="value" style="color: #ff0000;">${riskStats.highRisk}</span></div>
+          <div class="metric"><span class="label">Medium Risk (4-6):</span><span class="value" style="color: #ffff00;">${riskStats.mediumRisk}</span></div>
+          <div class="metric"><span class="label">Low Risk (0-3):</span><span class="value" style="color: #00ff00;">${riskStats.lowRisk}</span></div>
+          <div class="metric"><span class="label">Average Risk Score:</span><span class="value">${riskStats.averageRiskScore}/10</span></div>
+          <div class="metric"><span class="label">Total Workers:</span><span class="value">${riskStats.totalWorkers}</span></div>
+          <div class="metric"><span class="label">Total Vehicles:</span><span class="value">${riskStats.totalVehicles}</span></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">🚧 DETECTED WORK ZONES (${workZones.length})</div>
+      `;
+
+      // Sort work zones by risk score (highest first)
+      const sortedWorkZones = [...workZones].sort((a, b) => b.riskScore - a.riskScore);
+
+      sortedWorkZones.forEach((wz, index) => {
+        const riskClass = wz.riskScore >= 7 ? 'high-risk' :
+                         wz.riskScore >= 4 ? 'medium-risk' : 'low-risk';
+        const riskLabel = wz.riskScore >= 7 ? 'HIGH' :
+                         wz.riskScore >= 4 ? 'MEDIUM' : 'LOW';
+
+        html += `
+          <div class="work-zone ${riskClass}">
+            <div class="metric"><span class="label">Work Zone #${index + 1}</span></div>
+            <div class="metric"><span class="label">Camera ID:</span><span class="value">${wz.cameraId}</span></div>
+            <div class="metric"><span class="label">View ID:</span><span class="value">${wz.viewId}</span></div>
+            <div class="metric"><span class="label">Location:</span><span class="value">${wz.location || 'Unknown'}</span></div>
+            <div class="metric"><span class="label">Risk Score:</span><span class="value">${wz.riskScore}/10 (${riskLabel})</span></div>
+            <div class="metric"><span class="label">Workers:</span><span class="value">${wz.workers || 0}</span></div>
+            <div class="metric"><span class="label">Vehicles:</span><span class="value">${wz.vehicles || 0}</span></div>
+            <div class="metric"><span class="label">Detected:</span><span class="value">${new Date(wz.detectedAt).toLocaleString()}</span></div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+
+      // Camera breakdown
+      if (latestReport.cameraBreakdown && latestReport.cameraBreakdown.length > 0) {
+        html += `
+          <div class="section">
+            <div class="section-title">📹 CAMERA BREAKDOWN</div>
+        `;
+
+        latestReport.cameraBreakdown.forEach(cam => {
+          html += `
+            <div class="metric">
+              <span class="label">Camera ${cam.cameraId}:</span>
+              <span class="value">
+                ${cam.analyzed} analyzed, ${cam.workZones} work zones, ${cam.errors} errors
+              </span>
+            </div>
+          `;
+        });
+
+        html += '</div>';
+      }
+
+      reportDiv.innerHTML = html;
+    }
+
+    function copyReport() {
+      const latestReport = JSON.parse(localStorage.getItem('qew_latest_collection_run') || 'null');
+      const workZones = JSON.parse(localStorage.getItem('qew_workzone_camera_history') || '[]');
+
+      if (!latestReport) {
+        alert('No report to copy');
+        return;
+      }
+
+      const summary = latestReport.summary;
+      const riskStats = latestReport.riskStatistics;
+
+      let text = `
+========================================
+QEW COLLECTION RUN REPORT
+========================================
+
+REPORT ID: ${latestReport.reportId}
+RUN DATE: ${summary.runDate}
+GENERATED: ${new Date(latestReport.generatedAt).toLocaleString()}
+
+----------------------------------------
+SUMMARY STATISTICS
+----------------------------------------
+Total Images:        ${summary.totalImages}
+Images Analyzed:     ${summary.imagesAnalyzed}
+Images Skipped:      ${summary.imagesSkipped}
+Errors:              ${summary.errors}
+Work Zones Detected: ${summary.workZonesDetected}
+Success Rate:        ${summary.successRate}%
+Detection Rate:      ${summary.detectionRate}%
+
+----------------------------------------
+RISK STATISTICS
+----------------------------------------
+High Risk (7-10):    ${riskStats.highRisk}
+Medium Risk (4-6):   ${riskStats.mediumRisk}
+Low Risk (0-3):      ${riskStats.lowRisk}
+Average Risk Score:  ${riskStats.averageRiskScore}/10
+Total Workers:       ${riskStats.totalWorkers}
+Total Vehicles:      ${riskStats.totalVehicles}
+
+----------------------------------------
+DETECTED WORK ZONES (${workZones.length})
+----------------------------------------
+`;
+
+      workZones
+        .sort((a, b) => b.riskScore - a.riskScore)
+        .forEach((wz, index) => {
+          const riskLabel = wz.riskScore >= 7 ? 'HIGH' :
+                           wz.riskScore >= 4 ? 'MEDIUM' : 'LOW';
+
+          text += `
+Work Zone #${index + 1}
+  Camera ID:   ${wz.cameraId}
+  View ID:     ${wz.viewId}
+  Location:    ${wz.location || 'Unknown'}
+  Risk Score:  ${wz.riskScore}/10 (${riskLabel})
+  Workers:     ${wz.workers || 0}
+  Vehicles:    ${wz.vehicles || 0}
+  Detected:    ${new Date(wz.detectedAt).toLocaleString()}
+
+`;
+        });
+
+      text += '========================================\n';
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert('✅ Report copied to clipboard!');
+      }).catch(err => {
+        alert('❌ Failed to copy: ' + err.message);
+      });
+    }
+
+    // Load report on page load
+    window.addEventListener('load', loadReport);
+  </script>
+</body>
+</html>
